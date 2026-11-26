@@ -142,7 +142,10 @@ public enum Uf {
     }
 
     /**
-     * Busca pelo nome completo. Desconsidera caixa, acentos e espaços nas extremidades.
+     * Busca pelo nome completo sem distinguir maiúsculas de minúsculas.
+     * Remove marcas combinantes Unicode após decomposição canônica e aplica
+     * {@link String#trim()} nas extremidades. Espaços não separáveis e letras
+     * de largura total permanecem na comparação.
      *
      * @param nome nome completo da unidade federativa
      * @return a UF encontrada ou vazio quando a entrada é nula ou não corresponde a um nome

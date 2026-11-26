@@ -35,3 +35,7 @@ Comparação de consumidores e alternativas em [research.md](research.md).
 ## Phase 2 — Tasks
 
 [Tarefas em ordem de execução](tasks.md). A versão-alvo é v0.2.0. O incremento tem adoção a avaliar separadamente em Core e Censo. A T001 registra aprovação, revisão de partida e ativação da spec antes do código. A T008 propaga o contrato à documentação junto da implementação. A publicação da v0.1.0 segue pela Spec 004.
+
+## Revalidação pós-parecer técnico
+
+Automatizar T007 no job JDK 21 do CI. Reconstruir a referência a partir do commit da tag v0.1.0, comparar os JARs Java e Kotlin com japicmp 0.26.1 e falhar com incompatibilidade binária ou de fonte. Validar o erro com remoção de API em JARs de teste. O contrato de Geografia e o escopo do C1 seguem conforme a spec.

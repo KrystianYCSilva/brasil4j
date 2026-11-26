@@ -33,3 +33,8 @@ Os arquivos Java ficam sob `brasil4j-core/src/{main,test}/java/io/github/brasil4
 ## Dependencies & Execution Order
 
 A evidência da T002 subsidia a T001. Depois do aceite, executar T003 → T004 → T005 → T009 → T006 → T007 → T008.
+
+## Revisão técnica
+
+- [x] T010 Automatizar a comparação de T007 no CI em JDK 21, reconstruir a baseline v0.1.0 por commit e demonstrar falha para remoção de API nos dois módulos (FR-004).
+- [x] T011 Explicitar os limites já praticados por `Uf.fromName` no contrato e no JavaDoc e exercitar os casos citados na revisão (FR-005).

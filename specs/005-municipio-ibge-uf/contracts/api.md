@@ -8,7 +8,7 @@
 | `matchesUf(Uf)` | Verdadeiro quando o prefixo corresponde ao código da UF. UF nula ou prefixo desconhecido retornam falso, inclusive quando ocorrem juntos. |
 | `Uf.getIbgeCode()`, `Uf.fromIbgeCode(String)` | Código textual e busca exata. A busca retorna `Optional.empty()` para nulo, desconhecido ou apresentação alternativa. |
 | `Uf.getNome()`, `getSigla()`, `getCapital()`, `getDdds()` | Nome oficial, sigla/acrônimo, capital e lista imutável de DDDs de dois dígitos em ordem crescente. |
-| `Uf.fromName(String)` | `Optional<Uf>`, busca pelo nome completo sem distinção de caixa ou acentos e com `trim()` nas extremidades. Nulo, vazio, sigla, abreviação e nome desconhecido retornam vazio. |
+| `Uf.fromName(String)` | `Optional<Uf>`, busca pelo nome completo sem distinção de caixa, removendo marcas combinantes Unicode após decomposição canônica e usando `String.trim()` nas extremidades. Espaço não separável e letras de largura total permanecem na comparação. Nulo, vazio, sigla, abreviação e nome desconhecido retornam vazio. |
 | `equals`, `hashCode`, `toString` | Base canônica. O código municipal é público. |
 
 Em Kotlin, `CodigoMunicipio(String)`, `String.toCodigoMunicipio()` e propriedades `canonicalValue`, `ufCode`, `uf: Uf?`. Também expõe `matchesUf(Uf?)` e `toJava()`. `matchesUf` delega ao núcleo, inclusive quando a UF é nula. O retorno de `override fun toString(): String` é o código canônico, também em interpolação e quando a instância está representada como `Any`. A igualdade e o hash valem entre objetos Kotlin. Para comparar com o objeto Java, use `toJava()`.

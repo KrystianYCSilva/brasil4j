@@ -81,12 +81,13 @@ class UfTest {
     void encontraPeloNomeCompletoComToleranciaACaixaEAcentos() {
         assertEquals(Optional.of(Uf.SP), Uf.fromName("  sAo PAULO  "));
         assertEquals(Optional.of(Uf.SP), Uf.fromName("Sa\u0303o Paulo"));
+        assertEquals(Optional.of(Uf.PR), Uf.fromName("P\u0308ara\u0301na\u0301"));
         assertEquals(Optional.of(Uf.DF), Uf.fromName("distrito federal"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {"SP", "São", "São  Paulo", "35", " "})
+    @ValueSource(strings = {"SP", "São", "São  Paulo", "35", " ", "\u00a0São Paulo", "Ｓão Paulo"})
     void buscaPorNomeRetornaVazioParaOutrasApresentacoes(String entrada) {
         assertEquals(Optional.empty(), Uf.fromName(entrada));
     }
