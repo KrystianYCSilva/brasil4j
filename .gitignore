@@ -1,0 +1,46 @@
+# Build, ferramentas locais e IDE
+target/
+.idea/
+*.iml
+__pycache__/
+*.pyc
+
+# Configurações, instruções e histórico locais de assistentes
+/.agents/
+/.codex/
+/.claude/
+/.copilot/
+/.cursor/
+/.gemini/
+/.continue/
+/.windsurf/
+/.aider.*
+/AGENTS.md
+/AGENTS.local.md
+/AGENTS.override.md
+/CLAUDE.md
+/GEMINI.md
+/.github/agents/
+/.github/copilot-instructions.md
+/.github/instructions/
+/.github/prompts/
+/.specify/commands/
+/.specify/integration.json
+/.specify/init-options.json
+/.specify/integrations/
+
+# Temporários e relatórios locais
+/.cache/
+/.tmp/
+/tmp/
+/temp/
+/work/
+/outputs/
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db

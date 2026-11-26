@@ -1,0 +1,13 @@
+# Fontes das regras
+
+| ID | Classe | Regra ou convenção | Autoridade e evidência |
+| --- | --- | --- | --- |
+| F-01 | OFICIAL | Identificador de 14 posições, base alfanumérica e DVs numéricos, com coexistência das inscrições numéricas. | [Anexo XV da IN RFB 2.119/2022, redação de 2024](https://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=76204), incluído pela [IN RFB 2.229/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=141102) e [FAQ RFB](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf). |
+| F-02 | OFICIAL | Cálculo em duas etapas com módulo 11 e conversão ASCII menos 48. | [Manual técnico do Serpro e arquivos de referência publicados pela RFB, 05/11/2024](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj). O manual demonstra o resultado 35 para a base 12ABC34501DE. |
+| F-03 | ESTRUTURAL | Contrato de entrada da lib com forma canônica ou máscara completa. Preservação do texto e zeros. | [Spec 002](../specs/002-cnpj/spec.md), com apresentação ancorada no exemplo do manual. Posição da pontuação, aceitação de caixa e espaços na API são escolhas de contrato. |
+| F-04 | CONVENCAO_TECNICA | Perfil técnico de DF-e pode ter regras próprias, com fonte e versão. | [MOC CT-e](https://moc.sped.fazenda.pr.gov.br/CTe/TabelasEInformacoes.html). Qualquer filtro adicional de letras requer spec própria. |
+| F-05 | ESTRUTURAL | Nos modos CNPJ com DV, bloqueio de 14 zeros, mesmo quando o DV calculado coincide. | Rejeição documentada no código Java de referência da RFB e observada no Core. A spec adota esse comportamento como política de entrada. |
+| F-06 | ESTRUTURAL | CPF com 11 dígitos ASCII em forma canônica ou máscara completa, com aceitação de formato por padrão. | [IN RFB 2.172/2024](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=135611) para contexto cadastral e [Catálogo Padrão de Dados](https://catalogo.governoeletronico.gov.br/arquivos/CPD_Volume_2.pdf) para comprimento. Máscara e modo padrão pertencem à [Spec 003](../specs/003-cpf/spec.md). |
+| F-07 | CONVENCAO_TECNICA | Conferência matemática opcional por módulo 11 no CPF. | [Manual e-Financeira, versão 2.0.1, Anexo V, REGRA_VALIDA_CPF](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/manuais/sped/manuais-e-financeira/versao-2.x/manual-e-financeira-anexo-v-versao-2-0-1-leiaute-modulo-de-repasse.pdf) publica o cálculo para esse leiaute, com vetor 280012389-38. |
+
+Para o estado da verificação dos vetores de CNPJ, consulte a [matriz do C1](descoberta/c1/matriz-cnpj.md).
