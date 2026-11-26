@@ -39,7 +39,7 @@
                 <executions>
                     <execution>
                         <id>api-documentation</id>
-                        <phase>verify</phase>
+                        <phase>${brasil4j.javadoc.phase}</phase>
                         <goals><goal>jar</goal></goals>
                     </execution>
                 </executions>

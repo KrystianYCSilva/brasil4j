@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project child.project.url.inherit.append.path="false" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.brasil4j</groupId>
@@ -7,6 +8,25 @@
     <packaging>pom</packaging>
     <name>brasil4j</name>
     <description>Biblioteca de domínio brasileiro para Java e Kotlin.</description>
+    <url>https://github.com/KrystianYCSilva/brasil4j</url>
+    <developers>
+        <developer>
+            <id>KrystianYCSilva</id>
+            <name>Krystian</name>
+            <url>https://github.com/KrystianYCSilva</url>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
+    <scm child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false"
+         child.scm.url.inherit.append.path="false">
+        <connection>scm:git:https://github.com/KrystianYCSilva/brasil4j.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/KrystianYCSilva/brasil4j.git</developerConnection>
+        <url>https://github.com/KrystianYCSilva/brasil4j</url>
+        <tag>HEAD</tag>
+    </scm>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -24,6 +44,8 @@
         <kotlin.version>2.3.10</kotlin.version>
         <junit.version>5.12.2</junit.version>
         <jacoco.version>0.8.14</jacoco.version>
+        <brasil4j.javadoc.phase>verify</brasil4j.javadoc.phase>
+        <brasil4j.dokka.phase>verify</brasil4j.dokka.phase>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -70,7 +92,10 @@
                     <version>3.5.3</version>
                     <executions>
                         <execution>
-                            <goals><goal>integration-test</goal><goal>verify</goal></goals>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
@@ -98,12 +123,17 @@
                     </configuration>
                     <executions>
                         <execution>
-                            <goals><goal>prepare-agent</goal></goals>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
                         </execution>
                         <execution>
                             <id>coverage</id>
                             <phase>verify</phase>
-                            <goals><goal>report</goal><goal>check</goal></goals>
+                            <goals>
+                                <goal>report</goal>
+                                <goal>check</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
@@ -117,11 +147,17 @@
                 <executions>
                     <execution>
                         <id>supported-build-tools</id>
-                        <goals><goal>enforce</goal></goals>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
                         <configuration>
                             <rules>
-                                <requireMavenVersion><version>[3.9,4)</version></requireMavenVersion>
-                                <requireJavaVersion><version>[1.8,)</version></requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.9,4)</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>[1.8,)</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -129,4 +165,83 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>central</id>
+            <properties>
+                <brasil4j.javadoc.phase>package</brasil4j.javadoc.phase>
+                <brasil4j.dokka.phase>prepare-package</brasil4j.dokka.phase>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>central-build-environment</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[21,22)</version>
+                                        </requireJavaVersion>
+                                        <requireEnvironmentVariable>
+                                            <variableName>MAVEN_GPG_KEY</variableName>
+                                        </requireEnvironmentVariable>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.8</version>
+                        <configuration>
+                            <signer>bc</signer>
+                            <bestPractices>true</bestPractices>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-central-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.12.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <skipUpload>true</skipUpload>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
