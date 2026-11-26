@@ -1,5 +1,7 @@
 # C1 · decisão sobre o primeiro incremento do brasil4j
 
+[Retomada pós-CPF e CNPJ](retomada.md) · [Roteiro e matriz de expansão](roteiro-expansao.md) · [Consolidação da Spec 005](fechamento-expansao.md)
+
 **Base compartilhada para revisão 0.1 · 25/11/2026.** Descoberta de 30/11 a 13/12/2026, com cinco horas de trabalho e uma hora de revisão e fechamento. Esta rodada antecipa a preparação documental.
 
 ## Registro de decisão
@@ -28,6 +30,6 @@ A biblioteca global de agentes estava limpa em `main` / `35c7b83`. O Core estava
 | Consolidação | 1 h | Usar os 27 resultados da sondagem de pré-filtro + JAR. Comparar custo de manutenção, disponibilidade do artefato e semântica de API com a correção local. Obter evidência de intenção de adoção fora do Core ou registrar lacuna com responsável. |
 | Revisão e fechamento | 1 h | Colher os dois [pareceres](revisao.md). O Codex consolida. Krystian decide promoção, correção local, adoção ou investigação de calendário. |
 
-Para promover ao C2, o Codex retoma a partir da [spec 001](../../../specs/002-cnpj/spec.md) e das linhas 10, 11, 16–18 e 26 da matriz. Confirmados demanda, contrato e alternativa, seguir spec, esclarecer, planejar, gerar tarefas e analisar. Caso a evidência de adoção fique pendente, usar o C2 para concluir a descoberta. O C3 é pausa e a implementação é candidata ao C4 após autorização. O eSocial segue em espera, Gate 1 em `c40ffbd` com registro `032c30d`.
+Para promover ao C2, o Codex retoma a partir da [Spec 002](../../../specs/002-cnpj/spec.md) e das linhas 10, 11, 16–18 e 26 da matriz. Confirmados demanda, contrato e alternativa, seguir spec, esclarecer, planejar, gerar tarefas e analisar. Caso a evidência de adoção fique pendente, usar o C2 para concluir a descoberta. O C3 é pausa e a implementação é candidata ao C4 após autorização. O eSocial segue em espera, Gate 1 em `c40ffbd` com registro `032c30d`.
 
 Insumos desta revisão: `lib-br-plano-refinado-v0.3.md` (SHA-256 `0ED7DCE818413520C0B6835A9AEC4A710F99B81778A7E8A97553471BD1DAFA69`), `lib-br-c1-sintese.md` (SHA-256 `255C321727EA8C824D0DB7F90CD651DDA9571B5B82CA35379A086C1C028F7CD8`) e a decisão do catálogo acima.

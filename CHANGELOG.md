@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 — em desenvolvimento
+
+- Código estrutural de município do IBGE, com preservação do texto, resolução de UF por prefixo e comparação explícita.
+- As 27 UFs incluem nome oficial, sigla, código IBGE, capital, DDDs imutáveis e busca por nome.
+- A API Kotlin delega ao núcleo Java, com representação textual canônica e compatibilidade Java 8.
+
 ## 0.1.0 — 2026-11-26
 
 - Núcleo Java para CNPJ numérico e alfanumérico, com validação de apresentação, dígitos verificadores e formatação. Modos `ALPHANUMERIC` (padrão), `NUMERIC` e `FORMAT_ONLY`.

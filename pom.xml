@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.brasil4j</groupId>
     <artifactId>brasil4j</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>brasil4j</name>
     <description>Biblioteca de domínio brasileiro para Java e Kotlin.</description>

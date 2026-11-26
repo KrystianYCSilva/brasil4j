@@ -4,9 +4,11 @@
     <parent>
         <groupId>io.github.brasil4j</groupId>
         <artifactId>brasil4j</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>brasil4j-core</artifactId>
+    <name>brasil4j-core</name>
+    <description>Objetos de valor e validação de documentos e códigos brasileiros em Java.</description>
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
