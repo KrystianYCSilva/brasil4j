@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — em desenvolvimento
+## 0.2.0 — 2026-11-26
 
 - Código estrutural de município do IBGE, com preservação do texto, resolução de UF por prefixo e comparação explícita.
 - As 27 UFs incluem nome oficial, sigla, código IBGE, capital, DDDs imutáveis e busca por nome.
