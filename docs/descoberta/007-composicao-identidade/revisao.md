@@ -1,0 +1,21 @@
+# Pareceres da descoberta · Spec 007
+
+**Data** 2026-11-27 · **Base** `5fd9dae` · **Revisão** Claude Code em modo de leitura e Antigravity via Agy em `plan` com sandbox. Ambos receberam o mesmo recorte e a mesma pergunta de revisão. SHA-256 do pacote enviado `4E9C6FD5D6907A917CA29710FB64E8A0706DCDF2ABECE1F648F9B820BF9AA77B`.
+
+## Pareceres independentes
+
+- **Claude.** Aprovou a direção e pediu fechar o contrato observável antes de formalizar. Propôs modo explícito, leitura única do texto, política e apresentação sobre a mesma instância, item tipado, resultado comum com três estados e apresentação opcional. Preferiu iteração pelo consumidor e uso do núcleo via SAM no Kotlin. Pediu explicitar nulabilidade, reexecução e proteção de diagnósticos.
+- **Antigravity.** Aprovou a direção com ressalvas. Tratou como bloqueante verificar se o CPF já pode ser construído em `FORMAT_ONLY` e reforçou a passagem única, a proteção de item e resultado, a separação entre erros e rejeições e o papel limitado da prova da UEM. Sugeriu quatro estados, construtor fluente, rótulo opcional, método de lote e conveniências Kotlin como opções de API.
+
+## Conferências e decisões
+
+| Ponto | Decisão para o recorte |
+| --- | --- |
+| `FORMAT_ONLY` e passe único | O código já resolve a dúvida de viabilidade. `Cpf.parse(input, mode)` e `Cnpj.parse(input, mode)` chamam uma vez `validatedCanonical` e constroem o valor a partir do retorno. O teste de CPF confirma o parse padrão de `28001238939` com DV divergente. O teste de CNPJ confirma `Cnpj.parse("12ABC34501DE36", FORMAT_ONLY).applyMask()`. A máscara do CNPJ é opcional e as letras aceitas são ASCII maiúsculas. A nova operação exige modo explícito de CPF e CNPJ. [CPF](../../../brasil4j-core/src/main/java/io/github/brasil4j/identidade/cpf/Cpf.java#L35) · [Teste de CPF](../../../brasil4j-core/src/test/java/io/github/brasil4j/identidade/cpf/CpfTest.java#L15) · [Teste de CNPJ](../../../brasil4j-core/src/test/java/io/github/brasil4j/identidade/cnpj/CnpjTest.java#L60) |
+| Superfície mínima | Preferir um item genérico com resultado comum, usando `Predicate` e `Function`. O valor de uma lista única é padronizar as etapas e produzir decisão e apresentação correlacionadas. O consumidor usa suas coleções para iterar e correlacionar por posição ou metadado externo. Construtor fluente separado, método de lote, rótulo interno e interfaces funcionais próprias exigiriam um caso de uso adicional. |
+| Desfecho | Adotar três decisões, com apresentação opcional na aceitação. Uma string vazia produzida de propósito conta como saída. Rejeição nativa e rejeição pela política têm significado distinto. A aceitação é relativa ao modo e às políticas configurados. O objeto de valor permanece dentro da execução. |
+| Nulos, falhas e privacidade | Texto nulo, vazio ou só com espaços é uma rejeição esperada, em linha com os validadores da base. Parâmetros de configuração obrigatórios são conferidos na montagem. Callbacks rodam no máximo uma vez por avaliação e exceções propagam intactas. Item e resultado ocultam documentos nos diagnósticos. A execução é síncrona e reexecutável, sem cache. |
+| Kotlin e compatibilidade | Começar pelo consumo direto do núcleo com SAM e valores Java, como no callback atual de NIS. Exercitar inferência e nulabilidade pelos JARs em Java 8 e 21 antes de avaliar extensões Kotlin. Evitar dependências de anotação e ferramentas adicionais como condições de formalização. Usar o japicmp já adotado e testes de consumo Kotlin para comparar a tag `v0.2.0` e o commit da 006. |
+| UEM | A política de `ValidationUtils.isPis` cabe na API e permanece opcional no consumidor. Os vetores 09 e 17 distinguem a forma da decisão de DV. O vetor 02 documenta a mudança para quem migra do helper isolado, que aceita a máscara. Nenhum dos pareceres encontrou evidência adicional de uso de produção. A montagem de listas heterogêneas é o cenário que justifica a 007. |
+
+O [recorte](recorte.md) está pronto para formalização no Spec Kit com esses ajustes. O plano deve definir nomes, assinaturas, representação da saída opcional, adaptação de falha nativa sem reparse e exemplos de consumo Java e Kotlin. A revisão foi documental e as verificações acima usaram o código e os testes existentes, além das evidências da Spec 006.
