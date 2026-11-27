@@ -1,5 +1,10 @@
 # Changelog
 
+## Não lançado
+
+- Inscrição estrutural de NIS, PIS, Pasep e NIT em Java e Kotlin. A API confere exatamente 11 dígitos ASCII, preserva zeros iniciais e oculta o valor na saída padrão. A verificação de arquivos históricos cobre o campo `nisTrab` do S-2200 v2.5.
+- `NisValidator` oferece verificação estrutural booleana e política opcional do consumidor. `NisFormatter` usa uma função de apresentação explícita. Kotlin delega aos mesmos contratos.
+
 ## 0.2.0 — 2026-11-26
 
 - Código estrutural de município do IBGE, com preservação do texto, resolução de UF por prefixo e comparação explícita.

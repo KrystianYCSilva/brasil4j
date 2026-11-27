@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fragmento sintético de S-2200 v2.5, conforme leiaute consolidado até NT 19/2020. -->
+<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtAdmissao/v02_05_00">
+  <evtAdmissao>
+    <trabalhador>
+      <nisTrab>
+	01234567897</nisTrab>
+    </trabalhador>
+  </evtAdmissao>
+</eSocial>

@@ -44,6 +44,8 @@
                 <includes>
                     <include>cnpj-c1.csv</include>
                     <include>cnpj-rfb-ascii.csv</include>
+                    <include>nis/nis-c1.csv</include>
+                    <include>nis/esocial-2.5/*.xml</include>
                 </includes>
             </testResource>
         </testResources>
