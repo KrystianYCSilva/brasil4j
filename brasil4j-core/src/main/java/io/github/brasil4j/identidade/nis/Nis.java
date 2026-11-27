@@ -1,16 +1,19 @@
 package io.github.brasil4j.identidade.nis;
 
+import io.github.brasil4j.identidade.AbstractDocument;
+import io.github.brasil4j.identidade.SecurityMaskedDocument;
+import io.github.brasil4j.mascara.DocumentMask;
+
 /**
  * Inscrição estrutural de NIS, PIS, Pasep ou NIT, com igualdade pelo valor canônico.
  * A conferência abrange somente a apresentação do campo.
  */
-public final class Nis {
+public final class Nis extends AbstractDocument implements SecurityMaskedDocument {
     private static final String INVALID_FORMAT = "NIS inválido.";
-
-    private final String canonical;
+    private static final DocumentMask CANONICAL = DocumentMask.of("99999999999");
 
     private Nis(String canonical) {
-        this.canonical = canonical;
+        super(canonical);
     }
 
     /**
@@ -33,16 +36,7 @@ public final class Nis {
     }
 
     static boolean hasCanonicalFormat(String input) {
-        if (input == null || input.length() != 11) {
-            return false;
-        }
-        for (int index = 0; index < input.length(); index++) {
-            char digit = input.charAt(index);
-            if (digit < '0' || digit > '9') {
-                return false;
-            }
-        }
-        return true;
+        return CANONICAL.unmask(input).isPresent();
     }
 
     /**
@@ -50,20 +44,22 @@ public final class Nis {
      *
      * @return os 11 dígitos na ordem recebida, inclusive zeros iniciais
      */
+    @Override
     public String getCanonicalValue() {
-        return canonical;
+        return super.getCanonicalValue();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Aplica a máscara de segurança sobre os 11 dígitos, sem pontuação, ocultando os três primeiros e
+     * o último, como em {@code ***3456789*}. O NIS não tem máscara de apresentação pronta.
+     *
+     * @param maskChar caractere de ocultação, que não pode ser letra nem dígito
+     * @return a inscrição parcialmente ocultada
+     * @throws IllegalArgumentException se o caractere for letra ou dígito
+     */
     @Override
-    public boolean equals(Object other) {
-        return other instanceof Nis && canonical.equals(((Nis) other).canonical);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        return canonical.hashCode();
+    public String applySecurityMask(char maskChar) {
+        return CANONICAL.applySecure(getCanonicalValue(), 3, 1, maskChar);
     }
 
     /**

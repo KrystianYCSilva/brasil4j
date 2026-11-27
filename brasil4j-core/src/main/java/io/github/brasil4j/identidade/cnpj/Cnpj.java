@@ -1,5 +1,9 @@
 package io.github.brasil4j.identidade.cnpj;
 
+import io.github.brasil4j.identidade.AbstractDocument;
+import io.github.brasil4j.identidade.CheckDigitDocument;
+import io.github.brasil4j.identidade.MaskedDocument;
+import io.github.brasil4j.identidade.SecurityMaskedDocument;
 import io.github.brasil4j.mascara.DocumentMask;
 
 import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC;
@@ -8,13 +12,12 @@ import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC
  * Valor imutável de um CNPJ completo, com igualdade pelo valor canônico.
  * A construção padrão verifica a estrutura e os DVs. A existência da inscrição é cadastral.
  */
-public final class Cnpj {
+public final class Cnpj extends AbstractDocument
+        implements MaskedDocument, SecurityMaskedDocument, CheckDigitDocument {
     static final DocumentMask MASK = DocumentMask.of("XX.XXX.XXX/XXXX-99");
 
-    private final String canonical;
-
     private Cnpj(String canonical) {
-        this.canonical = canonical;
+        super(canonical);
     }
 
     /**
@@ -49,8 +52,9 @@ public final class Cnpj {
      *
      * @return os 14 caracteres do CNPJ, sem pontuação e com zeros preservados
      */
+    @Override
     public String getCanonicalValue() {
-        return canonical;
+        return super.getCanonicalValue();
     }
 
     /**
@@ -58,8 +62,9 @@ public final class Cnpj {
      *
      * @return a base de 12 caracteres, composta de raiz e ordem
      */
+    @Override
     public String getBase() {
-        return canonical.substring(0, 12);
+        return getCanonicalValue().substring(0, 12);
     }
 
     /**
@@ -68,7 +73,7 @@ public final class Cnpj {
      * @return os oito caracteres da raiz
      */
     public String getRoot() {
-        return canonical.substring(0, 8);
+        return getCanonicalValue().substring(0, 8);
     }
 
     /**
@@ -77,7 +82,7 @@ public final class Cnpj {
      * @return os quatro caracteres da ordem do estabelecimento
      */
     public String getBranch() {
-        return canonical.substring(8, 12);
+        return getCanonicalValue().substring(8, 12);
     }
 
     /**
@@ -85,8 +90,19 @@ public final class Cnpj {
      *
      * @return os dois dígitos verificadores informados
      */
+    @Override
     public String getCheckDigits() {
-        return canonical.substring(12);
+        return getCanonicalValue().substring(12);
+    }
+
+    /**
+     * Confere os DVs pelo módulo 11 do Anexo XV da IN RFB 2.119/2022, com o bloqueio de 14 zeros (F-05).
+     *
+     * @return se os dígitos informados coincidem com o cálculo e o valor não é formado só por zeros
+     */
+    @Override
+    public boolean hasValidCheckDigits() {
+        return CnpjValidationMode.hasCheckDigits(getCanonicalValue());
     }
 
     /**
@@ -95,7 +111,7 @@ public final class Cnpj {
      * @return o tipo numérico ou alfanumérico, conforme a base
      */
     public CnpjType getType() {
-        return CnpjType.of(canonical);
+        return CnpjType.of(getCanonicalValue());
     }
 
     /**
@@ -103,20 +119,22 @@ public final class Cnpj {
      *
      * @return o CNPJ com máscara completa, preservando a base e os DVs do valor
      */
+    @Override
     public String applyMask() {
-        return MASK.apply(canonical);
+        return MASK.apply(getCanonicalValue());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Aplica a máscara de segurança, que oculta os dois primeiros caracteres e os dois DVs,
+     * como em {@code **.ABC.345/01DE-**}.
+     *
+     * @param maskChar caractere de ocultação, que não pode ser letra nem dígito
+     * @return o CNPJ parcialmente ocultado
+     * @throws IllegalArgumentException se o caractere for letra ou dígito
+     */
     @Override
-    public boolean equals(Object other) {
-        return other instanceof Cnpj && canonical.equals(((Cnpj) other).canonical);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        return canonical.hashCode();
+    public String applySecurityMask(char maskChar) {
+        return MASK.applySecure(getCanonicalValue(), 2, 2, maskChar);
     }
 
     /**
@@ -126,6 +144,6 @@ public final class Cnpj {
      */
     @Override
     public String toString() {
-        return canonical;
+        return getCanonicalValue();
     }
 }

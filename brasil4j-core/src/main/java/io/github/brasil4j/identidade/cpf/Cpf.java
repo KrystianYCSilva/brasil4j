@@ -1,5 +1,9 @@
 package io.github.brasil4j.identidade.cpf;
 
+import io.github.brasil4j.identidade.AbstractDocument;
+import io.github.brasil4j.identidade.CheckDigitDocument;
+import io.github.brasil4j.identidade.MaskedDocument;
+import io.github.brasil4j.identidade.SecurityMaskedDocument;
 import io.github.brasil4j.mascara.DocumentMask;
 import io.github.brasil4j.verificacao.Modulus11;
 
@@ -9,13 +13,12 @@ import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
  * Valor imutável de um CPF, com igualdade pelo valor canônico.
  * A construção padrão confere a apresentação. A conferência do DV é opcional.
  */
-public final class Cpf {
+public final class Cpf extends AbstractDocument
+        implements MaskedDocument, SecurityMaskedDocument, CheckDigitDocument {
     static final DocumentMask MASK = DocumentMask.of("999.999.999-99");
 
-    private final String canonical;
-
     private Cpf(String canonical) {
-        this.canonical = canonical;
+        super(canonical);
     }
 
     /**
@@ -50,8 +53,9 @@ public final class Cpf {
      *
      * @return os 11 dígitos informados, sem pontuação e com zeros preservados
      */
+    @Override
     public String getCanonicalValue() {
-        return canonical;
+        return super.getCanonicalValue();
     }
 
     /**
@@ -59,8 +63,9 @@ public final class Cpf {
      *
      * @return os nove dígitos da base
      */
+    @Override
     public String getBase() {
-        return canonical.substring(0, 9);
+        return getCanonicalValue().substring(0, 9);
     }
 
     /**
@@ -68,8 +73,9 @@ public final class Cpf {
      *
      * @return os dois dígitos verificadores informados, inclusive no modo de formato
      */
+    @Override
     public String getCheckDigits() {
-        return canonical.substring(9);
+        return getCanonicalValue().substring(9);
     }
 
     /**
@@ -77,8 +83,9 @@ public final class Cpf {
      *
      * @return se os dígitos informados coincidem com o cálculo pelo módulo 11
      */
+    @Override
     public boolean hasValidCheckDigits() {
-        return Modulus11.cpf().verify(canonical);
+        return Modulus11.cpf().verify(getCanonicalValue());
     }
 
     /**
@@ -86,20 +93,22 @@ public final class Cpf {
      *
      * @return o CPF com máscara completa, exibindo todos os dígitos
      */
+    @Override
     public String applyMask() {
-        return MASK.apply(canonical);
+        return MASK.apply(getCanonicalValue());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Aplica a máscara de segurança, que oculta os três primeiros dígitos e os dois DVs,
+     * como em {@code ***.345.678-**}.
+     *
+     * @param maskChar caractere de ocultação, que não pode ser letra nem dígito
+     * @return o CPF parcialmente ocultado
+     * @throws IllegalArgumentException se o caractere for letra ou dígito
+     */
     @Override
-    public boolean equals(Object other) {
-        return other instanceof Cpf && canonical.equals(((Cpf) other).canonical);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        return canonical.hashCode();
+    public String applySecurityMask(char maskChar) {
+        return MASK.applySecure(getCanonicalValue(), 3, 2, maskChar);
     }
 
     /**
