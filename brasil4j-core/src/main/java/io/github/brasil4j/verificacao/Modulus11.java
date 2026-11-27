@@ -16,6 +16,7 @@ import java.util.function.IntUnaryOperator;
 public final class Modulus11 implements CheckDigitAlgorithm {
     private static final String DIGITS = "0123456789";
     private static final String ALPHANUMERIC = DIGITS + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final int[] PIS_WEIGHTS = {3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
 
     private final IntUnaryOperator charValue;
     private final String alphabet;
@@ -65,6 +66,33 @@ public final class Modulus11 implements CheckDigitAlgorithm {
      */
     public static Modulus11 cnpj() {
         return builder().charValue(c -> c - '0', ALPHANUMERIC).digits(2).build();
+    }
+
+    /**
+     * Fórmula publicada no Caderno do Agente Financeiro v016 da Caixa (p. 25), com alcance documentado
+     * para PIS/Pasep no contexto operacional do FGTS: pesos 3, 2, 9, 8, 7, 6, 5, 4, 3 e 2 da esquerda
+     * para a direita; resto 0 vira 0, resto 1 deixa a base sem DV válido e os demais viram
+     * {@code 11 - resto}. A extensão ao Cadastro NIS, ao NIT do INSS ou ao Pasep em geral não está
+     * confirmada. Não inclui a guarda de algarismos repetidos.
+     *
+     * @return algoritmo da fórmula publicada pela Caixa para o FGTS
+     */
+    public static Modulus11 pisCaixaFgtsV016() {
+        return builder().weightsFromLeft(PIS_WEIGHTS)
+                .remainder(rest -> rest == 1 ? OptionalInt.empty() : OptionalInt.of(rest == 0 ? 0 : 11 - rest))
+                .build();
+    }
+
+    /**
+     * Convenção técnica observada nos validadores legados de Declarações e da UEM (matriz C1 em
+     * {@code docs/descoberta/c1/nis-matriz.md}): os mesmos pesos da fórmula da Caixa, com restos 0 e 1
+     * convertidos em DV 0. Diverge da fórmula da Caixa quando o resto é 1. A guarda de algarismos
+     * repetidos observada nesses legados é uma regra separada.
+     *
+     * @return algoritmo da convenção legada
+     */
+    public static Modulus11 pisLegacyMod11() {
+        return builder().weightsFromLeft(PIS_WEIGHTS).build();
     }
 
     /** {@inheritDoc} */

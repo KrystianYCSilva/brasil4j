@@ -6,15 +6,25 @@ import io.github.brasil4j.identidade.DocumentParsers;
 import io.github.brasil4j.identidade.SecurityMaskedDocument;
 import io.github.brasil4j.mascara.DocumentMask;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  * Inscrição estrutural de NIS, PIS, Pasep ou NIT, com igualdade pelo valor canônico.
- * A conferência abrange somente a apresentação do campo.
+ * A conferência padrão abrange somente a apresentação do campo. Validadores de DV são opcionais,
+ * por {@link #parser(NisValidationMode)} ou por {@link NisRules}.
  */
 public final class Nis extends AbstractDocument implements SecurityMaskedDocument {
     private static final String INVALID_FORMAT = "NIS inválido.";
     private static final DocumentMask CANONICAL = DocumentMask.of("99999999999");
-    private static final DocumentParser<Nis> STRUCTURAL = DocumentParsers.builder(Nis::new)
-            .mask(CANONICAL).errorMessage(INVALID_FORMAT).build();
+    private static final Map<NisValidationMode, DocumentParser<Nis>> PARSERS = new EnumMap<>(NisValidationMode.class);
+
+    static {
+        for (NisValidationMode mode : NisValidationMode.values()) {
+            PARSERS.put(mode, mode.configure(DocumentParsers.builder(Nis::new).mask(CANONICAL))
+                    .errorMessage(INVALID_FORMAT).build());
+        }
+    }
 
     private Nis(String canonical) {
         super(canonical);
@@ -26,7 +36,21 @@ public final class Nis extends AbstractDocument implements SecurityMaskedDocumen
      * @return interpretador reutilizável
      */
     public static DocumentParser<Nis> parser() {
-        return STRUCTURAL;
+        return parser(NisValidationMode.FORMAT_ONLY);
+    }
+
+    /**
+     * Obtém o interpretador da configuração informada.
+     *
+     * @param mode configuração de conferência
+     * @return interpretador reutilizável
+     * @throws IllegalArgumentException se a configuração for nula
+     */
+    public static DocumentParser<Nis> parser(NisValidationMode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("Modo de validação do NIS obrigatório.");
+        }
+        return PARSERS.get(mode);
     }
 
     /**
@@ -37,19 +61,15 @@ public final class Nis extends AbstractDocument implements SecurityMaskedDocumen
      * @throws IllegalArgumentException se a entrada for nula ou tiver formato inválido
      */
     public static Nis parse(String input) {
-        Nis nis = parseOrNull(input);
-        if (nis == null) {
-            throw new IllegalArgumentException(INVALID_FORMAT);
-        }
-        return nis;
+        return parser().parseOrThrow(input);
     }
 
     static Nis parseOrNull(String input) {
-        return hasCanonicalFormat(input) ? new Nis(input) : null;
+        return parser().parse(input).getDocument().orElse(null);
     }
 
     static boolean hasCanonicalFormat(String input) {
-        return CANONICAL.unmask(input).isPresent();
+        return parser().isValid(input);
     }
 
     /**
