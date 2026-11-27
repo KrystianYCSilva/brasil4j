@@ -17,6 +17,8 @@ jobs:
           cache: maven
       - name: Test and verify
         run: sh ./mvnw -B -ntp clean verify
+      - name: Assert examples module ran
+        run: test -n "$(ls brasil4j-exemplos/target/surefire-reports/TEST-*.xml)"
       - name: Check Java 8 bytecode
         run: python3 scripts/check-bytecode.py
 

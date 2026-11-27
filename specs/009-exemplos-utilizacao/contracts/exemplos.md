@@ -1,0 +1,12 @@
+# Contrato do Módulo de Exemplos · Spec 009
+
+- **Coordenada interna de build**: `io.github.brasil4j:brasil4j-exemplos` (nunca instalada ou publicada).
+- **Superfície pública adicionada aos JARs distribuídos**: nenhuma (`0` classes adicionadas a `brasil4j-core` e `brasil4j-kotlin`).
+- **Suítes didáticas e cenários integrados garantidos no build padrão (`mvnw clean verify`) — 7 suítes / 28 casos comentados**:
+  1. `io.github.brasil4j.exemplos.java.IdentidadeExemplosTest`: CNPJ numérico/alfanumérico/`FORMAT_ONLY`/máscara, deduplicação e agrupamento matriz/filiais por `getRoot()`; CPF `FORMAT_ONLY`/`NUMERIC`, zeros à esquerda, triagem de lote legado e ocultação LGPD; NIS com zeros iniciais, políticas compostas `Predicate.and` e múltiplos leiautes em `NisFormatter`.
+  2. `io.github.brasil4j.exemplos.java.GeografiaExemplosTest`: validação cruzada NF-e entre `CodigoMunicipio` e `Uf` (`matchesUf`), saneamento de nomes de `Uf` em planilhas e índice reverso de DDDs Anatel (incluindo DDD compartilhado `61` em `DF`/`GO`).
+  3. `io.github.brasil4j.exemplos.java.FinancasExemplosTest`: todas as políticas de `MetodoArredondamento` (positivos, negativos, `fromRoundingMode`, `comArredondamento` e lambda customizada), fábricas `de`/`exato`/`deInteiro`/`deCentavos`/`zero`, sinais/ordenação, `Moeda` (`BRL`/`USD`/`EUR`, `iso` `JPY/0` e `KWD/3`, `fromJdkCurrency` e `enum` próprio do consumidor), faturamento com retenção, crediário com entrada + `ratear`, rateio NF-e com `alocar` (Hamilton) e consolidação multimoeda com `TaxaCambio`.
+  4. `io.github.brasil4j.exemplos.java.CenariosIntegradosExemplosTest`: cenários ponta a ponta combinando `identidade`, `geografia` e `financas` (venda interestadual e folha/reembolso internacional PTAX).
+  5. `io.github.brasil4j.exemplos.kotlin.IdentidadeGeografiaKotlinExemplosTest`: *value classes* e extensões Kotlin para CNPJ (`groupBy`), CPF (`partition`), NIS (receptor anulável `String?`), `CodigoMunicipio` (operador Elvis `?:`), `Uf` e `.toJava()`.
+  6. `io.github.brasil4j.exemplos.kotlin.FinancasKotlinExemplosTest`: todas as extensões construtoras fluentes (`Real`, `Dolar`, `Euro`, `Dinheiro`), operadores aritméticos e relacionais, carrinho de e-commerce (`alocarPorPesos` + `ratear`), carteira multimoeda (`when`) e fronteiras de exceção (`assertThrows`).
+  7. `io.github.brasil4j.exemplos.kotlin.CenariosIntegradosKotlinExemplosTest`: modelagem com `data class` integrando *value classes* e valores monetários com proteção automática de `Cpf` e `Nis` no `toString()` gerado pelo compilador.

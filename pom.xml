@@ -137,6 +137,17 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-plugin</artifactId>
+                    <version>${kotlin.version}</version>
+                    <configuration>
+                        <jvmTarget>1.8</jvmTarget>
+                        <args>
+                            <arg>-Xjdk-release=8</arg>
+                        </args>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -166,6 +177,17 @@
         </plugins>
     </build>
     <profiles>
+        <!-- Não adicione perfis com <activation> automática neste POM sem rever o perfil exemplos:
+             qualquer outro perfil ativo no mesmo POM desliga activeByDefault. -->
+        <profile>
+            <id>exemplos</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>brasil4j-exemplos</module>
+            </modules>
+        </profile>
         <profile>
             <id>central</id>
             <properties>
