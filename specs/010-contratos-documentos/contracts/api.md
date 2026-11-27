@@ -23,8 +23,8 @@ public interface CheckDigitDocument extends Document {
 public abstract class AbstractDocument implements Document {
     protected AbstractDocument(String canonical);   // NPE se nulo
     public String getCanonicalValue();
-    public final boolean equals(Object other);      // getClass() igual e canônico igual
-    public final int hashCode();
+    public boolean equals(Object other);            // getClass() igual e canônico igual; não final (japicmp METHOD_NOW_FINAL)
+    public int hashCode();
     public String toString();                       // "[documento oculto]"
 }
 
