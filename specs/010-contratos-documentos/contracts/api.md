@@ -102,7 +102,15 @@ public interface CheckDigitAlgorithm {
 }
 
 public final class Modulus11 implements CheckDigitAlgorithm {
-    public static Builder builder();                 // charValue, weights, remainderMapping, digits
+    public static Builder builder();
+    public static final class Builder {
+        public Builder charValue(IntUnaryOperator charToValue, String alphabet); // padrão: ASCII − 48, "0123456789"
+        public Builder weightsFromRight(int first, int last);  // cíclicos da direita: first..last, recomeça em first
+        public Builder weightsFromLeft(int... weights);         // pesos fixos da esquerda para a direita
+        public Builder remainder(IntFunction<OptionalInt> mapping); // resto → DV; vazio = base sem DV válido
+        public Builder digits(int count);                       // padrão 1; cada DV entra na base do seguinte
+        public Modulus11 build();
+    }
     public static Modulus11 cpf();
     public static Modulus11 cnpj();
     public static Modulus11 pisCaixaFgtsV016();
@@ -110,7 +118,12 @@ public final class Modulus11 implements CheckDigitAlgorithm {
 }
 ```
 
-`compute` e `verify` lançam `IllegalArgumentException` para nulo, comprimento incompatível ou caractere fora do domínio do `charValue`.
+O mapeamento de resto padrão é `r < 2 → 0, senão 11 − r`. Os pesos padrão são `weightsFromRight(2, 9)`. `weightsFromLeft` aplica pesos fixos; quando a base é maior que a lista de pesos, a configuração é inválida (IAE). `compute` e `verify` lançam `IllegalArgumentException` para nulo, comprimento incompatível ou caractere fora do alfabeto.
+
+- `cpf()`: `weightsFromRight(2, 11)` com 2 DVs. O peso não recomeça, porque a base tem no máximo 10 caracteres.
+- `cnpj()`: alfabeto `0-9A-Z` com ASCII − 48, `weightsFromRight(2, 9)` e 2 DVs.
+- `pisCaixaFgtsV016()`: `weightsFromLeft(3,2,9,8,7,6,5,4,3,2)`, resto `0 → 0`, `1 → vazio`, senão `11 − r`, 1 DV.
+- `pisLegacyMod11()`: os mesmos pesos, com o mapeamento padrão, 1 DV.
 
 ## `io.github.brasil4j.mascara`
 

@@ -36,9 +36,9 @@
 ### Etapa 3 · Algoritmo de DV
 
 - [ ] T009 RED em `core-test/verificacao/Modulus11Test.java`: validação de nulo, comprimento e domínio (inclusive caracteres abaixo de `'0'`), `digitCount` e `verify`.
-- [ ] T010 RED em `core-test/verificacao/Modulus11EquivalenceTest.java` (pacote de teste `identidade.cpf` e `identidade.cnpj` para acesso package-private): comparar `Modulus11.cpf()` e `cnpj()` com `CpfCheckDigits` e `CnpjCheckDigits` nos vetores existentes e em 10 000 bases geradas com semente fixa. Gravar as bases e os DVs esperados em `brasil4j-core/src/test/resources/verificacao/modulus11-equivalencia.csv`.
+- [ ] T010 RED em dois testes, um por pacote, para acessar as classes package-private: `core-test/identidade/cpf/CpfModulus11EquivalenceTest.java` compara `Modulus11.cpf()` com `CpfCheckDigits` e `core-test/identidade/cnpj/CnpjModulus11EquivalenceTest.java` compara `Modulus11.cnpj()` com `CnpjCheckDigits`. Usar os vetores existentes e 10 000 bases geradas com semente fixa. Gravar as bases e os DVs esperados em `brasil4j-core/src/test/resources/verificacao/cpf-equivalencia.csv` e `cnpj-equivalencia.csv`.
 - [ ] T011 GREEN em `core/verificacao/CheckDigitAlgorithm.java` e `core/verificacao/Modulus11.java`, com builder e presets `cpf()` e `cnpj()`. O JavaDoc cita e-Financeira e IN RFB 2.119/2022.
-- [ ] T012 REFACTOR: `CpfValidationMode` e `CnpjValidationMode` passam a usar `Modulus11`. O bloqueio de 14 zeros vira uma regra canônica explícita. Converter `Modulus11EquivalenceTest` para ler o CSV congelado. Remover `core/identidade/cpf/CpfCheckDigits.java` e `core/identidade/cnpj/CnpjCheckDigits.java`. Toda a suíte fica verde.
+- [ ] T012 REFACTOR: `CpfValidationMode` e `CnpjValidationMode` passam a usar `Modulus11`. O bloqueio de 14 zeros vira uma regra canônica explícita. Converter os dois testes de equivalência para ler os CSVs congelados. Remover `core/identidade/cpf/CpfCheckDigits.java` e `core/identidade/cnpj/CnpjCheckDigits.java`. Toda a suíte fica verde.
 - [ ] T013 Commit da etapa 3.
 
 ### Etapa 4 · Máscara

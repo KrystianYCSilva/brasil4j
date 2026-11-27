@@ -61,7 +61,7 @@ O [contrato](contracts/api.md) define assinaturas e semântica. O [modelo](data-
 
 ### Sequência de entrega
 
-Cada etapa segue TDD (vermelho, verde, refatoração) e tem um commit próprio.
+Cada etapa segue TDD (vermelho, verde, refatoração) e tem um commit próprio. As tarefas executam essas etapas agrupadas por história. A etapa 6 se divide em 6a (fundação) e 6b (US2). As etapas 8 e 9 (US1) vêm antes da 7 (US3), pois a US1 tem prioridade maior e não depende do DV do NIS. Ver [tasks.md](tasks.md#dependências).
 
 1. Caracterização: `toString`, mensagens, tipos exatos de exceção, modo nulo e 14 zeros.
 2. `Rejection`, `RejectionReason`, `ValidationResult` e `ValidationRule`.
