@@ -9,6 +9,11 @@ public interface Document { String getCanonicalValue(); }
 
 public interface MaskedDocument extends Document { String applyMask(); }
 
+public interface SecurityMaskedDocument extends Document {
+    String applySecurityMask();                     // caractere '*'
+    String applySecurityMask(char maskChar);        // IAE se dígito ou letra
+}
+
 public interface CheckDigitDocument extends Document {
     String getBase();
     String getCheckDigits();
@@ -85,6 +90,8 @@ public interface DocumentFormatter<D extends Document> extends Function<D, Strin
     static <D extends Document> DocumentFormatter<D> canonical();
     static <D extends MaskedDocument> DocumentFormatter<D> masked();
     static <D extends Document> DocumentFormatter<D> redacted(int visiblePrefix, int visibleSuffix, char maskChar);
+    static <D extends SecurityMaskedDocument> DocumentFormatter<D> secure();
+    static <D extends SecurityMaskedDocument> DocumentFormatter<D> secure(char maskChar);
 }
 ```
 
@@ -133,13 +140,17 @@ public final class DocumentMask {
     public int canonicalLength();
     public Optional<String> unmask(String input);    // canônico conforme os slots ou máscara completa exata
     public String apply(String canonical);           // IAE se não conforme
+    public String applySecure(String canonical, int hiddenPrefix, int hiddenSuffix, char maskChar);
 }
 ```
+
+`applySecure` aplica a máscara e substitui pelo caractere os `hiddenPrefix` primeiros e os `hiddenSuffix` últimos slots, preservando os literais. Quantidades negativas e caracteres que sejam dígito ou letra geram IAE. Uma soma maior ou igual ao número de slots oculta todos os slots.
 
 ## Documentos
 
 | Tipo | Adições |
 | --- | --- |
+| Máscara de segurança | `Cpf`, `Cnpj` e `Nis` implementam `SecurityMaskedDocument`. Layout: CPF oculta 3 + 2 (`***.345.678-**` para `01234567890`), CNPJ oculta 2 + 2 (`**.ABC.345/01DE-**`), NIS oculta 3 + 1 sobre o canônico sem pontuação (`***3456789*` para `01234567898`). O layout é uma escolha de projeto, registrada em `docs/fontes.md` sem rótulo de "oficial". Sem ocultação: `applyMask()` em CPF e CNPJ (inalterado) e `getCanonicalValue()` no NIS, que não implementa `MaskedDocument`. |
 | `Cpf` | `extends AbstractDocument implements MaskedDocument, CheckDigitDocument`. `static DocumentParser<Cpf> parser()` e `parser(CpfValidationMode)` (IAE para modo nulo). `toString` continua `***.***.***-**`. |
 | `Cnpj` | `extends AbstractDocument implements MaskedDocument, CheckDigitDocument`. `parser()`, `parser(CnpjValidationMode)` e `hasValidCheckDigits()` (falso para 14 zeros). `toString` continua canônico. |
 | `Nis` | `extends AbstractDocument`. `parser()` e `parser(NisValidationMode)`. `toString` continua `[NIS oculto]`. |
@@ -169,4 +180,5 @@ fun String?.toNisOrNull(mode: NisValidationMode = NisValidationMode.FORMAT_ONLY)
 fun <D : Document> DocumentParser<D>.parseOrNull(input: String?): D?
 fun String.toNis(mode: NisValidationMode): Nis
 // Cnpj.hasValidCheckDigits(): Boolean
+// Cpf, Cnpj e Nis: applySecurityMask(maskChar: Char = '*'): String
 ```

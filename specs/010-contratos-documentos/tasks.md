@@ -48,6 +48,7 @@
   - `unmask` de canônico e de máscara exata, e rejeição de máscara parcial, minúsculas, espaços e nulo;
   - `apply`;
   - `canonicalLength`;
+  - `applySecure` ocultando prefixo e sufixo de slots e preservando literais; soma maior ou igual aos slots oculta tudo; IAE para quantidade negativa e para caractere dígito ou letra;
   - padrão sem slot gerando IAE.
 - [ ] T015 GREEN em `core/mascara/DocumentMask.java`.
 - [ ] T016 REFACTOR: `CpfFormatter.canonicalize`, `CnpjFormatter.canonicalize`, `Cpf.applyMask` e `Cnpj.applyMask` passam a delegar a `DocumentMask` (`999.999.999-99` e `XX.XXX.XXX/XXXX-99`). A suíte e a caracterização ficam verdes.
@@ -55,8 +56,14 @@
 
 ### Etapa 5 · Contratos de valor
 
-- [ ] T018 RED em `core-test/identidade/AbstractDocumentTest.java`: igualdade por classe e canônico, NPE para canônico nulo e `toString` oculto por padrão. Incluir asserções de `instanceof` (`Cpf` e `Cnpj` como `MaskedDocument` e `CheckDigitDocument`; `Nis` apenas como `Document`) e `Cnpj.hasValidCheckDigits()`, falso para 14 zeros e para DV divergente.
-- [ ] T019 GREEN em `core/identidade/Document.java`, `MaskedDocument.java`, `CheckDigitDocument.java` e `AbstractDocument.java`. Ajustar `Cpf`, `Cnpj` e `Nis` para estender `AbstractDocument`, mantendo os `toString` atuais e acrescentando `Cnpj.hasValidCheckDigits()`.
+- [ ] T018 RED em `core-test/identidade/AbstractDocumentTest.java`: igualdade por classe e canônico, NPE para canônico nulo e `toString` oculto por padrão. Incluir:
+  - asserções de `instanceof`: `Cpf` e `Cnpj` como `MaskedDocument`, `SecurityMaskedDocument` e `CheckDigitDocument`; `Nis` como `SecurityMaskedDocument`, mas não como `MaskedDocument` nem `CheckDigitDocument`;
+  - `Cnpj.hasValidCheckDigits()`, falso para 14 zeros e para DV divergente;
+  - máscara de segurança (US1-4): `01234567890` → `***.345.678-**`, com `#` → `###.345.678-##`; `12ABC34501DE35` → `**.ABC.345/01DE-**`; `01234567898` → `***3456789*`;
+  - sem ocultação: `applyMask()` do CPF e do CNPJ inalterado e `getCanonicalValue()` do NIS;
+  - IAE para caractere de máscara dígito ou letra;
+  - `toString` dos três inalterado.
+- [ ] T019 GREEN em `core/identidade/Document.java`, `MaskedDocument.java`, `SecurityMaskedDocument.java`, `CheckDigitDocument.java` e `AbstractDocument.java`. Ajustar `Cpf`, `Cnpj` e `Nis` para estender `AbstractDocument`, mantendo os `toString` atuais. Acrescentar `Cnpj.hasValidCheckDigits()` e `applySecurityMask()`/`applySecurityMask(char)` nos três, via `DocumentMask.applySecure`. O NIS usa a máscara canônica `99999999999`, interna e sem pontuação.
 - [ ] T020 Gate de compatibilidade: empacotar o candidato e rodar `scripts/check-api-compatibility.py` contra `v0.2.0` e `5fd9dae`, cada baseline em um diretório separado. Se houver incompatibilidade, manter em `Cpf` e `Cnpj` overrides finos que delegam. Registrar o relatório em `analysis.md`.
 - [ ] T021 Commit da etapa 5.
 
@@ -83,7 +90,7 @@
 
 - [ ] T031 [US1] RED em `core-test/identidade/CustomDocumentExampleTest.java`: `Matricula` montada só com blocos públicos (`AbstractDocument`, `MaskedDocument`, `DocumentMask`, `Modulus11.builder()`, `DocumentParsers`). Cenários US1-1 e US1-2, igualdade e `toString` oculto. Uma subclasse `MatriculaParserContractTest` aplica o contrato.
 - [ ] T032 [US1] GREEN mínimo no que faltar em `Modulus11.Builder` ou `DocumentParsers`, sem código específico de `Matricula` na biblioteca.
-- [ ] T033 [P] [US1] RED em `core-test/identidade/DocumentFormatterTest.java`: `canonical`, `masked` e `redacted` (argumentos negativos geram IAE; soma maior ou igual ao comprimento oculta tudo).
+- [ ] T033 [P] [US1] RED em `core-test/identidade/DocumentFormatterTest.java`: `canonical`, `masked`, `secure()`/`secure(char)` e `redacted` (argumentos negativos geram IAE; soma maior ou igual ao comprimento oculta tudo). Incluir a `Matricula` com máscara de segurança própria (US1-4).
 - [ ] T034 [US1] GREEN em `core/identidade/DocumentFormatter.java`. Commit da etapa 8.
 - [ ] T035 [US1] RED em `core-test/identidade/composicao/DocumentCheckOfTest.java`:
   - `DocumentCheck.of` com `Matricula.PARSER` numa lista com `cpf`, `cnpj` e `nis` (US1-3);
@@ -104,14 +111,14 @@
   - `withRule(NisRules.repeatedDigits())` rejeitando o 07 e aceitando o 21;
   - regra do consumidor com código `PREFIXO_IMPORTACAO` (US3-4).
 - [ ] T040 [US3] GREEN nos presets PIS em `core/verificacao/Modulus11.java` e em `core/identidade/nis/NisValidationMode.java`, `NisRules.java` e `Nis.java` (`parser()`, `parser(mode)`; `parse` delegando). O JavaDoc cita fonte e alcance, sem a palavra "oficial".
-- [ ] T041 [US3] Atualizar `docs/fontes.md` com entradas para a fórmula publicada da Caixa FGTS v016 (alcance PIS/Pasep no FGTS), para a convenção legada (Declarações e UEM, matriz C1) e para a RV_03 do SIPREV (alcance SIPREV). Registrar a divergência no caso 17 e a extensão ao NIS/NIT como não confirmada.
+- [ ] T041 [US3] Atualizar `docs/fontes.md` com entradas para a fórmula publicada da Caixa FGTS v016 (alcance PIS/Pasep no FGTS), para a convenção legada (Declarações e UEM, matriz C1) e para a RV_03 do SIPREV (alcance SIPREV). Registrar a divergência no caso 17 e a extensão ao NIS/NIT como não confirmada. Registrar também o layout da máscara de segurança como escolha de projeto (decisão do usuário em 2026-11-27), sem rótulo de norma.
 - [ ] T042 [US3] Commit da etapa 7.
 
 ## Fase 6 · US4 · Migração sem quebra e Kotlin (P3)
 
 **Teste independente:** as suítes existentes ficam verdes sem alteração, o japicmp não registra incompatibilidades e as fachadas indicam o substituto.
 
-- [ ] T043 [P] [US4] RED em `kt/test/kotlin/io/github/brasil4j/kotlin/identidade/ContractExtensionsTest.kt`: `toCpfOrNull`, `toCnpjOrNull`, `toNisOrNull`, `DocumentParser.parseOrNull`, `String.toNis(mode)` e `Cnpj.hasValidCheckDigits`.
+- [ ] T043 [P] [US4] RED em `kt/test/kotlin/io/github/brasil4j/kotlin/identidade/ContractExtensionsTest.kt`: `toCpfOrNull`, `toCnpjOrNull`, `toNisOrNull`, `DocumentParser.parseOrNull`, `String.toNis(mode)`, `Cnpj.hasValidCheckDigits` e `applySecurityMask(maskChar = '*')` em `Cpf`, `Cnpj` e `Nis`.
 - [ ] T044 [US4] GREEN em `kt/main/kotlin/io/github/brasil4j/kotlin/identidade/Cpf.kt`, `Cnpj.kt`, `Nis.kt` e `DocumentParsers.kt`. `Nis.kt` passa a delegar a `Nis.parser()` e preserva NPE e a propagação de exceções. KDoc completo.
 - [ ] T045 [US4] Estender `core-test/identidade/composicao/DocumentCheckJarIT.java` e `kt/test/kotlin/io/github/brasil4j/kotlin/identidade/DocumentCheckJarIT.kt` para consumir `DocumentParser`, `ValidationResult` e as extensões a partir dos JARs, conferindo o `codeSource`. Commit da etapa 10.
 - [ ] T046 [US4] Marcar com `@Deprecated` e `@deprecated` (indicando o substituto) `CpfValidator`, `CpfFormatter`, `CnpjValidator`, `CnpjFormatter`, `NisValidator` e `NisFormatter`, conforme o [contrato](contracts/api.md#fachadas-deprecadas). Os testes que exercitam as fachadas recebem `@SuppressWarnings("deprecation")`, sem alterar asserções.

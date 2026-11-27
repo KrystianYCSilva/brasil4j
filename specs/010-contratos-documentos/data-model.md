@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | `Document` | Valor canônico não nulo e imutável. | Contrato raiz |
 | `MaskedDocument` | Apresentação mascarada derivada do canônico. | Estende `Document` (CPF, CNPJ) |
+| `SecurityMaskedDocument` | Apresentação que oculta prefixo e sufixo com caractere não alfanumérico (padrão `*`). Não altera `toString`. Layouts: CPF 3+2, CNPJ 2+2, NIS 3+1 sem pontuação. | Estende `Document` (CPF, CNPJ, NIS) |
 | `CheckDigitDocument` | Base, DVs informados e `hasValidCheckDigits()`, que não depende do modo usado na construção. | Estende `Document` (CPF, CNPJ) |
 | `AbstractDocument` | Igualdade por classe concreta e canônico; `hashCode` pelo canônico; `toString` oculto por padrão. | Superclasse de `Cpf`, `Cnpj`, `Nis` e de documentos do consumidor |
 | `Rejection` | Motivo obrigatório e código simbólico opcional, não vazio. Não contém entrada, canônico nem saída. | Produzida por regras e interpretadores |
