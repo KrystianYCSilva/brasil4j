@@ -26,24 +26,25 @@ public abstract class AbstractDocument implements Document {
     }
 
     /**
-     * Compara pela classe concreta e pelo valor canônico.
+     * Compara pela classe concreta e pelo valor canônico. Subclasses não devem redefinir a igualdade;
+     * o método não é final apenas para preservar a compatibilidade binária dos tipos já publicados.
      *
      * @param other objeto a comparar
      * @return verdadeiro para a mesma classe e o mesmo valor canônico
      */
     @Override
-    public final boolean equals(Object other) {
+    public boolean equals(Object other) {
         return this == other || other != null && getClass() == other.getClass()
                 && canonical.equals(((AbstractDocument) other).canonical);
     }
 
     /**
-     * Calcula o hash pelo valor canônico.
+     * Calcula o hash pelo valor canônico, coerente com {@link #equals(Object)}.
      *
      * @return hash do valor canônico
      */
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return canonical.hashCode();
     }
 
