@@ -2,6 +2,8 @@
 
 **Data** 2026-11-27 · **Base** `5fd9dae6f4059b5e25528c5717d10c7c2f0aa922`.
 
+> **Superada em parte (2026-11-27).** As alternativas rejeitadas em D1 (contratos próprios) e D3 (superinterface nos valores) passam a ser o desenho adotado pela Spec 010 (`specs/010-contratos-documentos`). Essa mudança decorre da [constituição v0.5.0](../../.specify/memory/constitution.md#engenharia-jvm). D2 e D4 seguem válidas como contexto histórico.
+
 ## D1 · Contratos funcionais para consumidores
 
 - **Decisão** Usar `Predicate<? super T>` para compor a validação nativa com uma regra do consumidor e `Function<? super T, String>` para escolher a apresentação. Para NIS, `Predicate<? super Nis>` é a mesma interface na validação direta da Spec 006 e na operação em lista. Regras sobre o valor canônico podem ser compartilhadas pelo integrador e combinadas com `Predicate.and`, respeitando sua ordem de avaliação.
