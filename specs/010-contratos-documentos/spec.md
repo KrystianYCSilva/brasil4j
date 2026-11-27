@@ -2,9 +2,15 @@
 
 - **Identificador da spec** `010-contratos-documentos`
 - **Criada em** 2026-11-27
-- **Status** Especificada, com uma clarificação pendente
+- **Status** Especificada e clarificada, pronta para planejamento
 - **Base** [Recorte](../../docs/descoberta/010-contratos-documentos/recorte.md) e [pareceres consolidados](../../docs/descoberta/010-contratos-documentos/revisao.md). [Constituição v0.5.0](../../.specify/memory/constitution.md).
 - **Numeração** A 010 segue a 008 (núcleo monetário) e a 009 (exemplos de utilização), em andamento em paralelo.
+
+## Clarifications
+
+### Session 2026-11-27
+
+- Q: O validador da fórmula da Caixa FGTS v016 deve aplicar a guarda de onze algarismos iguais, que vem do SIPREV RV_03? → A: Não embutida. A guarda é uma regra opcional e componível, nomeada pela própria fonte (SIPREV RV_03) e pelo seu alcance. O consumidor a encadeia quando quiser. O validador da Caixa permanece fiel à fórmula publicada. A convenção legada continua incluindo a guarda, como observado em Declarações e UEM.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -51,7 +57,7 @@ Como integrador, quero acrescentar minhas regras a um interpretador e, para o NI
 2. Dado o validador da fórmula publicada no Caderno do Agente Financeiro v016 da Caixa, ao interpretar `00000000060` (caso 17, resto 1), obter rejeição por dígito verificador. Ao interpretar `00000000280` (caso 19) e `00000000019` (caso 15), obter aceitação.
 3. Dado o validador da convenção legada observada em Declarações e UEM, ao interpretar o caso 17, obter aceitação. Ao interpretar `00000000000` (caso 07), obter rejeição pela guarda de onze algarismos iguais. Ao interpretar `11111111116` (caso 21), obter aceitação.
 4. Dado um interpretador com uma regra do consumidor que exige o prefixo `00` e tem o código `PREFIXO_IMPORTACAO`, ao interpretar `01234567898`, obter rejeição por política com esse código. A regra não é executada quando a validação nativa rejeita.
-5. Dado o validador da Caixa FGTS v016, o tratamento de onze algarismos iguais é [NEEDS CLARIFICATION: aplicar ou não a guarda de algarismos repetidos, cuja fonte é o SIPREV RV_03, com outro alcance? Sem a guarda, `00000000000` é aceito pela fórmula isolada].
+5. Dado o validador da Caixa FGTS v016 sem regra adicional, ao interpretar `00000000000` (caso 07), obter aceitação pela fórmula isolada. Dado o mesmo validador encadeado à regra opcional de algarismos repetidos, cuja fonte é a RV_03 das Regras de Validação v1.3 do SIPREV Gestão (Dataprev), com alcance no SIPREV, obter rejeição do caso 07 e aceitação do caso 21 (`11111111116`). A regra verifica os onze algarismos.
 
 ### User Story 4 - Migrar sem quebra (Priority: P3)
 
@@ -87,7 +93,7 @@ Como mantenedor de um sistema que já usa a biblioteca, quero atualizar a versã
 - **FR-006** A biblioteca deve oferecer uma montagem de interpretadores com máscara ou normalizador, algoritmo de DV, regras e mensagem de erro. CPF, CNPJ e NIS devem ser construídos por essa mesma montagem.
 - **FR-007** A biblioteca deve oferecer, em blocos independentes de contexto, uma máscara declarativa (dígito, letra, alfanumérico e literais), que remove e aplica a apresentação, e um algoritmo de módulo 11 configurável por valor de caractere, pesos e mapeamento do resto.
 - **FR-008** Os módulos 11 de CPF e CNPJ devem produzir os mesmos resultados das regras atuais para todos os vetores existentes e para uma amostra gerada e congelada. O bloqueio de 14 zeros do CNPJ deve continuar nos modos com DV.
-- **FR-009** O NIS deve continuar validando por padrão apenas tamanho e formato. Os validadores de DV devem ser opcionais e nomeados pela fonte e pelo alcance: a fórmula publicada no Caderno do Agente Financeiro v016 da Caixa, com alcance de PIS/Pasep no FGTS, e a convenção técnica legada observada em Declarações e UEM. Nenhum artefato pode descrever esses validadores como regra oficial do NIS.
+- **FR-009** O NIS deve continuar validando por padrão apenas tamanho e formato. Os validadores de DV devem ser opcionais e nomeados pela fonte e pelo alcance: a fórmula publicada no Caderno do Agente Financeiro v016 da Caixa, com alcance de PIS/Pasep no FGTS, e a convenção técnica legada observada em Declarações e UEM. Uma regra opcional de onze algarismos iguais, nomeada pela RV_03 do SIPREV e pelo seu alcance, deve poder ser encadeada a qualquer validador. Nenhum artefato pode descrever esses validadores ou a regra como regra oficial do NIS.
 - **FR-010** A biblioteca deve oferecer apresentações reutilizáveis: canônica, mascarada e com ocultação parcial validada. Uma ocultação que exporia todos os caracteres deve ocultar o valor inteiro.
 - **FR-011** O item de conferência da Spec 007 deve aceitar qualquer interpretador, inclusive de documentos do consumidor, e expor o motivo da rejeição. Deve preservar os três estados, a semântica de substituição de política, a ordem de execução e a privacidade.
 - **FR-012** O artefato Kotlin deve oferecer conversões tolerantes a nulo que devolvam os tipos Kotlin de CPF, CNPJ e NIS, uma conversão genérica para qualquer interpretador e a conferência de DV no CNPJ. Tudo deve delegar ao núcleo.

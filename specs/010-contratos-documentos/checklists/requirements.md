@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -32,4 +32,4 @@
 ## Notes
 
 - Num produto que é uma biblioteca, os stakeholders são integradores. Como nas Specs 006 e 007, a spec cita os modos públicos existentes, o `DocumentCheck` e o `withPolicy` da 007, e fontes (`F-05`, `docs/fontes.md`), porque esses nomes fazem parte do contrato observável preservado. Assinaturas, pacotes e nomes dos novos tipos ficam no plano.
-- Uma clarificação está pendente (US3, cenário 5): a guarda de algarismos repetidos no validador da Caixa FGTS v016. Deve ser resolvida no `speckit-clarify` antes do plano.
+- A clarificação da US3, cenário 5, foi resolvida em 2026-11-27: a guarda de algarismos repetidos é uma regra opcional com fonte SIPREV RV_03.
