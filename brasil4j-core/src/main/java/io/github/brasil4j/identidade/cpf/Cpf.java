@@ -1,5 +1,7 @@
 package io.github.brasil4j.identidade.cpf;
 
+import io.github.brasil4j.verificacao.Modulus11;
+
 import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
 
 /**
@@ -73,7 +75,7 @@ public final class Cpf {
      * @return se os dígitos informados coincidem com o cálculo pelo módulo 11
      */
     public boolean hasValidCheckDigits() {
-        return CpfCheckDigits.matches(canonical);
+        return Modulus11.cpf().verify(canonical);
     }
 
     /**
