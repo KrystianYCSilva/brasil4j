@@ -85,6 +85,7 @@ Cada etapa segue TDD (vermelho, verde, refatoração) e tem um commit próprio. 
 | Cálculos | Equivalência de CPF e CNPJ em vetores atuais mais 10 000 bases geradas com semente fixa e congeladas. 14 zeros. Domínio inválido. | FR-007/008 · SC-003 |
 | NIS | Vetores C1 07, 09, 15–21 no modo padrão, na Caixa FGTS v016 com e sem `repeatedDigits` e no legado. Regra do consumidor com código. | US3 · FR-005/009 · SC-004 |
 | Regressão | Suítes existentes sem alteração de asserções. JarIT Java e Kotlin. | US4 · FR-013 · SC-005 |
+| Consumidor (009) | `brasil4j-exemplos` verde sem alteração em cada etapa, provando compatibilidade pelas fachadas. Novas suítes de exemplos para os contratos na etapa 12. | US1/US4 · FR-013 · SC-005 |
 | Proveniência | Busca por "oficial" em `src` e `docs`. Cada ocorrência remete a `fontes.md`. | FR-009 · SC-006 |
 
 ### Compatibilidade

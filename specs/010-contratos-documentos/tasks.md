@@ -10,6 +10,7 @@
 - Os caminhos são relativos à raiz do reator. `core` é `brasil4j-core/src/main/java/io/github/brasil4j`, `core-test` é `brasil4j-core/src/test/java/io/github/brasil4j` e `kt` é `brasil4j-kotlin/src`.
 - Cada par RED/GREEN cobre uma invariante. Registrar em `specs/010-contratos-documentos/analysis.md` o comando, a falha esperada, a correção mínima e a decisão de refatoração. Depois de cada GREEN, revisar com a suíte do módulo verde.
 - **Nenhuma asserção existente pode ser alterada.** Casos já satisfeitos são registrados como regressões verdes.
+- **Gate do consumidor (Spec 009).** Depois de cada GREEN, além da suíte do módulo, rodar `.\mvnw.cmd -B -o test -pl brasil4j-exemplos -am`. Os exemplos existentes usam as fachadas e precisam continuar verdes **sem alteração** até o fim da 010.
 - Cada etapa do plano termina com uma tarefa de commit (`git commit`, com coautoria).
 
 ## Fase 1 · Preparação (etapa 1 · caracterização)
@@ -131,7 +132,14 @@
 - [ ] T050 Buscar `oficial` em `brasil4j-*/src` e `docs` e conferir que cada ocorrência remete a uma fonte normativa confirmada em `docs/fontes.md` (SC-006).
 - [ ] T051 Rodar `.\mvnw.cmd -B clean verify` em JDK 8 e 21. Conferir JaCoCo ≥ 90% de linhas e ≥ 85% de branches por módulo, DocLint e Dokka, e registrar as contagens em `analysis.md`.
 - [ ] T052 Revisão independente do diff com `agy -p --mode plan --sandbox` (sem shell) e pelo agente `quality-gatekeeper`. Registrar os achados e o tratamento de cada um em `analysis.md`. Commit da etapa 12.
-- [ ] T053 Coordenação: rebasear sobre `main` depois do merge de `008-nucleo-monetario` e `009-exemplos-utilizacao`, resolvendo os arquivos compartilhados e migrando para a nova API os exemplos da 009 que usem fachadas.
+- [ ] T053 Coordenação: a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f6e7`, que inclui a 008). Rebasear sobre `main` quando a 009 for integrada e resolver os arquivos compartilhados.
+- [ ] T054 [P] Acrescentar, sem alterar os exemplos existentes, `brasil4j-exemplos/src/test/java/io/github/brasil4j/exemplos/java/ContratosExemplosTest.java` e `brasil4j-exemplos/src/test/kotlin/io/github/brasil4j/exemplos/kotlin/ContratosKotlinExemplosTest.kt`. Cobrir:
+  - `DocumentParser` injetado e motivo da rejeição;
+  - documento criado pelo consumidor e usado numa lista com `DocumentCheck.of`;
+  - máscara de segurança e máscara completa;
+  - validadores opcionais do NIS e guarda SIPREV opcional.
+
+  Atualizar o índice de `brasil4j-exemplos/README.md`.
 
 ## Dependências
 
