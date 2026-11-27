@@ -2,9 +2,14 @@ package io.github.brasil4j.identidade.cnpj;
 
 import io.github.brasil4j.identidade.AbstractDocument;
 import io.github.brasil4j.identidade.CheckDigitDocument;
+import io.github.brasil4j.identidade.DocumentParser;
+import io.github.brasil4j.identidade.DocumentParsers;
 import io.github.brasil4j.identidade.MaskedDocument;
 import io.github.brasil4j.identidade.SecurityMaskedDocument;
 import io.github.brasil4j.mascara.DocumentMask;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC;
 
@@ -15,9 +20,40 @@ import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC
 public final class Cnpj extends AbstractDocument
         implements MaskedDocument, SecurityMaskedDocument, CheckDigitDocument {
     static final DocumentMask MASK = DocumentMask.of("XX.XXX.XXX/XXXX-99");
+    private static final Map<CnpjValidationMode, DocumentParser<Cnpj>> PARSERS = new EnumMap<>(CnpjValidationMode.class);
+
+    static {
+        for (CnpjValidationMode mode : CnpjValidationMode.values()) {
+            PARSERS.put(mode, mode.configure(DocumentParsers.builder(Cnpj::new).mask(MASK))
+                    .errorMessage("CNPJ inválido.").build());
+        }
+    }
 
     private Cnpj(String canonical) {
         super(canonical);
+    }
+
+    /**
+     * Obtém o interpretador do modo padrão alfanumérico, que confere os DVs e aceita também bases numéricas.
+     *
+     * @return interpretador reutilizável
+     */
+    public static DocumentParser<Cnpj> parser() {
+        return parser(ALPHANUMERIC);
+    }
+
+    /**
+     * Obtém o interpretador do modo informado.
+     *
+     * @param mode nível de verificação
+     * @return interpretador reutilizável
+     * @throws IllegalArgumentException se o modo for nulo
+     */
+    public static DocumentParser<Cnpj> parser(CnpjValidationMode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("Modo de validação do CNPJ obrigatório.");
+        }
+        return PARSERS.get(mode);
     }
 
     /**
@@ -40,11 +76,7 @@ public final class Cnpj extends AbstractDocument
      * @throws IllegalArgumentException se a entrada for inválida ou se o modo for nulo
      */
     public static Cnpj parse(String input, CnpjValidationMode mode) {
-        String canonical = CnpjValidator.validatedCanonical(input, mode);
-        if (canonical == null) {
-            throw new IllegalArgumentException("CNPJ inválido.");
-        }
-        return new Cnpj(canonical);
+        return parser(mode).parseOrThrow(input);
     }
 
     /**

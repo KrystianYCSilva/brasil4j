@@ -26,8 +26,4 @@ public final class CpfFormatter {
     public static String unformat(String input) {
         return Cpf.parse(input).getCanonicalValue();
     }
-
-    static String canonicalize(String input) {
-        return Cpf.MASK.unmask(input).orElse(null);
-    }
 }

@@ -26,8 +26,4 @@ public final class CnpjFormatter {
     public static String unformat(String input) {
         return Cnpj.parse(input).getCanonicalValue();
     }
-
-    static String canonicalize(String input) {
-        return Cnpj.MASK.unmask(input).orElse(null);
-    }
 }

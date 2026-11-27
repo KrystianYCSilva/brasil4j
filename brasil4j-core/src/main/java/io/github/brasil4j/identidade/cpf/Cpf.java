@@ -2,10 +2,15 @@ package io.github.brasil4j.identidade.cpf;
 
 import io.github.brasil4j.identidade.AbstractDocument;
 import io.github.brasil4j.identidade.CheckDigitDocument;
+import io.github.brasil4j.identidade.DocumentParser;
+import io.github.brasil4j.identidade.DocumentParsers;
 import io.github.brasil4j.identidade.MaskedDocument;
 import io.github.brasil4j.identidade.SecurityMaskedDocument;
 import io.github.brasil4j.mascara.DocumentMask;
 import io.github.brasil4j.verificacao.Modulus11;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
 
@@ -16,9 +21,40 @@ import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
 public final class Cpf extends AbstractDocument
         implements MaskedDocument, SecurityMaskedDocument, CheckDigitDocument {
     static final DocumentMask MASK = DocumentMask.of("999.999.999-99");
+    private static final Map<CpfValidationMode, DocumentParser<Cpf>> PARSERS = new EnumMap<>(CpfValidationMode.class);
+
+    static {
+        for (CpfValidationMode mode : CpfValidationMode.values()) {
+            PARSERS.put(mode, mode.configure(DocumentParsers.builder(Cpf::new).mask(MASK))
+                    .errorMessage("CPF inválido.").build());
+        }
+    }
 
     private Cpf(String canonical) {
         super(canonical);
+    }
+
+    /**
+     * Obtém o interpretador do modo padrão, que confere só o formato.
+     *
+     * @return interpretador reutilizável
+     */
+    public static DocumentParser<Cpf> parser() {
+        return parser(FORMAT_ONLY);
+    }
+
+    /**
+     * Obtém o interpretador do modo informado.
+     *
+     * @param mode nível de verificação
+     * @return interpretador reutilizável
+     * @throws IllegalArgumentException se o modo for nulo
+     */
+    public static DocumentParser<Cpf> parser(CpfValidationMode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("Modo de validação do CPF obrigatório.");
+        }
+        return PARSERS.get(mode);
     }
 
     /**
@@ -41,11 +77,7 @@ public final class Cpf extends AbstractDocument
      * @throws IllegalArgumentException se a entrada for inválida ou se o modo for nulo
      */
     public static Cpf parse(String input, CpfValidationMode mode) {
-        String canonical = CpfValidator.validatedCanonical(input, mode);
-        if (canonical == null) {
-            throw new IllegalArgumentException("CPF inválido.");
-        }
-        return new Cpf(canonical);
+        return parser(mode).parseOrThrow(input);
     }
 
     /**
