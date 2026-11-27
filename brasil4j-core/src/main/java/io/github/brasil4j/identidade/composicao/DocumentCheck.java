@@ -1,5 +1,10 @@
 package io.github.brasil4j.identidade.composicao;
 
+import io.github.brasil4j.identidade.Document;
+import io.github.brasil4j.identidade.DocumentParser;
+import io.github.brasil4j.identidade.Rejection;
+import io.github.brasil4j.identidade.RejectionReason;
+import io.github.brasil4j.identidade.ValidationResult;
 import io.github.brasil4j.identidade.cnpj.Cnpj;
 import io.github.brasil4j.identidade.cnpj.CnpjValidationMode;
 import io.github.brasil4j.identidade.cpf.Cpf;
@@ -14,20 +19,40 @@ import java.util.function.Predicate;
  * Configuração imutável e reutilizável de uma conferência de documento.
  * A representação textual padrão do item omite o conteúdo do documento.
  *
+ * <p>O item aceita qualquer {@link DocumentParser}, inclusive de documentos do consumidor. A política
+ * do item, definida por {@link #withPolicy(Predicate)}, substitui a anterior e roda depois do
+ * interpretador. As regras do próprio interpretador se encadeiam.
+ *
  * @param <T> tipo do valor construído pela regra nativa
  */
 public final class DocumentCheck<T> {
+    private static final Rejection POLICY = Rejection.of(RejectionReason.POLICY);
+
     private final String input;
-    private final Function<String, T> parser;
+    private final Function<String, ValidationResult<T>> parser;
     private final Predicate<? super T> policy;
     private final Function<? super T, String> formatter;
 
-    private DocumentCheck(String input, Function<String, T> parser,
+    private DocumentCheck(String input, Function<String, ValidationResult<T>> parser,
                           Predicate<? super T> policy, Function<? super T, String> formatter) {
         this.input = input;
         this.parser = parser;
         this.policy = policy;
         this.formatter = formatter;
+    }
+
+    /**
+     * Prepara uma conferência com qualquer interpretador.
+     *
+     * @param input texto de entrada, que pode ser nulo
+     * @param parser interpretador obrigatório
+     * @param <D> documento interpretado
+     * @return item de conferência
+     * @throws NullPointerException se o interpretador for nulo
+     */
+    public static <D extends Document> DocumentCheck<D> of(String input, DocumentParser<D> parser) {
+        Objects.requireNonNull(parser, "Interpretador obrigatório");
+        return new DocumentCheck<>(input, parser::parse, null, null);
     }
 
     /**
@@ -40,7 +65,7 @@ public final class DocumentCheck<T> {
      */
     public static DocumentCheck<Cpf> cpf(String input, CpfValidationMode mode) {
         Objects.requireNonNull(mode, "Modo de validação obrigatório");
-        return new DocumentCheck<>(input, text -> Cpf.parse(text, mode), null, null);
+        return of(input, Cpf.parser(mode));
     }
 
     /**
@@ -53,7 +78,7 @@ public final class DocumentCheck<T> {
      */
     public static DocumentCheck<Cnpj> cnpj(String input, CnpjValidationMode mode) {
         Objects.requireNonNull(mode, "Modo de validação obrigatório");
-        return new DocumentCheck<>(input, text -> Cnpj.parse(text, mode), null, null);
+        return of(input, Cnpj.parser(mode));
     }
 
     /**
@@ -63,7 +88,7 @@ public final class DocumentCheck<T> {
      * @return item de conferência
      */
     public static DocumentCheck<Nis> nis(String input) {
-        return new DocumentCheck<>(input, Nis::parse, null, null);
+        return of(input, Nis.parser());
     }
 
     /**
@@ -90,7 +115,7 @@ public final class DocumentCheck<T> {
     }
 
     /**
-     * Constrói o valor pela regra nativa, aplica a política e só então formata um valor aceito.
+     * Interpreta a entrada uma vez, aplica a política e só então formata um valor aceito.
      * Cada chamada é síncrona e repete as etapas. Exceções da política e do formatador
      * são propagadas ao chamador.
      *
@@ -98,19 +123,22 @@ public final class DocumentCheck<T> {
      * @throws NullPointerException se o formatador produzir nulo
      */
     public DocumentCheckResult evaluate() {
-        T document;
-        try {
-            document = parser.apply(input);
-        } catch (IllegalArgumentException invalidInput) {
-            return new DocumentCheckResult(DocumentCheckResult.Status.REJECTED_BY_VALIDATION, null);
+        ValidationResult<T> result = parser.apply(input);
+        if (!result.isValid()) {
+            Rejection rejection = result.getRejection().get();
+            DocumentCheckResult.Status status = rejection.getReason() == RejectionReason.POLICY
+                    ? DocumentCheckResult.Status.REJECTED_BY_POLICY
+                    : DocumentCheckResult.Status.REJECTED_BY_VALIDATION;
+            return new DocumentCheckResult(status, null, rejection);
         }
+        T document = result.getDocument().get();
 
         if (policy != null && !policy.test(document)) {
-            return new DocumentCheckResult(DocumentCheckResult.Status.REJECTED_BY_POLICY, null);
+            return new DocumentCheckResult(DocumentCheckResult.Status.REJECTED_BY_POLICY, null, POLICY);
         }
 
         String formattedValue = formatter == null ? null
                 : Objects.requireNonNull(formatter.apply(document), "Saída do formatador obrigatória");
-        return new DocumentCheckResult(DocumentCheckResult.Status.ACCEPTED, formattedValue);
+        return new DocumentCheckResult(DocumentCheckResult.Status.ACCEPTED, formattedValue, null);
     }
 }

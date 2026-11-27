@@ -1,9 +1,11 @@
 package io.github.brasil4j.identidade.composicao;
 
+import io.github.brasil4j.identidade.Rejection;
+
 import java.util.Optional;
 
 /**
- * Decisão de uma conferência com acesso explícito à saída opcional.
+ * Decisão de uma conferência com acesso explícito à saída opcional e ao motivo da rejeição.
  * A representação textual padrão omite o conteúdo do documento e a saída formatada.
  */
 public final class DocumentCheckResult {
@@ -19,10 +21,12 @@ public final class DocumentCheckResult {
 
     private final Status status;
     private final String formattedValue;
+    private final Rejection rejection;
 
-    DocumentCheckResult(Status status, String formattedValue) {
+    DocumentCheckResult(Status status, String formattedValue, Rejection rejection) {
         this.status = status;
         this.formattedValue = formattedValue;
+        this.rejection = rejection;
     }
 
     /**
@@ -42,5 +46,14 @@ public final class DocumentCheckResult {
      */
     public Optional<String> getFormattedValue() {
         return Optional.ofNullable(formattedValue);
+    }
+
+    /**
+     * Retorna o motivo da rejeição, sem conteúdo do documento produzido pela biblioteca.
+     *
+     * @return rejeição, presente nas duas rejeições e vazia na aceitação
+     */
+    public Optional<Rejection> getRejection() {
+        return Optional.ofNullable(rejection);
     }
 }

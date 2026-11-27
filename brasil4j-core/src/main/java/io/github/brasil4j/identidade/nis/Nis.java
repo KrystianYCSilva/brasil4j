@@ -1,6 +1,8 @@
 package io.github.brasil4j.identidade.nis;
 
 import io.github.brasil4j.identidade.AbstractDocument;
+import io.github.brasil4j.identidade.DocumentParser;
+import io.github.brasil4j.identidade.DocumentParsers;
 import io.github.brasil4j.identidade.SecurityMaskedDocument;
 import io.github.brasil4j.mascara.DocumentMask;
 
@@ -11,9 +13,20 @@ import io.github.brasil4j.mascara.DocumentMask;
 public final class Nis extends AbstractDocument implements SecurityMaskedDocument {
     private static final String INVALID_FORMAT = "NIS inválido.";
     private static final DocumentMask CANONICAL = DocumentMask.of("99999999999");
+    private static final DocumentParser<Nis> STRUCTURAL = DocumentParsers.builder(Nis::new)
+            .mask(CANONICAL).errorMessage(INVALID_FORMAT).build();
 
     private Nis(String canonical) {
         super(canonical);
+    }
+
+    /**
+     * Obtém o interpretador estrutural, que confere exatamente 11 dígitos ASCII, sem máscara e sem DV.
+     *
+     * @return interpretador reutilizável
+     */
+    public static DocumentParser<Nis> parser() {
+        return STRUCTURAL;
     }
 
     /**
