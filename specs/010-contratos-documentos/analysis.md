@@ -15,3 +15,4 @@ A pedido do usuário, a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f
 | Etapa | RED (falha esperada) | GREEN (mudança mínima) | Refatoração |
 | --- | --- | --- | --- |
 | 1 · Caracterização | Não se aplica: as regressões foram escritas sobre o comportamento atual e passaram verdes de imediato. | `CharacterizationTest` fixa o `toString` dos três tipos, as mensagens com IAE exata, o modo nulo, o bloqueio de 14 zeros e a rejeição de máscara parcial e minúsculas. | — |
+| 2 · Resultado, rejeição e regra | `RejectionTest`, `ValidationResultTest` e `ValidationRuleTest` não compilavam: `cannot find symbol class Rejection`. | `RejectionReason`, `Rejection`, `ValidationResult` (construtor package-private, `Valid`/`Invalid` privados) e `ValidationRule` com `of`, `accept` e `and`. Os 3 testes passaram. | A mensagem padrão "Documento inválido." ficou numa constante interna reutilizada pelo parser. |
