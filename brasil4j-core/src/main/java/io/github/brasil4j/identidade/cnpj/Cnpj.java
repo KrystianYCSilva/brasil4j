@@ -1,5 +1,7 @@
 package io.github.brasil4j.identidade.cnpj;
 
+import io.github.brasil4j.mascara.DocumentMask;
+
 import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC;
 
 /**
@@ -7,6 +9,8 @@ import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC
  * A construção padrão verifica a estrutura e os DVs. A existência da inscrição é cadastral.
  */
 public final class Cnpj {
+    static final DocumentMask MASK = DocumentMask.of("XX.XXX.XXX/XXXX-99");
+
     private final String canonical;
 
     private Cnpj(String canonical) {
@@ -100,8 +104,7 @@ public final class Cnpj {
      * @return o CNPJ com máscara completa, preservando a base e os DVs do valor
      */
     public String applyMask() {
-        return canonical.substring(0, 2) + "." + canonical.substring(2, 5) + "."
-                + canonical.substring(5, 8) + "/" + getBranch() + "-" + getCheckDigits();
+        return MASK.apply(canonical);
     }
 
     /** {@inheritDoc} */

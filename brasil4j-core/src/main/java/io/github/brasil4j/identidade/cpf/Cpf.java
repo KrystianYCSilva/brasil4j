@@ -1,5 +1,6 @@
 package io.github.brasil4j.identidade.cpf;
 
+import io.github.brasil4j.mascara.DocumentMask;
 import io.github.brasil4j.verificacao.Modulus11;
 
 import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
@@ -9,6 +10,8 @@ import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
  * A construção padrão confere a apresentação. A conferência do DV é opcional.
  */
 public final class Cpf {
+    static final DocumentMask MASK = DocumentMask.of("999.999.999-99");
+
     private final String canonical;
 
     private Cpf(String canonical) {
@@ -84,8 +87,7 @@ public final class Cpf {
      * @return o CPF com máscara completa, exibindo todos os dígitos
      */
     public String applyMask() {
-        return canonical.substring(0, 3) + "." + canonical.substring(3, 6) + "."
-                + canonical.substring(6, 9) + "-" + getCheckDigits();
+        return MASK.apply(canonical);
     }
 
     /** {@inheritDoc} */
