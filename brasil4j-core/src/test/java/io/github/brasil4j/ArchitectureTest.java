@@ -3,14 +3,18 @@ package io.github.brasil4j;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import io.github.brasil4j.geografia.Uf;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.type;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 /**
- * Package rules AR-4 to AR-8 from {@code .context/patterns/architecture.md}, checked on the production bytecode
+ * Package rules AR-4 to AR-9 from {@code .context/patterns/architecture.md}, checked on the production bytecode
  * with plain JUnit tests (no extra test engine).
  */
 class ArchitectureTest {
@@ -81,6 +85,23 @@ class ArchitectureTest {
                 .orShould().accessField(System.class, "out")
                 .orShould().accessField(System.class, "err")
                 .because("AR-8: o núcleo não registra log nem usa reflexão")
+                .check(producao);
+    }
+
+    @Test
+    void ctpsHistoricaDependeSoDoJdkEDaUf() {
+        classes().that().resideInAPackage("..trabalhista.ctps..")
+                .should().onlyDependOnClassesThat(resideInAnyPackage("java..", "..trabalhista.ctps..")
+                        .or(type(Uf.class)))
+                .because("AR-9: CTPS histórica usa a tabela de UFs")
+                .check(producao);
+    }
+
+    @Test
+    void outrosPacotesNaoDependemDeCtpsHistorica() {
+        noClasses().that().resideOutsideOfPackage("..trabalhista.ctps..")
+                .should().dependOnClassesThat().resideInAPackage("..trabalhista.ctps..")
+                .because("AR-9: o perfil histórico fica no pacote trabalhista")
                 .check(producao);
     }
 }

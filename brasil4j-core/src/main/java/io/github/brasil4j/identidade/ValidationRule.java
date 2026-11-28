@@ -1,6 +1,7 @@
 package io.github.brasil4j.identidade;
 
 import io.github.brasil4j.verificacao.CheckDigitAlgorithm;
+import io.github.brasil4j.verificacao.InvalidBaseException;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -40,7 +41,9 @@ public interface ValidationRule<T> {
     /**
      * Cria a regra de dígitos verificadores sobre o valor canônico. Uma divergência gera
      * {@link RejectionReason#INVALID_CHECK_DIGITS}; um valor fora do domínio do algoritmo gera
-     * {@link RejectionReason#INVALID_FORMAT}, sem exceção.
+     * {@link RejectionReason#INVALID_FORMAT}, sem exceção. Só {@link InvalidBaseException} é tratada como
+     * entrada fora do domínio; qualquer outra exceção do algoritmo, inclusive
+     * {@link IllegalArgumentException}, indica defeito de configuração e é propagada ao chamador.
      *
      * @param algorithm algoritmo de dígitos verificadores
      * @return regra sobre o valor canônico
@@ -52,7 +55,7 @@ public interface ValidationRule<T> {
             try {
                 return algorithm.verify(canonical)
                         ? Optional.empty() : Optional.of(Rejection.of(RejectionReason.INVALID_CHECK_DIGITS));
-            } catch (IllegalArgumentException outOfDomain) {
+            } catch (InvalidBaseException outOfDomain) {
                 return Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT));
             }
         };
