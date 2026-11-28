@@ -1,6 +1,6 @@
 # Architecture rules (II.3, IV.2, VI.7)
 
-Enforced by `ArchitectureTest` (ArchUnit) in `brasil4j-core`. Human overview: [docs/arquitetura.md](../../docs/arquitetura.md).
+AR-4…AR-8 are enforced by `ArchitectureTest` (ArchUnit) in `brasil4j-core`; AR-1…AR-3 by the module POMs and review. Human overview: [docs/arquitetura.md](../../docs/arquitetura.md).
 
 ## Modules
 
@@ -24,6 +24,6 @@ Enforced by `ArchitectureTest` (ArchUnit) in `brasil4j-core`. Human overview: [d
 - **AR-5** `identidade`, `geografia` and `financas` do not depend on each other.
 - **AR-6** `identidade.cpf`, `.cnpj` and `.nis` do not depend on each other; only `composicao` sees all of them.
 - **AR-7** No package cycles.
-- **AR-8** Core production code does not use `java.util.logging`, `System.out`/`System.err` or reflection-based frameworks.
+- **AR-8** Core production code does not use `java.util.logging`, `System.out`/`System.err` or `java.lang.reflect`.
 
 A new package or context updates this table, the ArchUnit test and `docs/arquitetura.md` in the same change.

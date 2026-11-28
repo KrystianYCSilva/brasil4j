@@ -58,7 +58,8 @@ $settings = @{
     allow_rebase_merge      = $false
 } | ConvertTo-Json -Compress
 Invoke-Gh -Arguments @('api', '-X', 'PATCH', "repos/$Repo") -Body $settings | Out-Null
-Write-Host "Repository settings: $settings"
+$settingsLabel = if ($Apply) { 'Repository settings' } else { 'Would set repository settings' }
+Write-Host "${settingsLabel}: $settings"
 
 $existing = @{}
 foreach ($line in (& gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)\t\(.name)"')) {
