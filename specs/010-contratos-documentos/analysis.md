@@ -112,3 +112,23 @@ O usuário aprovou o [plano v2](../../docs/descoberta/010-contratos-documentos/p
 **Ocorrências de ambiente:**
 - O `~/.gitconfig` do usuário desapareceu durante a sessão, por ação externa: nenhum comando desta sessão tocou nele. Os commits seguintes usaram identidade por comando (`git -c`), sem recriar o arquivo.
 - A validação do `~/.agents` confirmou que o Codex desktop continua importando skills para a biblioteca, porque "Keep import in sync" está ativo.
+
+
+## Pós-merge: correções do pr-review
+
+Correções dos achados do pr-review após o merge da PR #1, na branch `feature/010-pr-review-fixes`, com TDD (III.1). A compatibilidade segue aditiva: `InvalidBaseException` é um tipo novo e estende `IllegalArgumentException`, e o pacote `verificacao` não existia na `v0.2.0`.
+
+| Achado | Teste (RED) | Mensagem da falha | GREEN |
+| --- | --- | --- | --- |
+| `ValidationRule.checkDigits` convertia toda `IllegalArgumentException` em `INVALID_FORMAT` | `ValidationRuleTest.algoritmoMalConfiguradoNaoViraFormatoInvalido` | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` (a regra devolvia `INVALID_FORMAT`) | Só `InvalidBaseException` vira `INVALID_FORMAT`; as demais exceções se propagam. `baseForaDoDominioContinuaSendoFormatoInvalido` e `algoritmoPodeSinalizarBaseForaDoDominioPelaExcecaoDedicada` documentam o caso de domínio. |
+| `Modulus11.Builder.build()` aceitava mais DVs que pesos | `Modulus11Test.construcaoRecusaConfiguracaoIncoerente` | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` | `build()` recusa `weightsFromLeft(1, 2).digits(3)`; o limite `digits(2)` com dois pesos continua válido. |
+| Valor de caractere negativo só falhava no cálculo | `Modulus11Test.recusaValoresDeCaractereOuDvForaDoIntervalo` (ajustado para exigir a falha no `build()`) | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` | `build()` confere o valor de cada caractere do alfabeto. |
+| Alfabeto sem dígitos com mais de um DV (o DV entra na base do seguinte) | `Modulus11Test.construcaoRecusaAlfabetoSemOsDigitosQuandoHaMaisDeUmDv` | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` | `build()` exige os dígitos de 0 a 9 no alfabeto quando `digits > 1`. |
+
+Os presets não mudaram: `CpfModulus11EquivalenceTest` e `CnpjModulus11EquivalenceTest` seguem verdes.
+
+**Testes que já passavam (sem defeito encontrado):** `DocumentFormatterTest.quantidadesVisiveisMaximasOcultamTudoSemTransbordo` (`redacted(Integer.MAX_VALUE, Integer.MAX_VALUE, ...)` oculta tudo), `DocumentParsersTest.alterarOConstrutorDepoisDeBuildNaoAfetaOInterpretadorJaCriado`, `DocumentParsersTest.decoracoesDaMesmaOrigemSaoIndependentes`, `DocumentCheckOfTest.regraDoInterpretadorComMotivoQueNaoEPoliticaViraRejeicaoDeValidacao` (motivo `UNSUPPORTED_BASE` resulta em `REJECTED_BY_VALIDATION`) e `AbstractDocumentTest.canonicoNuloLancaNpeComMensagemEQualquerTextoNaoNuloEAceito`, que caracteriza o NPE do canônico nulo. A `AbstractDocument` não ganhou validação nova: o JavaDoc diz que a subclasse valida o canônico.
+
+**Sem comportamento:** `scripts/github/apply-repo-settings.ps1` agora lança erro quando a listagem de rulesets falha, em vez de seguir para o POST (sem harness de teste). Comentários corrigidos: bloqueio de 14 zeros atribuído a F-05 e Anexo XV só para o cálculo (`Modulus11`, `Cnpj`, `CnpjValidationMode`), máscara `999.999.999-99` no `CpfFormatter`, mensagem de `parseOrThrow` restrita aos interpretadores de `DocumentParsers.builder` e uso `withRule(NisRules.checkDigits(...))` no `Nis`.
+
+**Verificação:** `clean verify` passou em JDK 8 (Corretto 1.8.0_512) e JDK 21 (Corretto 21.0.13), com 20 590 testes no núcleo, 89 no Kotlin e zero falhas; JaCoCo do núcleo com 98,9% (instruções) e 94,3% (ramos), e do Kotlin com 99,0% e 100%; bytecode 52 nos dois JARs. PIT (perfil `mutation`): 937 mutantes, 840 mortos, 90%, acima do gate de 89%.
