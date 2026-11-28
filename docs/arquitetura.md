@@ -25,9 +25,24 @@ Trabalhista confere o grupo histórico da CTPS segundo o leiaute S-2200 v2.5. O 
 | `brasil4j-core` | `io.github.brasil4j.geografia` | Código municipal, comparação com UF e metadados das unidades federativas. |
 | `brasil4j-core` | `io.github.brasil4j.financas` | Moedas, políticas de arredondamento, `Dinheiro` selado (`Real`, `Dolar`, `Euro`, `QuantiaMonetaria`), rateio/alocação sem perda, `TaxaCambio`, `CalculadoraFinanceira`, `Percentual` (*gross-up*) e `TabelaProgressiva`. |
 | `brasil4j-core` | `io.github.brasil4j.trabalhista.ctps` | Perfil histórico de CTPS, conferência estrutural e proveniência. |
-| `brasil4j-kotlin` | `io.github.brasil4j.kotlin.identidade` | Value classes e extensões de documentos delegadas ao núcleo. |
+| `brasil4j-kotlin` | `io.github.brasil4j.kotlin.identidade` | Value classes e extensões de documentos (`Cpf`, `Cnpj`, `Nis`), `parseOrNull` e `checkCtps` delegadas ao núcleo. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.geografia` | Value class e extensão de código municipal sobre o núcleo. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.financas` | Construtores fluentes, operadores aritméticos/comutativos e DSLs (`calcularReais`, `porCento`, `tabelaProgressivaReais`) sobre os tipos monetários do núcleo. |
+| `brasil4j-exemplos` | `io.github.brasil4j.exemplos.java` e `.kotlin` | Somente testes, sem deploy: exemplos executáveis dos dois artefatos (Spec 009). |
+
+## Regras de dependência
+
+O `ArchitectureTest` (ArchUnit, em `brasil4j-core`) verifica AR-4 a AR-9 no bytecode de produção. Os módulos POM e a revisão cobrem AR-1 a AR-3. O detalhe fica em [`.context/patterns/architecture.md`](../.context/patterns/architecture.md).
+
+- **AR-1** `brasil4j-core` é só Java e depende apenas do JDK.
+- **AR-2** `brasil4j-kotlin` depende só do núcleo e da biblioteca padrão Kotlin, como adaptador sem lógica de regra.
+- **AR-3** `brasil4j-exemplos` contém só testes e não é publicado.
+- **AR-4** `verificacao` e `mascara` não dependem de nenhum contexto.
+- **AR-5** `identidade`, `geografia` e `financas` não dependem entre si.
+- **AR-6** `identidade.cpf`, `.cnpj` e `.nis` não dependem entre si. Só `identidade.composicao` conhece os três.
+- **AR-7** Sem ciclos entre pacotes.
+- **AR-8** O núcleo não usa `java.util.logging`, `System.out`/`System.err` nem `java.lang.reflect`.
+- **AR-9** `trabalhista.ctps` usa só o JDK, os próprios tipos e `geografia.Uf`. Nenhum outro pacote depende dele.
 
 ## Contratos de documento (Spec 010)
 

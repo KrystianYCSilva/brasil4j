@@ -18,6 +18,8 @@ Este módulo reúne **exemplos executáveis, comentados e orientados a cenários
 | [ContratosExemplosTest.java](src/test/java/io/github/brasil4j/exemplos/java/ContratosExemplosTest.java) | **Contratos (Spec 010):** `DocumentParser` injetável com motivo da rejeição (`ValidationResult`/`Rejection`), políticas com código (`withPolicy`), dublê de teste, **documento próprio do consumidor** montado com `AbstractDocument` + `DocumentMask` + `Modulus11` + `DocumentParsers` em lista com `DocumentCheck.of`, **máscara de segurança** (`***.345.678-**`, `*` ou `#`) e máscara completa, e **validadores opcionais do NIS** (`CAIXA_FGTS_V016`, `LEGACY_MOD11`, guarda `NisRules.repeatedDigits()`). |
 | [CtpsExemplosTest.java](src/test/java/io/github/brasil4j/exemplos/java/CtpsExemplosTest.java) | Importação de CTPS física com zeros iniciais, projeção legada com perda declarada e distinção entre UF informada e UF de expedição. Conferência do identificador da CTPS Digital pelos modos do CPF. |
 
+> `CpfValidator`, `CpfFormatter`, `CnpjValidator`, `CnpjFormatter`, `NisValidator` e `NisFormatter` aparecem nos exemplos de identidade por compatibilidade, mas estão deprecados (remoção prevista para a 1.0). Para código novo, prefira `Cpf.parser(mode)`, `Cnpj.parser(mode)`, `Nis.parser(mode)` e as máscaras, como em `ContratosExemplosTest`.
+
 ### Kotlin (`src/test/kotlin/io/github/brasil4j/exemplos/kotlin/`)
 
 | Suíte | Cenários e recursos demonstrados |

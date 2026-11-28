@@ -15,7 +15,7 @@ Brazilian domain library for the JVM: immutable value objects and rules for CPF,
 
 ## Stack
 
-Java 8 (`release 8`, bytecode 52) · Kotlin 2.x (JVM target 1.8, explicit API) · Maven Wrapper 3.9.x · JUnit 5 · JaCoCo · japicmp · PIT · ArchUnit · DocLint · Dokka. Modules: `brasil4j-core` (JDK-only runtime), `brasil4j-kotlin` (core + stdlib), `brasil4j-exemplos` (tests only, not published).
+Java 8 (`release 8`, bytecode 52) · Kotlin 2.x (JVM target 1.8, explicit API) · Maven Wrapper 3.10.x · JUnit 5 · JaCoCo · japicmp · PIT · ArchUnit · DocLint · Dokka. Modules: `brasil4j-core` (JDK-only runtime), `brasil4j-kotlin` (core + stdlib), `brasil4j-exemplos` (tests only, not published).
 
 ## Commands
 
@@ -49,4 +49,4 @@ Product docs (PT-BR): [README](README.md), [architecture](docs/arquitetura.md), 
 
 ## Layout
 
-`brasil4j-core/src/main/java/io/github/brasil4j/{identidade,verificacao,mascara,geografia,financas}` · `brasil4j-kotlin/src/main/kotlin/io/github/brasil4j/kotlin/` · `specs/` (Spec Kit artifacts per increment) · `.github/` (CI, rulesets) · `scripts/` (build checks, GitHub settings).
+`brasil4j-core/src/main/java/io/github/brasil4j/{identidade,verificacao,mascara,geografia,financas,trabalhista}` · `brasil4j-kotlin/src/main/kotlin/io/github/brasil4j/kotlin/` · `specs/` (Spec Kit artifacts per increment) · `.github/` (CI, rulesets) · `scripts/` (build checks, GitHub settings).

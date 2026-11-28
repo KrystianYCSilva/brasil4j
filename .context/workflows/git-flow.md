@@ -21,7 +21,7 @@
 
 ## Versions
 
-Released: `v0.1.0`, `v0.2.0`. In progress: `0.3.0` (Specs 008–010) on `develop` as `0.3.0-SNAPSHOT`. Maven Central publication is pending namespace approval; until then releases are tags plus GitHub Releases only, and tag adjustments may be needed when publication starts.
+Released: `v0.1.0`, `v0.2.0`. In progress: `0.3.0` (Specs 006–011 and 014) on `develop` as `0.3.0-SNAPSHOT`. Maven Central publication is pending namespace approval; until then releases are tags plus GitHub Releases only, and tag adjustments may be needed when publication starts.
 
 ## Commits
 
