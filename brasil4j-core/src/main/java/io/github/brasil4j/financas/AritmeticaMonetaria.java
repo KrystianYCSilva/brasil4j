@@ -2,6 +2,7 @@ package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
@@ -29,11 +30,10 @@ final class AritmeticaMonetaria {
         return ValidacaoMoeda.capturarSnapshot(moeda);
     }
 
-    static MetodoArredondamento exigirArredondamento(MetodoArredondamento arredondamento) {
+    static void exigirArredondamento(MetodoArredondamento arredondamento) {
         if (arredondamento == null) {
             throw new IllegalArgumentException("A política de arredondamento não pode ser nula.");
         }
-        return arredondamento;
     }
 
     static void exigirBigDecimalPadrao(BigDecimal valor) {
@@ -145,7 +145,7 @@ final class AritmeticaMonetaria {
             return BigDecimal.ZERO;
         }
         BigDecimal stripped = valor.stripTrailingZeros();
-        return stripped.scale() < 0 ? stripped.setScale(0) : stripped;
+        return stripped.scale() < 0 ? stripped.setScale(0, RoundingMode.UNNECESSARY) : stripped;
     }
 
     static BigDecimal[] reconciliarFaixasMaioresRestos(
@@ -170,7 +170,7 @@ final class AritmeticaMonetaria {
 
         BigInteger[] restos = new BigInteger[k];
         for (int i = 0; i < k; i++) {
-            restos[i] = fracoes[i].setScale(escalaMax).unscaledValue();
+            restos[i] = fracoes[i].setScale(escalaMax, RoundingMode.UNNECESSARY).unscaledValue();
         }
 
         int faltantes = totalEscalado.unscaledValue().subtract(somaCotas).intValueExact();
@@ -211,7 +211,7 @@ final class AritmeticaMonetaria {
 
     static BigDecimal normalizarZero(BigDecimal escalado, int casasDecimais) {
         if (escalado.signum() == 0) {
-            return BigDecimal.ZERO.setScale(casasDecimais);
+            return BigDecimal.ZERO.setScale(casasDecimais, RoundingMode.UNNECESSARY);
         }
         return escalado;
     }
@@ -258,14 +258,14 @@ final class AritmeticaMonetaria {
             throw new IllegalArgumentException(
                     "A entrada possui mais casas decimais que o permitido pela moeda no modo exato.");
         }
-        BigDecimal escalado = valor.setScale(casasDecimais);
+        BigDecimal escalado = valor.setScale(casasDecimais, RoundingMode.UNNECESSARY);
         validarResultadoMonetario(escalado);
         return normalizarZero(escalado, casasDecimais);
     }
 
     static BigDecimal deInteiroEscalado(long unidadesPrincipais, int casasDecimais) {
         ValidacaoMoeda.validarCasasDecimais(casasDecimais);
-        BigDecimal res = BigDecimal.valueOf(unidadesPrincipais).setScale(casasDecimais);
+        BigDecimal res = BigDecimal.valueOf(unidadesPrincipais).setScale(casasDecimais, RoundingMode.UNNECESSARY);
         validarResultadoMonetario(res);
         return normalizarZero(res, casasDecimais);
     }
@@ -290,7 +290,7 @@ final class AritmeticaMonetaria {
     }
 
     static BigDecimal multiplicarPorLong(BigDecimal valor, long fator, int casasDecimais) {
-        BigDecimal prod = valor.multiply(BigDecimal.valueOf(fator)).setScale(casasDecimais);
+        BigDecimal prod = valor.multiply(BigDecimal.valueOf(fator)).setScale(casasDecimais, RoundingMode.UNNECESSARY);
         validarResultadoMonetario(prod);
         return normalizarZero(prod, casasDecimais);
     }
@@ -331,7 +331,7 @@ final class AritmeticaMonetaria {
 
         BigDecimal intermediario;
         try {
-            intermediario = numerador.divide(denominador);
+            intermediario = numerador.divide(denominador, MathContext.UNLIMITED);
         } catch (ArithmeticException ex) {
             intermediario = aproximarDivisaoNaoTerminante(numerador, denominador, casasDestino);
         }
@@ -342,8 +342,8 @@ final class AritmeticaMonetaria {
             BigDecimal numerador, BigDecimal denominador, int casasDestino) {
         BigDecimal escaladoAlvo = numerador.movePointRight(casasDestino);
         int escalaComum = Math.max(0, Math.max(escaladoAlvo.scale(), denominador.scale()));
-        BigInteger numInt = escaladoAlvo.setScale(escalaComum).unscaledValue();
-        BigInteger denInt = denominador.setScale(escalaComum).unscaledValue();
+        BigInteger numInt = escaladoAlvo.setScale(escalaComum, RoundingMode.UNNECESSARY).unscaledValue();
+        BigInteger denInt = denominador.setScale(escalaComum, RoundingMode.UNNECESSARY).unscaledValue();
 
         BigInteger quociente = numInt.multiply(DEZ_ELEVADO_34).divide(denInt);
         long sinal = ((numInt.signum() > 0) == (denInt.signum() > 0)) ? 1L : -1L;
@@ -410,7 +410,7 @@ final class AritmeticaMonetaria {
         BigInteger[] pesosInt = new BigInteger[k];
         BigInteger somaPesos = BigInteger.ZERO;
         for (int i = 0; i < k; i++) {
-            pesosInt[i] = copiaPesos[i].setScale(escalaMax).unscaledValue();
+            pesosInt[i] = copiaPesos[i].setScale(escalaMax, RoundingMode.UNNECESSARY).unscaledValue();
             somaPesos = somaPesos.add(pesosInt[i]);
         }
         if (somaPesos.signum() <= 0) {
@@ -420,7 +420,7 @@ final class AritmeticaMonetaria {
         int sinal = valor.signum();
         BigDecimal[] resultado = new BigDecimal[k];
         if (sinal == 0) {
-            BigDecimal zero = BigDecimal.ZERO.setScale(casasDecimais);
+            BigDecimal zero = BigDecimal.ZERO.setScale(casasDecimais, RoundingMode.UNNECESSARY);
             Arrays.fill(resultado, zero);
             return resultado;
         }

@@ -25,6 +25,6 @@ class CnpjModulus11EquivalenceTest {
     @Test
     void bloqueioDeQuatorzeZerosFicaNosModosDoDocumento() {
         assertTrue(Modulus11.cnpj().verify("00000000000000"));
-        assertFalse(CnpjValidator.isValid("00000000000000", CnpjValidationMode.ALPHANUMERIC));
+        assertFalse(Cnpj.parser(CnpjValidationMode.ALPHANUMERIC).isValid("00000000000000"));
     }
 }

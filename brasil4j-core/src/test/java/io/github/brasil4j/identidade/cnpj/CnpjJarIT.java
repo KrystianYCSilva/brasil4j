@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Exercita também as fachadas legadas enquanto elas fizerem parte da API.
+@SuppressWarnings("deprecation")
 class CnpjJarIT {
     @ParameterizedTest
     @CsvFileSource(resources = {"/cnpj-c1.csv", "/cnpj-rfb-ascii.csv"}, nullValues = "<null>", ignoreLeadingAndTrailingWhitespace = false)

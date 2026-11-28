@@ -5,7 +5,6 @@ import io.github.brasil4j.identidade.cnpj.CnpjValidationMode;
 import io.github.brasil4j.identidade.cpf.Cpf;
 import io.github.brasil4j.identidade.cpf.CpfValidationMode;
 import io.github.brasil4j.identidade.nis.Nis;
-import io.github.brasil4j.identidade.nis.NisValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,14 +35,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Exercita também as fachadas legadas enquanto elas fizerem parte da API.
+@SuppressWarnings("deprecation")
 class DocumentCheckPolicyTest {
     @Test
     void regraLocalFuncionaNoValidadorDiretoENaListaMista() {
         Predicate<Nis> policy = nis -> nis.getCanonicalValue().startsWith("00");
         String accepted = "00000000019";
         String rejected = "01234567898";
-        assertTrue(NisValidator.isValid(accepted, policy));
-        assertFalse(NisValidator.isValid(rejected, policy));
+        assertTrue(io.github.brasil4j.identidade.nis.NisValidator.isValid(accepted, policy));
+        assertFalse(io.github.brasil4j.identidade.nis.NisValidator.isValid(rejected, policy));
         assertEquals(ACCEPTED, DocumentCheck.nis(accepted).withPolicy(policy).evaluate().getStatus());
         List<DocumentCheck<?>> list = Arrays.asList(
                 DocumentCheck.cpf(rejected, CpfValidationMode.FORMAT_ONLY).withPolicy(Cpf.class::isInstance),

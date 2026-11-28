@@ -166,3 +166,9 @@ Os quatro cenários novos falharam pelas razões acima. Após a correção, os 2
 O Claude Sonnet aprovou com ajustes. Foram acrescentados o registro de RED/GREEN, as tarefas da rodada, a distinção entre erro de configuração e rejeição de entrada no modelo e o custo da compatibilidade no plano. Uma `IllegalArgumentException` que sinalize um defeito do algoritmo também vira `INVALID_FORMAT`. O contrato recomenda `IllegalStateException` para distinguir esse caso.
 
 Na base `73af5d0`, o `clean verify` passou em Corretto 8u512 e 21.0.13. Em cada JDK foram 20.992 testes, com 20.776 no core, 165 no Kotlin e 51 nos exemplos, sem falhas, erros ou pulos. Os dois JARs de cada JDK passaram na checagem de bytecode Java 8 e no japicmp contra a `v0.2.0` e a base `d0164a3`, com critérios de fonte e binário. O PIT matou 1.143 de 1.243 mutantes (92%). Os relatórios locais ficam em `.tmp/spec010-release/`.
+
+### Avisos incluídos no PR
+
+Os ajustes da `develop` local foram revisados sobre `73af5d0`. Os consumidores de `ValidationResult` usam `fold`, o perfil de CTPS preserva a precedência da incompletude e as operações monetárias explicitam onde a escala e a divisão são exatas. Os exemplos usam a API vigente. Os testes dedicados às fachadas deprecadas preservam as asserções de compatibilidade.
+
+O Claude Sonnet aprovou a equivalência do patch e indicou um comentário obsoleto no exemplo de CNPJ, corrigido na mesma rodada. O core compilou com `javac --release 8 -Xlint:all,-options -Werror` em JDK 21. O aviso do compilador sobre o alvo Java 8 segue associado à versão mínima suportada.

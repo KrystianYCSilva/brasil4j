@@ -69,7 +69,7 @@ public final class DocumentMask {
             char expected = pattern.charAt(index);
             char actual = input.charAt(index);
             if (isSlot(expected)) {
-                if (!accepts(expected, actual)) {
+                if (isInvalidForSlot(expected, actual)) {
                     return Optional.empty();
                 }
                 canonical.append(actual);
@@ -138,7 +138,7 @@ public final class DocumentMask {
         int slot = 0;
         for (int index = 0; index < pattern.length(); index++) {
             char expected = pattern.charAt(index);
-            if (isSlot(expected) && !accepts(expected, value.charAt(slot++))) {
+            if (isSlot(expected) && isInvalidForSlot(expected, value.charAt(slot++))) {
                 return false;
             }
         }
@@ -149,10 +149,10 @@ public final class DocumentMask {
         return character == '9' || character == 'A' || character == 'X';
     }
 
-    private static boolean accepts(char slot, char character) {
+    private static boolean isInvalidForSlot(char slot, char character) {
         boolean digit = character >= '0' && character <= '9';
         boolean letter = character >= 'A' && character <= 'Z';
-        return slot == '9' ? digit : slot == 'A' ? letter : digit || letter;
+        return slot == '9' ? !digit : slot == 'A' ? !letter : !digit && !letter;
     }
 
     /** {@inheritDoc} */

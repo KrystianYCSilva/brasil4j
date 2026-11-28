@@ -8,11 +8,11 @@ import io.github.brasil4j.financas.Real;
 import io.github.brasil4j.financas.TaxaCambio;
 import io.github.brasil4j.geografia.CodigoMunicipio;
 import io.github.brasil4j.geografia.Uf;
+import io.github.brasil4j.identidade.DocumentFormatter;
 import io.github.brasil4j.identidade.cnpj.Cnpj;
 import io.github.brasil4j.identidade.cpf.Cpf;
 import io.github.brasil4j.identidade.cpf.CpfValidationMode;
 import io.github.brasil4j.identidade.nis.Nis;
-import io.github.brasil4j.identidade.nis.NisFormatter;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -88,11 +88,11 @@ class CenariosIntegradosExemplosTest {
         Cpf cpfColaborador = Cpf.parse("000.123.456-01", CpfValidationMode.NUMERIC);
         Nis nisColaborador = Nis.parse("00000000280");
 
-        String nisNoDemonstrativo = NisFormatter.format(nisColaborador, n -> {
+        DocumentFormatter<Nis> formatoDemonstrativo = n -> {
             String d = n.getCanonicalValue();
             return d.substring(0, 3) + "." + d.substring(3, 8) + "." + d.substring(8, 10) + "-" + d.substring(10);
-        });
-        assertEquals("000.00000.28-0", nisNoDemonstrativo);
+        };
+        assertEquals("000.00000.28-0", formatoDemonstrativo.apply(nisColaborador));
         assertEquals("Colaborador cpf=***.***.***-** nis=[NIS oculto]",
                 "Colaborador cpf=" + cpfColaborador + " nis=" + nisColaborador);
 

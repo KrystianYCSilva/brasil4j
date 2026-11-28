@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Exercita também as fachadas legadas enquanto elas fizerem parte da API.
+@SuppressWarnings("deprecation")
 class NisJarIT {
     private static final String NAMESPACE_S2200 = "http://www.esocial.gov.br/schema/evt/evtAdmissao/v02_05_00";
 

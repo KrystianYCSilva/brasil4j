@@ -9,6 +9,8 @@ import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
 import static io.github.brasil4j.identidade.cpf.CpfValidationMode.NUMERIC;
 import static org.junit.jupiter.api.Assertions.*;
 
+// Exercita também as fachadas legadas enquanto elas fizerem parte da API.
+@SuppressWarnings("deprecation")
 class CpfTest {
     @Test
     void confereDvSomenteQuandoSolicitado() {

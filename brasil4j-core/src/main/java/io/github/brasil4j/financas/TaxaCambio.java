@@ -2,6 +2,7 @@ package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
@@ -32,7 +33,7 @@ public final class TaxaCambio {
             throw new IllegalArgumentException("A cotação da taxa de câmbio deve ser estritamente positiva.");
         }
         BigDecimal stripped = cotacao.stripTrailingZeros();
-        return stripped.scale() < 0 ? stripped.setScale(0) : stripped;
+        return stripped.scale() < 0 ? stripped.setScale(0, RoundingMode.UNNECESSARY) : stripped;
     }
 
     /**

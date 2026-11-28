@@ -8,15 +8,15 @@ package io.github.brasil4j.financas;
 final class ValidacaoMoeda {
     private static final int TAMANHO_MAXIMO_TEXTO = 16;
     private static final int CASAS_DECIMAIS_MAXIMAS = 18;
+    private static final int CASAS_DECIMAIS_PADRAO = 2;
 
     private ValidacaoMoeda() {
     }
 
-    static Moeda criarConstanteInicial(String codigo, int casasDecimais, String simbolo) {
+    static Moeda criarConstanteInicial(String codigo, String simbolo) {
         validarCodigoAsciiVisivel(codigo);
-        validarCasasDecimais(casasDecimais);
         validarSimbolo(simbolo);
-        return new MoedaPadrao(codigo, casasDecimais, simbolo);
+        return new MoedaPadrao(codigo, CASAS_DECIMAIS_PADRAO, simbolo);
     }
 
     static Moeda criarIso(String codigo, int casasDecimais) {
@@ -33,15 +33,16 @@ final class ValidacaoMoeda {
         }
         validarCasasDecimais(casasDecimais);
         Moeda padraoBrl = Moeda.BRL;
-        if (casasDecimais == 2) {
-            if ("BRL".equals(codigo)) {
-                return padraoBrl;
-            }
-            if ("USD".equals(codigo)) {
-                return Moeda.USD;
-            }
-            if ("EUR".equals(codigo)) {
-                return Moeda.EUR;
+        if (casasDecimais == CASAS_DECIMAIS_PADRAO) {
+            switch (codigo) {
+                case "BRL":
+                    return padraoBrl;
+                case "USD":
+                    return Moeda.USD;
+                case "EUR":
+                    return Moeda.EUR;
+                default:
+                    break;
             }
         }
         return new MoedaPadrao(codigo, casasDecimais, codigo);
@@ -73,7 +74,7 @@ final class ValidacaoMoeda {
 
     static MoedaPadrao normalizarMoedaCanonica(Moeda moeda) {
         MoedaPadrao snap = capturarSnapshot(moeda);
-        if (snap.getCasasDecimais() == 2) {
+        if (snap.getCasasDecimais() == CASAS_DECIMAIS_PADRAO) {
             String cod = snap.getCodigo();
             if ("BRL".equals(cod)) {
                 return (MoedaPadrao) Moeda.BRL;
@@ -96,40 +97,40 @@ final class ValidacaoMoeda {
         int casasA = a.getCasasDecimais();
         String codB = b.getCodigo();
         int casasB = b.getCasasDecimais();
-        if (!ehCodigoAsciiVisivelValido(codA)
-                || !ehCasasDecimaisValidas(casasA)
-                || !ehCodigoAsciiVisivelValido(codB)
-                || !ehCasasDecimaisValidas(casasB)) {
+        if (codigoAsciiVisivelInvalido(codA)
+                || casasDecimaisInvalidas(casasA)
+                || codigoAsciiVisivelInvalido(codB)
+                || casasDecimaisInvalidas(casasB)) {
             return false;
         }
         return casasA == casasB && codA.equals(codB);
     }
 
     static void validarCasasDecimais(int casasDecimais) {
-        if (!ehCasasDecimaisValidas(casasDecimais)) {
+        if (casasDecimaisInvalidas(casasDecimais)) {
             throw new IllegalArgumentException("As casas decimais devem estar entre 0 e 18.");
         }
     }
 
-    private static boolean ehCasasDecimaisValidas(int casasDecimais) {
-        return casasDecimais >= 0 && casasDecimais <= CASAS_DECIMAIS_MAXIMAS;
+    private static boolean casasDecimaisInvalidas(int casasDecimais) {
+        return casasDecimais < 0 || casasDecimais > CASAS_DECIMAIS_MAXIMAS;
     }
 
-    private static boolean ehCodigoAsciiVisivelValido(String codigo) {
+    private static boolean codigoAsciiVisivelInvalido(String codigo) {
         if (codigo == null || codigo.isEmpty() || codigo.length() > TAMANHO_MAXIMO_TEXTO) {
-            return false;
+            return true;
         }
         for (int i = 0; i < codigo.length(); i++) {
             char c = codigo.charAt(i);
             if (c < 0x21 || c > 0x7E) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private static void validarCodigoAsciiVisivel(String codigo) {
-        if (!ehCodigoAsciiVisivelValido(codigo)) {
+        if (codigoAsciiVisivelInvalido(codigo)) {
             throw new IllegalArgumentException(
                     "O código da moeda deve conter entre 1 e 16 caracteres ASCII visíveis sem espaços.");
         }
