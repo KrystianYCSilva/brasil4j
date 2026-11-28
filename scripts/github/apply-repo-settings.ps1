@@ -61,7 +61,7 @@ Invoke-Gh -Arguments @('api', '-X', 'PATCH', "repos/$Repo") -Body $settings | Ou
 Write-Host "Repository settings: $settings"
 
 $existing = @{}
-foreach ($line in (& gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)	\(.name)"')) {
+foreach ($line in (& gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)\t\(.name)"')) {
     if ($line) {
         $parts = $line -split "`t"
         $existing[$parts[1]] = $parts[0]
