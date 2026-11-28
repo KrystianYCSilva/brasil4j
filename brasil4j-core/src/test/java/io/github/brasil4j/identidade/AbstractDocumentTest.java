@@ -95,4 +95,13 @@ class AbstractDocumentTest {
         assertEquals("12ABC34501DE35", cnpj.toString());
         assertEquals("[NIS oculto]", nis.toString());
     }
+
+    /** Documenta o comportamento atual: a classe só recusa nulo e não valida o conteúdo do canônico. */
+    @Test
+    void canonicoNuloLancaNpeComMensagemEQualquerTextoNaoNuloEAceito() {
+        NullPointerException erro = assertThrows(NullPointerException.class, () -> new Protocolo(null));
+        assertEquals("Valor canônico obrigatório.", erro.getMessage());
+        assertEquals("", new Protocolo("").getCanonicalValue());
+        assertEquals("qualquer coisa", new Protocolo("qualquer coisa").getCanonicalValue());
+    }
 }
