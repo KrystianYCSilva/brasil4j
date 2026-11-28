@@ -1,9 +1,9 @@
 # Feature Specification: Conferência estrutural de CTPS em registros históricos
 
 - **Identificador da spec** `014-ctps-historica`
-- **Branch** `codex/014-ctps-historica`
+- **Branch** `feature/014-ctps-historica`
 - **Criada em** 2026-11-28
-- **Status** Especificada, pronta para planejamento
+- **Status** Implementada, em verificação para integração
 - **Base** [Descoberta de CTPS](../../docs/descoberta/ctps/recorte.md) e [pareceres de Claude e Agy](../../docs/descoberta/ctps/revisao.md).
 
 ## User Scenarios & Testing *(mandatory)*
