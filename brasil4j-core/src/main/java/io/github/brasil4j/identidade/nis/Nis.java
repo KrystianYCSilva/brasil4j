@@ -11,8 +11,9 @@ import java.util.Map;
 
 /**
  * Inscrição estrutural de NIS, PIS, Pasep ou NIT, com igualdade pelo valor canônico.
- * A conferência padrão abrange somente a apresentação do campo. Validadores de DV são opcionais,
- * por {@link #parser(NisValidationMode)} ou por {@link NisRules}.
+ * A conferência padrão abrange somente a apresentação do campo. Validadores de DV são opcionais:
+ * {@link #parser(NisValidationMode)} escolhe um modo e {@code parser.withRule(NisRules.checkDigits(...))}
+ * acrescenta a conferência a um interpretador existente.
  */
 public final class Nis extends AbstractDocument implements SecurityMaskedDocument {
     private static final String INVALID_FORMAT = "NIS inválido.";
