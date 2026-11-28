@@ -88,8 +88,7 @@ class Modulus11Test {
 
     @Test
     void recusaValoresDeCaractereOuDvForaDoIntervalo() {
-        Modulus11 negativo = Modulus11.builder().charValue(c -> -1, "0").build();
-        assertThrows(IllegalArgumentException.class, () -> negativo.compute("0"));
+        assertThrows(IllegalArgumentException.class, () -> Modulus11.builder().charValue(c -> -1, "0").build());
         Modulus11 dvLongo = Modulus11.builder().remainder(resto -> OptionalInt.of(10)).build();
         assertThrows(IllegalStateException.class, () -> dvLongo.compute("1"));
         Modulus11 mapeamentoNulo = Modulus11.builder().remainder(resto -> null).build();
@@ -115,5 +114,23 @@ class Modulus11Test {
         assertTrue(Modulus11.cpf().verify("28001238938"));
         assertTrue(Modulus11.cnpj().verify("12ABC34501DE35"));
         assertFalse(Modulus11.cnpj().verify("12ABC34501DE36"));
+    }
+
+    @Test
+    void construcaoRecusaConfiguracaoIncoerente() {
+        // Mais DVs que pesos: nenhuma base de ao menos um caractere seria aceita.
+        assertThrows(IllegalArgumentException.class, () -> Modulus11.builder().weightsFromLeft(1, 2).digits(3).build());
+        // Alfabeto com caractere de valor negativo.
+        assertThrows(IllegalArgumentException.class,
+                () -> Modulus11.builder().charValue(c -> c == 'B' ? -1 : c - 'A', "AB").build());
+        // Configuração coerente continua válida, inclusive no limite.
+        assertEquals(2, Modulus11.builder().weightsFromLeft(1, 2).digits(2).build().digitCount());
+    }
+
+    @Test
+    void construcaoRecusaAlfabetoSemOsDigitosQuandoHaMaisDeUmDv() {
+        // O primeiro DV calculado entra na base do segundo e precisa pertencer ao alfabeto.
+        assertThrows(IllegalArgumentException.class, () -> Modulus11.builder().charValue(c -> c - 'A', "AB").digits(2).build());
+        assertEquals(1, Modulus11.builder().charValue(c -> c - 'A', "AB").build().digitCount());
     }
 }
