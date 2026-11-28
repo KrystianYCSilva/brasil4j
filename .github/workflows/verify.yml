@@ -1,11 +1,28 @@
 name: Verify
-on: [push, pull_request]
+
+# Required checks (rulesets in .github/rulesets): verify (8), verify (21), api-compatibility, mutation;
+# PRs into main also require branch-policy. See .context/workflows/git-flow.md.
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_call:
+  workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
+    name: verify (${{ matrix.java }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         java: ['8', '21']
     steps:
@@ -15,24 +32,36 @@ jobs:
           distribution: corretto
           java-version: ${{ matrix.java }}
           cache: maven
-      - name: Test and verify
+      - name: Test and verify (tests, JarITs, ArchUnit, JaCoCo, DocLint, Dokka on 21)
         run: sh ./mvnw -B -ntp clean verify
       - name: Assert examples module ran
         run: test -n "$(ls brasil4j-exemplos/target/surefire-reports/TEST-*.xml)"
       - name: Check Java 8 bytecode
         run: python3 scripts/check-bytecode.py
 
-      - name: Check API compatibility against v0.1.0
-        if: matrix.java == '21'
+  api-compatibility:
+    name: api-compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: corretto
+          java-version: '21'
+          cache: maven
+      - name: Compare with the latest release tag (IV.4)
         shell: bash
         run: |
-          # Commit apontado pela tag v0.1.0.
-          baseline_commit='8a6780d61a8d0ee036fe5ec134da906b596a2fb8'
-          git fetch --no-tags --depth=1 origin "$baseline_commit"
-          baseline="$RUNNER_TEMP/brasil4j-v0.1.0"
+          baseline_tag="$(git tag --list 'v*' --sort=-v:refname | head -n 1)"
+          test -n "$baseline_tag" || { echo "no release tag found"; exit 1; }
+          echo "Baseline: $baseline_tag"
+          baseline="$RUNNER_TEMP/brasil4j-$baseline_tag"
           mkdir -p "$baseline"
-          git archive "$baseline_commit" | tar -x -C "$baseline"
+          git archive "$baseline_tag" | tar -x -C "$baseline"
           (cd "$baseline" && sh ./mvnw -B -ntp -Dmaven.test.skip=true package)
+          sh ./mvnw -B -ntp -Dmaven.test.skip=true -Dmaven.javadoc.skip=true package
 
           japicmp="$RUNNER_TEMP/japicmp-0.26.1.jar"
           curl --fail --silent --show-error --location --retry 3 \
@@ -40,3 +69,38 @@ jobs:
             --output "$japicmp"
           printf '%s  %s\n' '4b4f0301861d97cd2a05af3f7fa9173cc1dd3831b1284b2b9e2f81c4f1c2f858' "$japicmp" | sha256sum --check
           python3 scripts/check-api-compatibility.py "$baseline" . "$japicmp" "$HOME/.m2/repository"
+
+  mutation:
+    name: mutation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: corretto
+          java-version: '21'
+          cache: maven
+      - name: Mutation testing of the Java core (IV.5, threshold in brasil4j-core/pom.xml)
+        run: sh ./mvnw -B -ntp -pl brasil4j-core -Pmutation -Djacoco.skip=true test-compile org.pitest:pitest-maven:mutationCoverage
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pit-report
+          path: brasil4j-core/target/pit-reports
+          if-no-files-found: ignore
+
+  branch-policy:
+    name: branch-policy
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only release/* and hotfix/* may target main (GF-3)
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$HEAD_REF" in
+            release/*|hotfix/*) echo "ok: $HEAD_REF" ;;
+            *) echo "PRs into main must come from release/* or hotfix/* (got $HEAD_REF)"; exit 1 ;;
+          esac
