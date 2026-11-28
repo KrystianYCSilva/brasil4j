@@ -123,9 +123,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
                 return Optional.empty();
             }
             char character = (char) ('0' + digit.getAsInt());
-            if (index < digits - 1) {
-                value.append(character);
-            }
+            value.append(character);
             computed.append(character);
         }
         return Optional.of(computed.toString());
