@@ -2,6 +2,8 @@
 
 ## Não lançado
 
+- Perfil de CTPS histórica do S-2200 v2.5 em Java e Kotlin, com validação estrutural, proveniência declarada e diagnósticos que ocultam número, série e UF. A vitrine inclui exemplos de registros físicos, projeções legadas e identificação digital via CPF.
+
 - Contratos públicos de documento (Spec 010):
   - `Document`, `MaskedDocument`, `SecurityMaskedDocument`, `CheckDigitDocument` e `AbstractDocument`, adotados por CPF, CNPJ e NIS;
   - interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)`, cujo `ValidationResult` informa o motivo da rejeição sem lançar exceção;
