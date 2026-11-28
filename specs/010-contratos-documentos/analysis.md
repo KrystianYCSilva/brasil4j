@@ -73,5 +73,18 @@ A pedido do usuário, a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f
     3. **Importante:** faltavam os nove vetores C1 no modo estrutural. O teste `estruturalAceitaOsNoveVetoresC1` foi acrescentado e passou de imediato, como regressão.
     4. **Sugestão:** o contrato de `verify` descrevia exceção para sufixo divergente. **JavaDoc e `api.md` corrigidos.**
     5. **Sugestão:** rastreabilidade defasada. **Atualizada nesta seção.**
+- **Segunda rodada, em `c1aa4e6`.** O `clean verify` passou em JDK 8 e em JDK 21. Os números finais:
+
+  | Módulo | Surefire | Failsafe |
+  | --- | --- | --- |
+  | Núcleo | 20 573 | 88 |
+  | Kotlin | 53 | 88 |
+  | Exemplos | 37 | — |
+  | **Total** | | **20 839** |
+
+  - Zero falhas. JaCoCo do núcleo com 98,8% das linhas e 94,1% dos branches, e do Kotlin com 99,3% e 100%.
+  - Bytecode 52 nos dois JARs. japicmp sem incompatibilidade contra `v0.2.0`, `5fd9dae` e `18bfe9c`.
+  - **Antigravity: APROVA PARA MERGE.** Confirmou o Decorator achatado, a redução módulo 11 e a rastreabilidade.
+  - **Codex: APROVA PARA MERGE.** Confirmou os cinco achados resolvidos, o merge fast-forward e o `git diff --check` limpo. Também conferiu nos XMLs locais os 20 839 testes, a cobertura e o bytecode 52.
 - **T053 · Coordenação.** Concluída: a 010 está rebaseada sobre a `main` em `5405591`, com a 008 e a 009 integradas, sem divergência e com merge fast-forward possível.
 - **Pendência de ambiente.** Um `install` acidental na etapa 10 gravou `~/.m2/repository/io/github/brasil4j/brasil4j-core/0.2.0` com o JAR candidato. A remoção foi bloqueada pela política de ações destrutivas e aguarda decisão do usuário. Nenhum build da 010 depende desse artefato, porque todos usam o reator.
