@@ -56,4 +56,12 @@ class DocumentFormatterTest {
         DocumentFormatter<Cpf> lambda = cpf -> "x";
         assertEquals("x", lambda.apply(CPF));
     }
+
+    @Test
+    void quantidadesVisiveisMaximasOcultamTudoSemTransbordo() {
+        assertEquals("***********",
+                DocumentFormatter.<Cpf>redacted(Integer.MAX_VALUE, Integer.MAX_VALUE, '*').apply(CPF));
+        assertEquals("***********", DocumentFormatter.<Cpf>redacted(Integer.MAX_VALUE, 0, '*').apply(CPF));
+        assertEquals("***********", DocumentFormatter.<Cpf>redacted(0, Integer.MAX_VALUE, '*').apply(CPF));
+    }
 }

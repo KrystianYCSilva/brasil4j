@@ -1,0 +1,5 @@
+<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtAdmissao/v02_05_00">
+  <evtAdmissao>
+    <trabalhador><documentos><CTPS><nrCtps>123456789012</nrCtps><serieCtps>4</serieCtps><ufCtps>PR</ufCtps></CTPS></documentos></trabalhador>
+  </evtAdmissao>
+</eSocial>

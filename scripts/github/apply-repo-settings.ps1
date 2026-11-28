@@ -62,7 +62,9 @@ $settingsLabel = if ($Apply) { 'Repository settings' } else { 'Would set reposit
 Write-Host "${settingsLabel}: $settings"
 
 $existing = @{}
-foreach ($line in (& gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)\t\(.name)"')) {
+$rulesetList = & gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)\t\(.name)"'
+if ($LASTEXITCODE -ne 0) { throw "gh api repos/$Repo/rulesets failed with exit code $LASTEXITCODE" }
+foreach ($line in $rulesetList) {
     if ($line) {
         $parts = $line -split "`t"
         $existing[$parts[1]] = $parts[0]
