@@ -124,6 +124,39 @@ class DocumentParsersTest {
     }
 
     @Test
+    void decoracaoPreservaAExcecaoDoInterpretadorDoConsumidorNaRejeicaoNativa() {
+        IllegalStateException propria = new IllegalStateException("erro do consumidor");
+        DocumentParser<Codigo> proprio = new DocumentParser<Codigo>() {
+            @Override
+            public ValidationResult<Codigo> parse(String input) {
+                return "1".equals(input) ? ValidationResult.valid(new Codigo("1")) : ValidationResult.invalid(PREFIXO_ZERO);
+            }
+
+            @Override
+            public Codigo parseOrThrow(String input) {
+                if (!"1".equals(input)) {
+                    throw propria;
+                }
+                return new Codigo("1");
+            }
+        };
+        DocumentParser<Codigo> decorado = proprio.withPolicy(documento -> true);
+        assertSame(propria, assertThrows(IllegalStateException.class, () -> decorado.parseOrThrow("2")));
+        assertEquals(new Codigo("1"), decorado.parseOrThrow("1"));
+        assertEquals("Documento inválido.", assertThrowsExactly(IllegalArgumentException.class,
+                () -> proprio.withPolicy(documento -> false).parseOrThrow("1")).getMessage());
+    }
+
+    @Test
+    void regraDeDigitoVerificadorReutilizavel() {
+        ValidationRule<String> dv = ValidationRule.checkDigits(Modulus11.builder().build());
+        assertEquals(Optional.empty(), dv.check("123456789"));
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_CHECK_DIGITS)), dv.check("123456780"));
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)), dv.check("12A456789"));
+        assertThrows(NullPointerException.class, () -> ValidationRule.checkDigits(null));
+    }
+
+    @Test
     void validaAConfiguracao() {
         assertThrows(NullPointerException.class, () -> DocumentParsers.builder(null));
         DocumentParsers.Builder<Codigo> builder = DocumentParsers.builder(Codigo::new);

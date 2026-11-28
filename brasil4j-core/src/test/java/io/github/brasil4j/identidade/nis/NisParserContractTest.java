@@ -88,6 +88,12 @@ class NisParserContractTest {
         assertEquals(esperado(legado), Nis.parser(NisValidationMode.LEGACY_MOD11).parse(nis).getRejection());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"00000000000", "11111111111", "99999999999"})
+    void legadoRecusaRepetidosAntesDoCalculoComOMesmoCodigo(String repetido) {
+        assertEquals(Optional.of(REPETIDOS), Nis.parser(NisValidationMode.LEGACY_MOD11).parse(repetido).getRejection());
+    }
+
     @Test
     void guardaSipreVOpcionalEncadeadaAoValidadorDaCaixa() {
         DocumentParser<Nis> caixaComGuarda = Nis.parser(NisValidationMode.CAIXA_FGTS_V016)

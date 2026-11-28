@@ -22,9 +22,11 @@ public enum NisValidationMode {
 
     /**
      * Acrescenta o DV pela convenção técnica observada em Declarações e UEM (ver
-     * {@link Modulus11#pisLegacyMod11()}), com a guarda de algarismos repetidos desses legados.
+     * {@link Modulus11#pisLegacyMod11()}), com a guarda de algarismos repetidos desses legados, aplicada
+     * antes do cálculo como neles.
      */
-    LEGACY_MOD11(builder -> builder.checkDigits(Modulus11.pisLegacyMod11()).documentRule(NisRules.repeatedDigits()));
+    LEGACY_MOD11(builder -> builder.canonicalRule(NisRules.repeatedDigitsOfCanonical())
+            .checkDigits(Modulus11.pisLegacyMod11()));
 
     private final UnaryOperator<DocumentParsers.Builder<Nis>> configuration;
 

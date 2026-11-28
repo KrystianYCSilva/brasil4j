@@ -5,7 +5,6 @@ import io.github.brasil4j.identidade.RejectionReason;
 import io.github.brasil4j.identidade.ValidationRule;
 import io.github.brasil4j.verificacao.CheckDigitAlgorithm;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -16,8 +15,6 @@ import java.util.Optional;
 public final class NisRules {
     private static final Rejection REPEATED_DIGITS =
             Rejection.of(RejectionReason.INVALID_CHECK_DIGITS, "REPEATED_DIGITS");
-    private static final Rejection INVALID_CHECK_DIGITS = Rejection.of(RejectionReason.INVALID_CHECK_DIGITS);
-    private static final Rejection INVALID_FORMAT = Rejection.of(RejectionReason.INVALID_FORMAT);
 
     private NisRules() {
     }
@@ -30,15 +27,8 @@ public final class NisRules {
      * @return regra de algarismos repetidos
      */
     public static ValidationRule<Nis> repeatedDigits() {
-        return nis -> {
-            String canonical = nis.getCanonicalValue();
-            for (int index = 1; index < canonical.length(); index++) {
-                if (canonical.charAt(index) != canonical.charAt(0)) {
-                    return Optional.empty();
-                }
-            }
-            return Optional.of(REPEATED_DIGITS);
-        };
+        ValidationRule<String> canonical = repeatedDigitsOfCanonical();
+        return nis -> canonical.check(nis.getCanonicalValue());
     }
 
     /**
@@ -51,13 +41,19 @@ public final class NisRules {
      * @throws NullPointerException se o algoritmo for nulo
      */
     public static ValidationRule<Nis> checkDigits(CheckDigitAlgorithm algorithm) {
-        Objects.requireNonNull(algorithm, "Algoritmo obrigatório.");
-        return nis -> {
-            try {
-                return algorithm.verify(nis.getCanonicalValue()) ? Optional.empty() : Optional.of(INVALID_CHECK_DIGITS);
-            } catch (IllegalArgumentException outOfDomain) {
-                return Optional.of(INVALID_FORMAT);
+        ValidationRule<String> canonical = ValidationRule.checkDigits(algorithm);
+        return nis -> canonical.check(nis.getCanonicalValue());
+    }
+
+    /** Guarda de repetição sobre o canônico, usada antes do cálculo na convenção legada. */
+    static ValidationRule<String> repeatedDigitsOfCanonical() {
+        return canonical -> {
+            for (int index = 1; index < canonical.length(); index++) {
+                if (canonical.charAt(index) != canonical.charAt(0)) {
+                    return Optional.empty();
+                }
             }
+            return Optional.of(REPEATED_DIGITS);
         };
     }
 }

@@ -17,6 +17,12 @@ public final class Modulus11 implements CheckDigitAlgorithm {
     private static final String DIGITS = "0123456789";
     private static final String ALPHANUMERIC = DIGITS + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final int[] PIS_WEIGHTS = {3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
+    private static final Modulus11 CPF = builder().weightsFromRight(2, 11).digits(2).build();
+    private static final Modulus11 CNPJ = builder().charValue(c -> c - '0', ALPHANUMERIC).digits(2).build();
+    private static final Modulus11 PIS_CAIXA_FGTS_V016 = builder().weightsFromLeft(PIS_WEIGHTS)
+            .remainder(rest -> rest == 1 ? OptionalInt.empty() : OptionalInt.of(rest == 0 ? 0 : 11 - rest))
+            .build();
+    private static final Modulus11 PIS_LEGACY_MOD11 = builder().weightsFromLeft(PIS_WEIGHTS).build();
 
     private final IntUnaryOperator charValue;
     private final String alphabet;
@@ -54,7 +60,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
      * @return algoritmo do CPF
      */
     public static Modulus11 cpf() {
-        return builder().weightsFromRight(2, 11).digits(2).build();
+        return CPF;
     }
 
     /**
@@ -65,7 +71,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
      * @return algoritmo do CNPJ
      */
     public static Modulus11 cnpj() {
-        return builder().charValue(c -> c - '0', ALPHANUMERIC).digits(2).build();
+        return CNPJ;
     }
 
     /**
@@ -78,9 +84,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
      * @return algoritmo da fórmula publicada pela Caixa para o FGTS
      */
     public static Modulus11 pisCaixaFgtsV016() {
-        return builder().weightsFromLeft(PIS_WEIGHTS)
-                .remainder(rest -> rest == 1 ? OptionalInt.empty() : OptionalInt.of(rest == 0 ? 0 : 11 - rest))
-                .build();
+        return PIS_CAIXA_FGTS_V016;
     }
 
     /**
@@ -92,7 +96,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
      * @return algoritmo da convenção legada
      */
     public static Modulus11 pisLegacyMod11() {
-        return builder().weightsFromLeft(PIS_WEIGHTS).build();
+        return PIS_LEGACY_MOD11;
     }
 
     /** {@inheritDoc} */

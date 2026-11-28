@@ -72,7 +72,7 @@ public interface DocumentParser<D extends Document> {
      * @param code código incluído na rejeição
      * @return novo interpretador decorado
      * @throws NullPointerException se a política ou o código forem nulos
-     * @throws IllegalArgumentException se o código for vazio
+     * @throws IllegalArgumentException se o código for vazio ou só tiver espaços
      */
     default DocumentParser<D> withPolicy(Predicate<? super D> policy, String code) {
         Objects.requireNonNull(policy, "Política obrigatória.");

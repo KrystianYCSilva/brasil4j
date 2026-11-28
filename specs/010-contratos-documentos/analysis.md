@@ -57,6 +57,13 @@ A pedido do usuário, a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f
 - **T050 · Proveniência.** Todas as linhas acrescentadas pela 010 que mencionam "oficial" negam a oficialidade: `recorte.md`, `revisao.md`, F-15 em `fontes.md`, `NisRules.java` e `NisValidationMode.java`. Nenhuma regra nova foi rotulada como oficial. F-15 a F-17 usam CONVENCAO_TECNICA com fonte e alcance, e F-18 usa ESTRUTURAL como escolha de projeto.
 - **T052 · Revisão independente.**
   - O agente `quality-gatekeeper` deu FAIL só por rastreabilidade: tarefas desmarcadas e evidência final ausente neste registro. Os dois pontos foram corrigidos aqui. Ele não encontrou placeholders, segredos, testes vazios, JavaDoc faltando nem divergência entre `contracts/api.md` e o código conferido.
-  - A primeira chamada ao `agy` estourou o limite de 9m30s sem conteúdo. Uma segunda chamada, de escopo menor, está em andamento.
+  - A primeira chamada ao `agy` estourou o limite de 9m30s sem conteúdo. A segunda, de escopo menor, deu **APROVA COM AJUSTES** e confirmou três pontos: `parse` nunca lança para entrada inválida, os diagnósticos não contêm a entrada e nenhuma regra é rotulada como oficial sem fonte. O tratamento de cada achado:
+    - Decorar um interpretador do consumidor descartava o `parseOrThrow` dele. **Corrigido:** a rejeição nativa agora delega ao `parseOrThrow` de origem.
+    - No `LEGACY_MOD11`, só `00000000000` recebia o código `REPEATED_DIGITS`. **Corrigido:** a guarda virou regra canônica, aplicada antes do cálculo, como nos legados.
+    - O contrato divergia do código em dois pontos: NPE e não IAE para nulo no `Modulus11`, e o formato do `toString` de `Invalid`. **`api.md` corrigido.**
+    - O JavaDoc de `withPolicy` não mencionava "só espaços". **Corrigido.**
+    - **Sugestões aplicadas:** os presets do `Modulus11` ficaram em cache como constantes imutáveis, e a conversão de DV em rejeição foi centralizada na nova regra pública `ValidationRule.checkDigits`, usada pelo builder e por `NisRules`.
+    - **Sugestões não aplicadas:** estratégia interna de pesos no `Modulus11` (refatoração interna, sem ganho de contrato) e variância de `canonicalRule` (`String` é final).
+    - Depois dos ajustes, `clean verify` passou em JDK 21 e JDK 8, e o japicmp segue sem incompatibilidade contra as três baselines.
 - **T053 · Coordenação.** Aberta. A 010 está sobre `009-exemplos-utilizacao` (`ad3f6e7`). O rebase sobre `main` depende da integração da 009.
 - **Pendência de ambiente.** Um `install` acidental na etapa 10 gravou `~/.m2/repository/io/github/brasil4j/brasil4j-core/0.2.0` com o JAR candidato. A remoção foi bloqueada pela política de ações destrutivas e aguarda decisão do usuário. Nenhum build da 010 depende desse artefato, porque todos usam o reator.

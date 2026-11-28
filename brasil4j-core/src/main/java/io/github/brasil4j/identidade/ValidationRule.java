@@ -1,5 +1,7 @@
 package io.github.brasil4j.identidade;
 
+import io.github.brasil4j.verificacao.CheckDigitAlgorithm;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -33,6 +35,27 @@ public interface ValidationRule<T> {
         Objects.requireNonNull(condition, "Condição obrigatória.");
         Objects.requireNonNull(rejection, "Rejeição obrigatória.");
         return value -> condition.test(value) ? Optional.empty() : Optional.of(rejection);
+    }
+
+    /**
+     * Cria a regra de dígitos verificadores sobre o valor canônico. Uma divergência gera
+     * {@link RejectionReason#INVALID_CHECK_DIGITS}; um valor fora do domínio do algoritmo gera
+     * {@link RejectionReason#INVALID_FORMAT}, sem exceção.
+     *
+     * @param algorithm algoritmo de dígitos verificadores
+     * @return regra sobre o valor canônico
+     * @throws NullPointerException se o algoritmo for nulo
+     */
+    static ValidationRule<String> checkDigits(CheckDigitAlgorithm algorithm) {
+        Objects.requireNonNull(algorithm, "Algoritmo obrigatório.");
+        return canonical -> {
+            try {
+                return algorithm.verify(canonical)
+                        ? Optional.empty() : Optional.of(Rejection.of(RejectionReason.INVALID_CHECK_DIGITS));
+            } catch (IllegalArgumentException outOfDomain) {
+                return Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT));
+            }
+        };
     }
 
     /**

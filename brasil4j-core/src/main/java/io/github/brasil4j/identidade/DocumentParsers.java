@@ -21,7 +21,6 @@ import java.util.function.Function;
 public final class DocumentParsers {
     private static final Rejection MISSING = Rejection.of(RejectionReason.MISSING);
     private static final Rejection INVALID_FORMAT = Rejection.of(RejectionReason.INVALID_FORMAT);
-    private static final Rejection INVALID_CHECK_DIGITS = Rejection.of(RejectionReason.INVALID_CHECK_DIGITS);
 
     private DocumentParsers() {
     }
@@ -39,13 +38,27 @@ public final class DocumentParsers {
     }
 
     static <D extends Document> DocumentParser<D> decorate(DocumentParser<D> origin, ValidationRule<? super D> rule) {
-        String message = origin instanceof ConfiguredParser
+        boolean configured = origin instanceof ConfiguredParser;
+        String message = configured
                 ? ((ConfiguredParser<?>) origin).errorMessage
                 : ValidationResult.DEFAULT_ERROR_MESSAGE;
         return new ConfiguredParser<D>(message) {
             @Override
             public ValidationResult<D> parse(String input) {
+                return check(origin.parse(input));
+            }
+
+            @Override
+            public D parseOrThrow(String input) {
                 ValidationResult<D> result = origin.parse(input);
+                if (!configured && !result.isValid()) {
+                    // A rejeição nativa de um interpretador do consumidor mantém a exceção dele.
+                    return origin.parseOrThrow(input);
+                }
+                return check(result).orElseThrow(message);
+            }
+
+            private ValidationResult<D> check(ValidationResult<D> result) {
                 if (!result.isValid()) {
                     return result;
                 }
@@ -189,7 +202,7 @@ public final class DocumentParsers {
             List<ValidationRule<String>> canonicalRules = Collections.unmodifiableList(new ArrayList<>(this.canonicalRules));
             List<ValidationRule<? super D>> documentRules =
                     Collections.unmodifiableList(new ArrayList<>(this.documentRules));
-            CheckDigitAlgorithm checkDigits = this.checkDigits;
+            ValidationRule<String> checkDigits = this.checkDigits == null ? null : ValidationRule.checkDigits(this.checkDigits);
             return new ConfiguredParser<D>(errorMessage) {
                 @Override
                 public ValidationResult<D> parse(String input) {
@@ -209,7 +222,7 @@ public final class DocumentParsers {
                         }
                     }
                     if (checkDigits != null) {
-                        Optional<Rejection> rejection = checkDigitsOf(checkDigits, canonical);
+                        Optional<Rejection> rejection = checkDigits.check(canonical);
                         if (rejection.isPresent()) {
                             return ValidationResult.invalid(rejection.get());
                         }
@@ -224,14 +237,6 @@ public final class DocumentParsers {
                     return ValidationResult.valid(document);
                 }
             };
-        }
-
-        private static Optional<Rejection> checkDigitsOf(CheckDigitAlgorithm algorithm, String canonical) {
-            try {
-                return algorithm.verify(canonical) ? Optional.empty() : Optional.of(INVALID_CHECK_DIGITS);
-            } catch (IllegalArgumentException outOfDomain) {
-                return Optional.of(INVALID_FORMAT);
-            }
         }
     }
 }
