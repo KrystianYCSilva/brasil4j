@@ -1,5 +1,8 @@
 package io.github.brasil4j.identidade;
 
+import io.github.brasil4j.verificacao.CheckDigitAlgorithm;
+import io.github.brasil4j.verificacao.InvalidBaseException;
+import io.github.brasil4j.verificacao.Modulus11;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -51,5 +54,50 @@ class ValidationRuleTest {
         assertThrows(NullPointerException.class, () -> ValidationRule.of(null, CURTO));
         assertThrows(NullPointerException.class, () -> ValidationRule.of(texto -> true, null));
         assertThrows(NullPointerException.class, () -> ValidationRule.<String>accept().and(null));
+    }
+
+    @Test
+    void algoritmoMalConfiguradoNaoViraFormatoInvalido() {
+        CheckDigitAlgorithm defeituoso = new CheckDigitAlgorithm() {
+            @Override
+            public int digitCount() {
+                return 1;
+            }
+
+            @Override
+            public Optional<String> compute(String base) {
+                throw new IllegalArgumentException("configuração incoerente");
+            }
+        };
+        IllegalArgumentException erro = assertThrows(IllegalArgumentException.class,
+                () -> ValidationRule.checkDigits(defeituoso).check("123"));
+        assertEquals("configuração incoerente", erro.getMessage());
+    }
+
+    @Test
+    void baseForaDoDominioContinuaSendoFormatoInvalido() {
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)),
+                ValidationRule.checkDigits(Modulus11.builder().build()).check("1A3"));
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)),
+                ValidationRule.checkDigits(Modulus11.builder().build()).check("1"));
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)),
+                ValidationRule.checkDigits(Modulus11.pisCaixaFgtsV016()).check("123456789012"));
+    }
+
+    @Test
+    void algoritmoPodeSinalizarBaseForaDoDominioPelaExcecaoDedicada() {
+        CheckDigitAlgorithm proprio = new CheckDigitAlgorithm() {
+            @Override
+            public int digitCount() {
+                return 1;
+            }
+
+            @Override
+            public Optional<String> compute(String base) {
+                throw new InvalidBaseException("base recusada");
+            }
+        };
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)),
+                ValidationRule.checkDigits(proprio).check("123"));
     }
 }

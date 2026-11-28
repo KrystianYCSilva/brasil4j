@@ -218,4 +218,38 @@ class DocumentParsersTest {
         chamadas.add(nome);
         return Optional.empty();
     }
+
+    @Test
+    void alterarOConstrutorDepoisDeBuildNaoAfetaOInterpretadorJaCriado() {
+        DocumentParsers.Builder<Codigo> builder = DocumentParsers.builder(Codigo::new)
+                .mask(MASCARA)
+                .errorMessage("Original.");
+        DocumentParser<Codigo> parser = builder.build();
+
+        builder.canonicalRule(texto -> Optional.of(PREFIXO_ZERO))
+                .documentRule(documento -> Optional.of(PREFIXO_ZERO))
+                .checkDigits(Modulus11.builder().build())
+                .errorMessage("Alterada.");
+
+        assertTrue(parser.isValid("123.456-780"));
+        assertEquals("Original.", assertThrowsExactly(IllegalArgumentException.class,
+                () -> parser.parseOrThrow("x")).getMessage());
+        assertEquals(Optional.of(PREFIXO_ZERO), builder.build().parse("123.456-780").getRejection());
+    }
+
+    @Test
+    void decoracoesDaMesmaOrigemSaoIndependentes() {
+        DocumentParser<Codigo> origem = codigo();
+        ValidationRule<Codigo> recusaA = documento -> Optional.of(Rejection.of(RejectionReason.POLICY, "A"));
+        ValidationRule<Codigo> recusaB = documento -> Optional.of(Rejection.of(RejectionReason.POLICY, "B"));
+        DocumentParser<Codigo> base = origem.withRule(documento -> Optional.empty());
+
+        DocumentParser<Codigo> comA = base.withRule(recusaA);
+        DocumentParser<Codigo> comB = base.withRule(recusaB);
+
+        assertEquals("A", comA.parse("123456789").getRejection().get().getCode().get());
+        assertEquals("B", comB.parse("123456789").getRejection().get().getCode().get());
+        assertTrue(base.isValid("123456789"));
+        assertTrue(origem.isValid("123456789"));
+    }
 }

@@ -36,7 +36,10 @@ public enum CnpjValidationMode {
         return Cnpj.parser(this).parse(input).map(Cnpj::getCanonicalValue).getDocument().orElse(null);
     }
 
-    /** Bloqueio de 14 zeros (F-05) seguido do módulo 11 do Anexo XV da IN RFB 2.119/2022. */
+    /**
+     * Bloqueio de 14 zeros, política de entrada F-05 de {@code docs/fontes.md}, seguido do cálculo do
+     * módulo 11 do Anexo XV da IN RFB 2.119/2022, que cobre somente o cálculo.
+     */
     static boolean hasCheckDigits(String canonical) {
         return !ALL_ZEROS.equals(canonical) && Modulus11.cnpj().verify(canonical);
     }

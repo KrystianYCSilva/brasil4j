@@ -1,0 +1,9 @@
+<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtAdmissao/v02_05_00">
+  <evtAdmissao>
+    <trabalhador>
+      <documentos>
+        <!-- Grupo CTPS omitido em documentos presente sem elementos. -->
+      </documentos>
+    </trabalhador>
+  </evtAdmissao>
+</eSocial>

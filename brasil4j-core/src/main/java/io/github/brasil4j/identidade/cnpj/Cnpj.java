@@ -128,7 +128,8 @@ public final class Cnpj extends AbstractDocument
     }
 
     /**
-     * Confere os DVs pelo módulo 11 do Anexo XV da IN RFB 2.119/2022, com o bloqueio de 14 zeros (F-05).
+     * Confere os DVs pelo módulo 11 do Anexo XV da IN RFB 2.119/2022 e aplica o bloqueio de 14 zeros,
+     * que é a política de entrada F-05 de {@code docs/fontes.md} e não faz parte do Anexo XV.
      *
      * @return se os dígitos informados coincidem com o cálculo e o valor não é formado só por zeros
      */
