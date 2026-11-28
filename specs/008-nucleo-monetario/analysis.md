@@ -65,5 +65,11 @@ Após a implementação inicial, a revisão estática completa de 26 arquivos pe
 | R2-02 | ALTA | `BigDecimal` não é `final` (subclasses maliciosas burlando `equals` e `scale()`). | `exigirBigDecimalPadrao` rejeita `valor.getClass() != BigDecimal.class` em todas as entradas e retornos de políticas customizadas, além de comparar `floor.equals(normalizado)` pelo lado confiável. |
 | R2-03 | MÉDIA | `ratear` sem teto superior de parcelas (`OutOfMemoryError`). | Aplicado teto `1..10_000` em `ratear` (alinhado a `alocar`) e testado com `10_001` e `Integer.MAX_VALUE`. |
 | R2-04 | MÉDIA | TOCTOU na lista de pesos em `alocar`. | Captura única via `pesos.toArray()` copiada e validada em array privado antes do cálculo; provado com `AbstractList` mutante. |
-| R2-05 | MÉDIA | Fração substituta curta em divisão customizada não terminante. | Expansão exata de 34 casas adicionais além de `casasDestino` + dígito *sticky*, preservando limiares arbitrários (ex.: `0.3` em `1.00 / 3 -> 0.34`). |
+| R2-05 | MÉDIA | Fração substituta curta em divisão customizada não terminante. | O callback recebe uma aproximação truncada em direção a zero em `casasDestino + 34` casas, com um dígito de sinalização assinado na casa seguinte. Uma política sensível a dígitos além desse limite pode divergir da decisão sobre o valor matemático. [Contrato](contracts/api.md) |
 | R2-06..R2-13 | MÉDIA / BAIXA | `Moeda.mesmaMoeda` com moeda inválida, escala intermediária em políticas compostas, `Locale.ROOT` em `fromJdkCurrency`, `MathContext.UNLIMITED` em `getFatorAproximado`, controles C1/RTL/surrogate no símbolo, DRY `mapearFatias` e datas/listas em `fontes.md`/`README.md`. | Todos implementados, documentados e cobertos na suíte verde. |
+
+## 6. Encerramento da auditoria de divisão customizada
+
+O teste de regressão do Agy demonstrou que `1,00 ÷ 2⁴⁰` podia produzir `BRL 0.01` quando a política esperava o quociente decimal exato e devolveria `BRL 0.00`. O commit `c0a91af` passou a entregar o quociente exato quando a divisão termina, inclusive na divisão cambial inversa. A regressão cobre os dois sinais e uma cotação que produz um quociente terminante com 126 casas.
+
+Em 2026-11-28, a verificação independente de `c0a91af` em Corretto 8u512 e 21.0.13 registrou 521 testes por JDK, sem falhas, erros ou pulos. Os dois JARs passaram na checagem de bytecode Java 8 e na comparação binária e de fonte com os artefatos da Spec 007. [Auditoria e sondagem do limite em divisões não terminantes](../../docs/descoberta/auditoria-008-nucleo-monetario.md)
