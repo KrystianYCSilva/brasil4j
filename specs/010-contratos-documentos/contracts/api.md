@@ -98,7 +98,7 @@ public interface DocumentFormatter<D extends Document> extends Function<D, Strin
 
 O builder rejeita nulos com NPE e rejeita configurar tanto `mask` quanto `normalizer`. O parser construído por ele trata `null` e `""` como `MISSING`. Uma normalização vazia vira `INVALID_FORMAT`. As regras canônicas rodam em ordem, seguidas do DV (`INVALID_CHECK_DIGITS`), da fábrica do documento e das regras de documento. Os interpretadores nativos sobrescrevem a mensagem por `errorMessage`. Um `parseOrThrow` de interpretador nativo usa essa mensagem por meio de uma implementação interna que sobrescreve o método default.
 
-`withPolicy(policy)` rejeita com `Rejection.of(POLICY)` e `withPolicy(policy, code)` com `Rejection.of(POLICY, code)`. As decorações preservam a mensagem de erro do interpretador de origem. Sobre um interpretador do consumidor, a rejeição nativa em `parseOrThrow` delega ao `parseOrThrow` dele, preservando a exceção própria; a rejeição por regra usa "Documento inválido.". `redacted` exige `visiblePrefix ≥ 0` e `visibleSuffix ≥ 0`. Quando a soma é maior ou igual ao comprimento do canônico, oculta tudo.
+`withPolicy(policy)` rejeita com `Rejection.of(POLICY)` e `withPolicy(policy, code)` com `Rejection.of(POLICY, code)`. As decorações preservam a mensagem de erro do interpretador de origem. As decorações são achatadas: a origem não decorada é interpretada uma única vez por chamada, e as regras rodam na ordem em que foram acrescentadas. Em `parseOrThrow`, a rejeição da origem mantém a exceção dela, inclusive a de um interpretador do consumidor, em qualquer profundidade. A rejeição por regra usa a mensagem da origem configurada, ou "Documento inválido." para interpretadores do consumidor. `redacted` exige `visiblePrefix ≥ 0` e `visibleSuffix ≥ 0`. Quando a soma é maior ou igual ao comprimento do canônico, oculta tudo.
 
 ## `io.github.brasil4j.verificacao`
 
@@ -126,7 +126,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
 }
 ```
 
-O mapeamento de resto padrão é `r < 2 → 0, senão 11 − r`. Os pesos padrão são `weightsFromRight(2, 9)`. `weightsFromLeft` aplica pesos fixos; quando a base é maior que a lista de pesos, a configuração é inválida (IAE). `compute` e `verify` lançam `NullPointerException` para nulo e `IllegalArgumentException` para comprimento incompatível ou caractere fora do alfabeto. Os presets são instâncias imutáveis compartilhadas.
+O mapeamento de resto padrão é `r < 2 → 0, senão 11 − r`. Os pesos padrão são `weightsFromRight(2, 9)`. `weightsFromLeft` aplica pesos fixos; quando a base é maior que a lista de pesos, a configuração é inválida (IAE). `compute` e `verify` lançam `NullPointerException` para nulo e `IllegalArgumentException` para base vazia, maior que os pesos fixos ou com caractere fora do alfabeto. Em `verify`, só a base é conferida contra o domínio: um sufixo divergente, inclusive não numérico, devolve `false`. Cada parcela é reduzida módulo 11, o que evita transbordamento para qualquer peso aceito. Os presets são instâncias imutáveis compartilhadas.
 
 - `cpf()`: `weightsFromRight(2, 11)` com 2 DVs. O peso não recomeça, porque a base tem no máximo 10 caracteres.
 - `cnpj()`: alfabeto `0-9A-Z` com ASCII − 48, `weightsFromRight(2, 9)` e 2 DVs.

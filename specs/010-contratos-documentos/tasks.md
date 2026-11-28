@@ -132,7 +132,7 @@
 - [X] T050 Buscar `oficial` em `brasil4j-*/src` e `docs` e conferir que cada ocorrência remete a uma fonte normativa confirmada em `docs/fontes.md` (SC-006).
 - [X] T051 Rodar `.\mvnw.cmd -B clean verify` em JDK 8 e 21. Conferir JaCoCo ≥ 90% de linhas e ≥ 85% de branches por módulo, DocLint e Dokka, e registrar as contagens em `analysis.md`.
 - [X] T052 Revisão independente do diff com `agy -p --mode plan --sandbox` (sem shell) e pelo agente `quality-gatekeeper`. Registrar os achados e o tratamento de cada um em `analysis.md`. Commit da etapa 12.
-- [ ] T053 Coordenação: a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f6e7`, que inclui a 008). Rebasear sobre `main` quando a 009 for integrada e resolver os arquivos compartilhados.
+- [X] T053 Coordenação: a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f6e7`, que inclui a 008). Rebasear sobre `main` quando a 009 for integrada e resolver os arquivos compartilhados.
 - [X] T054 [P] Acrescentar, sem alterar os exemplos existentes, `brasil4j-exemplos/src/test/java/io/github/brasil4j/exemplos/java/ContratosExemplosTest.java` e `brasil4j-exemplos/src/test/kotlin/io/github/brasil4j/exemplos/kotlin/ContratosKotlinExemplosTest.kt`. Cobrir:
   - `DocumentParser` injetado e motivo da rejeição;
   - documento criado pelo consumidor e usado numa lista com `DocumentCheck.of`;

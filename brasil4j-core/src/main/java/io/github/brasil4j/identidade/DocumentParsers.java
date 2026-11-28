@@ -38,39 +38,69 @@ public final class DocumentParsers {
     }
 
     static <D extends Document> DocumentParser<D> decorate(DocumentParser<D> origin, ValidationRule<? super D> rule) {
-        boolean configured = origin instanceof ConfiguredParser;
-        String message = configured
+        if (origin instanceof DecoratedParser) {
+            return ((DecoratedParser<D>) origin).with(rule);
+        }
+        String message = origin instanceof ConfiguredParser
                 ? ((ConfiguredParser<?>) origin).errorMessage
                 : ValidationResult.DEFAULT_ERROR_MESSAGE;
-        return new ConfiguredParser<D>(message) {
-            @Override
-            public ValidationResult<D> parse(String input) {
-                return check(origin.parse(input));
-            }
+        return new DecoratedParser<>(origin, Collections.<ValidationRule<? super D>>singletonList(rule), message);
+    }
 
-            @Override
-            public D parseOrThrow(String input) {
-                ValidationResult<D> result = origin.parse(input);
-                if (!configured && !result.isValid()) {
-                    // A rejeição nativa de um interpretador do consumidor mantém a exceção dele.
-                    return origin.parseOrThrow(input);
-                }
-                return check(result).orElseThrow(message);
-            }
+    /**
+     * Decorator achatado: guarda a origem não decorada e as regras na ordem em que foram acrescentadas.
+     * A origem é interpretada uma única vez por chamada. Em {@code parseOrThrow}, a rejeição da origem
+     * mantém a exceção dela, e a rejeição de uma regra usa a mensagem configurada.
+     */
+    private static final class DecoratedParser<D extends Document> extends ConfiguredParser<D> {
+        private final DocumentParser<D> origin;
+        private final List<ValidationRule<? super D>> rules;
 
-            private ValidationResult<D> check(ValidationResult<D> result) {
-                if (!result.isValid()) {
-                    return result;
-                }
-                Optional<Rejection> rejection = rule.check(result.getDocument().get());
-                return rejection.isPresent() ? ValidationResult.invalid(rejection.get()) : result;
+        DecoratedParser(DocumentParser<D> origin, List<ValidationRule<? super D>> rules, String message) {
+            super(message);
+            this.origin = origin;
+            this.rules = rules;
+        }
+
+        DecoratedParser<D> with(ValidationRule<? super D> rule) {
+            List<ValidationRule<? super D>> chained = new ArrayList<>(rules);
+            chained.add(rule);
+            return new DecoratedParser<>(origin, Collections.unmodifiableList(chained), errorMessage);
+        }
+
+        @Override
+        public ValidationResult<D> parse(String input) {
+            ValidationResult<D> result = origin.parse(input);
+            if (!result.isValid()) {
+                return result;
             }
-        };
+            Optional<Rejection> rejection = check(result.getDocument().get());
+            return rejection.isPresent() ? ValidationResult.invalid(rejection.get()) : result;
+        }
+
+        @Override
+        public D parseOrThrow(String input) {
+            D document = origin.parseOrThrow(input);
+            if (check(document).isPresent()) {
+                throw new IllegalArgumentException(errorMessage);
+            }
+            return document;
+        }
+
+        private Optional<Rejection> check(D document) {
+            for (ValidationRule<? super D> rule : rules) {
+                Optional<Rejection> rejection = rule.check(document);
+                if (rejection.isPresent()) {
+                    return rejection;
+                }
+            }
+            return Optional.empty();
+        }
     }
 
     /** Interpretador interno que preserva a mensagem de erro através das decorações. */
     abstract static class ConfiguredParser<D extends Document> implements DocumentParser<D> {
-        private final String errorMessage;
+        final String errorMessage;
 
         ConfiguredParser(String errorMessage) {
             this.errorMessage = errorMessage;

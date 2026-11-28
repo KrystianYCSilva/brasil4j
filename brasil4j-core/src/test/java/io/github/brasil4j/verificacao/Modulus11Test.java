@@ -97,6 +97,18 @@ class Modulus11Test {
     }
 
     @Test
+    void pesosGrandesNaoTransbordam() {
+        // 2147483647 mod 11 = 1; para a base "2": soma 2 (mod 11), resto 2, DV 11 - 2 = 9.
+        assertEquals(Optional.of("9"), Modulus11.builder().weightsFromLeft(Integer.MAX_VALUE).build().compute("2"));
+        // Soma que transbordaria em int: 9 parcelas de 9 * (2^31 - 1); cada peso vale 1 mod 11, soma 81, resto 4, DV 7.
+        int[] pesos = new int[9];
+        java.util.Arrays.fill(pesos, Integer.MAX_VALUE);
+        assertEquals(Optional.of("7"), Modulus11.builder().weightsFromLeft(pesos).build().compute("999999999"));
+        assertEquals(Optional.of("9"),
+                Modulus11.builder().weightsFromRight(Integer.MAX_VALUE, Integer.MAX_VALUE).build().compute("2"));
+    }
+
+    @Test
     void presetsComDocumentacaoDeFonte() {
         assertEquals(2, Modulus11.cpf().digitCount());
         assertEquals(2, Modulus11.cnpj().digitCount());

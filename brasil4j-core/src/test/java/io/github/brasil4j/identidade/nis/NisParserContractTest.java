@@ -63,6 +63,15 @@ class NisParserContractTest {
         assertEquals(Nis.parse(vetor), Nis.parser().parseOrThrow(vetor));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"00000000000", "01234567898", "00000000019", "00000000063", "00000000060",
+        "00000000050", "00000000280", "00000000281", "11111111116"})
+    void estruturalAceitaOsNoveVetoresC1(String vetor) {
+        assertTrue(Nis.parser().isValid(vetor));
+        assertEquals(Nis.parser().parse(vetor).getDocument(),
+                Nis.parser(NisValidationMode.FORMAT_ONLY).parse(vetor).getDocument());
+    }
+
     @Test
     void mascaraContinuaRejeitadaNaEntrada() {
         for (NisValidationMode mode : NisValidationMode.values()) {

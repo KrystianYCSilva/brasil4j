@@ -130,15 +130,17 @@ public final class Modulus11 implements CheckDigitAlgorithm {
         if (leftWeights != null && value.length() > leftWeights.length) {
             throw new IllegalArgumentException("Base maior que a sequência de pesos.");
         }
+        // Cada parcela é reduzida módulo 11 antes da soma, o que evita transbordamento para qualquer peso aceito.
         int sum = 0;
+        long range = (long) lastWeight - firstWeight + 1;
         for (int offset = 0; offset < value.length(); offset++) {
             char character = value.charAt(value.length() - 1 - offset);
-            int weight = leftWeights == null
-                    ? firstWeight + offset % (lastWeight - firstWeight + 1)
+            long weight = leftWeights == null
+                    ? firstWeight + offset % range
                     : leftWeights[value.length() - 1 - offset];
-            sum += valueOf(character) * weight;
+            sum = (int) ((sum + (valueOf(character) % 11) * (weight % 11)) % 11);
         }
-        OptionalInt digit = Objects.requireNonNull(remainder.apply(sum % 11), "Mapeamento do resto produziu nulo.");
+        OptionalInt digit = Objects.requireNonNull(remainder.apply(sum), "Mapeamento do resto produziu nulo.");
         if (digit.isPresent() && (digit.getAsInt() < 0 || digit.getAsInt() > 9)) {
             throw new IllegalStateException("Mapeamento do resto produziu DV fora de 0 a 9.");
         }

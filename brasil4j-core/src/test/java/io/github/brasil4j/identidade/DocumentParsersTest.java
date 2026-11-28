@@ -142,9 +142,41 @@ class DocumentParsersTest {
         };
         DocumentParser<Codigo> decorado = proprio.withPolicy(documento -> true);
         assertSame(propria, assertThrows(IllegalStateException.class, () -> decorado.parseOrThrow("2")));
+        DocumentParser<Codigo> encadeado = proprio.withPolicy(documento -> true).withRule(documento -> Optional.empty())
+                .withPolicy(documento -> true, "TERCEIRA");
+        assertSame(propria, assertThrows(IllegalStateException.class, () -> encadeado.parseOrThrow("2")));
+        assertEquals("Documento inválido.", assertThrowsExactly(IllegalArgumentException.class,
+                () -> encadeado.withPolicy(documento -> false).parseOrThrow("1")).getMessage());
+        assertEquals("CPF inválido.", assertThrowsExactly(IllegalArgumentException.class,
+                () -> io.github.brasil4j.identidade.cpf.Cpf.parser().withPolicy(cpf -> true)
+                        .withPolicy(cpf -> false).parseOrThrow("01234567890")).getMessage());
         assertEquals(new Codigo("1"), decorado.parseOrThrow("1"));
         assertEquals("Documento inválido.", assertThrowsExactly(IllegalArgumentException.class,
                 () -> proprio.withPolicy(documento -> false).parseOrThrow("1")).getMessage());
+    }
+
+    @Test
+    void decoracaoEncadeadaInterpretaAOrigemUmaUnicaVez() {
+        int[] chamadas = new int[2];
+        DocumentParser<Codigo> proprio = new DocumentParser<Codigo>() {
+            @Override
+            public ValidationResult<Codigo> parse(String input) {
+                chamadas[0]++;
+                return ValidationResult.invalid(PREFIXO_ZERO);
+            }
+
+            @Override
+            public Codigo parseOrThrow(String input) {
+                chamadas[1]++;
+                throw new IllegalStateException("erro do consumidor");
+            }
+        };
+        DocumentParser<Codigo> encadeado = proprio.withPolicy(c -> true).withPolicy(c -> true).withPolicy(c -> true);
+        assertThrows(IllegalStateException.class, () -> encadeado.parseOrThrow("x"));
+        assertEquals(0, chamadas[0]);
+        assertEquals(1, chamadas[1]);
+        encadeado.parse("x");
+        assertEquals(1, chamadas[0]);
     }
 
     @Test

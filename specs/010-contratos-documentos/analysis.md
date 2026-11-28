@@ -65,5 +65,13 @@ A pedido do usuário, a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f
     - **Sugestões aplicadas:** os presets do `Modulus11` ficaram em cache como constantes imutáveis, e a conversão de DV em rejeição foi centralizada na nova regra pública `ValidationRule.checkDigits`, usada pelo builder e por `NisRules`.
     - **Sugestões não aplicadas:** estratégia interna de pesos no `Modulus11` (refatoração interna, sem ganho de contrato) e variância de `canonicalRule` (`String` é final).
     - Depois dos ajustes, `clean verify` passou em JDK 21 e JDK 8, e o japicmp segue sem incompatibilidade contra as três baselines.
-- **T053 · Coordenação.** Aberta. A 010 está sobre `009-exemplos-utilizacao` (`ad3f6e7`). O rebase sobre `main` depende da integração da 009.
+- **Validação antes do merge (2026-11-28).** A branch foi rebaseada sobre a `main` em `5405591`, onde está a 009 reescrita depois do primeiro rebase. Houve conflito só de texto no README, resolvido mantendo as linhas da 009 e da 010, e o backup ficou em `backup/010-antes-rebase-main`. O `clean verify` passou em JDK 21 e JDK 8, inclusive os exemplos novos da 009, que não foram alterados. Pareceres pedidos em modo somente leitura:
+  - **Antigravity: APROVA COM AJUSTES.** Confirmou a preservação integral das Specs 008 e 009 nos documentos compartilhados e apontou o mesmo bloqueante do Codex (item 1 abaixo).
+  - **Codex (`llm-call.ps1`, modo read): REPROVA.** Achados e tratamento:
+    1. **Bloqueante:** com duas ou mais decorações, a exceção do interpretador do consumidor se perdia. RED em `DocumentParsersTest`. **Corrigido** com Decorator achatado (`DecoratedParser`): a origem é interpretada uma vez e `parseOrThrow` delega ao da origem. Um teste confere uma única interpretação em três camadas.
+    2. **Importante:** overflow em `Modulus11` com pesos grandes. RED em `Modulus11Test.pesosGrandesNaoTransbordam`, que esperava 9 e recebia 0. **Corrigido** reduzindo cada parcela módulo 11, com equivalência congelada intacta.
+    3. **Importante:** faltavam os nove vetores C1 no modo estrutural. O teste `estruturalAceitaOsNoveVetoresC1` foi acrescentado e passou de imediato, como regressão.
+    4. **Sugestão:** o contrato de `verify` descrevia exceção para sufixo divergente. **JavaDoc e `api.md` corrigidos.**
+    5. **Sugestão:** rastreabilidade defasada. **Atualizada nesta seção.**
+- **T053 · Coordenação.** Concluída: a 010 está rebaseada sobre a `main` em `5405591`, com a 008 e a 009 integradas, sem divergência e com merge fast-forward possível.
 - **Pendência de ambiente.** Um `install` acidental na etapa 10 gravou `~/.m2/repository/io/github/brasil4j/brasil4j-core/0.2.0` com o JAR candidato. A remoção foi bloqueada pela política de ações destrutivas e aguarda decisão do usuário. Nenhum build da 010 depende desse artefato, porque todos usam o reator.

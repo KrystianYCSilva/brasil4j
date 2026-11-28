@@ -26,12 +26,14 @@ public interface CheckDigitAlgorithm {
     Optional<String> compute(String base);
 
     /**
-     * Confere se os últimos {@link #digitCount()} caracteres coincidem com o cálculo sobre a base.
+     * Confere se os últimos {@link #digitCount()} caracteres coincidem com o cálculo sobre a base. Um
+     * sufixo divergente, inclusive com caracteres não numéricos, devolve {@code false}; só a base é
+     * conferida contra o domínio do algoritmo.
      *
      * @param canonical valor completo, com os dígitos verificadores ao final
      * @return verdadeiro quando os dígitos informados coincidem
      * @throws NullPointerException se o valor for nulo
-     * @throws IllegalArgumentException se o valor não tiver base ou estiver fora do domínio
+     * @throws IllegalArgumentException se o valor não tiver base ou se a base estiver fora do domínio
      */
     default boolean verify(String canonical) {
         Objects.requireNonNull(canonical, "Valor obrigatório.");
