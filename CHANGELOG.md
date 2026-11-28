@@ -9,6 +9,7 @@
   - interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)`, cujo `ValidationResult` informa o motivo da rejeição sem lançar exceção;
   - regras componíveis (`ValidationRule`) e políticas com código (`withPolicy`);
   - `DocumentParsers.builder` para o consumidor criar os próprios documentos no mesmo padrão.
+- `Modulus11.builder().build()` recusa configuração incoerente (menos pesos fixos que DVs, valor de caractere negativo e vários DVs sem os dígitos no alfabeto). `InvalidBaseException` marca a base fora do domínio, e `ValidationRule.checkDigits` só converte essa exceção em `INVALID_FORMAT`; qualquer outra `IllegalArgumentException` do algoritmo se propaga.
 - Blocos reutilizáveis `verificacao.Modulus11` (equivalência com os cálculos anteriores conferida em 10 000 bases por documento) e `mascara.DocumentMask`.
 - Máscara de segurança em CPF (`***.345.678-**`), CNPJ (`**.ABC.345/01DE-**`) e NIS (`***3456789*`), com `*` padrão e caractere configurável, e apresentações reutilizáveis em `DocumentFormatter`. A representação textual padrão não muda.
 - NIS com validadores de DV opcionais nomeados pela fonte: `CAIXA_FGTS_V016` (fórmula publicada pela Caixa para PIS/Pasep no FGTS), `LEGACY_MOD11` (convenção de Declarações/UEM) e a guarda `NisRules.repeatedDigits()` (SIPREV RV_03). O padrão continua estrutural.

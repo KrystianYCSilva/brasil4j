@@ -64,9 +64,10 @@ public final class Modulus11 implements CheckDigitAlgorithm {
     }
 
     /**
-     * Cálculo dos dois DVs do CNPJ numérico e alfanumérico, conforme o Anexo XV da IN RFB 2.119/2022:
-     * valor ASCII menos 48, pesos de 2 a 9 da direita para a esquerda, com recomeço, e mapeamento padrão
-     * do resto. O bloqueio de quatorze zeros é uma regra do documento, não deste algoritmo.
+     * Cálculo dos dois DVs do CNPJ numérico e alfanumérico, conforme o Anexo XV da IN RFB 2.119/2022,
+     * que cobre somente o cálculo: valor ASCII menos 48, pesos de 2 a 9 da direita para a esquerda, com
+     * recomeço, e mapeamento padrão do resto. O bloqueio de quatorze zeros não vem do Anexo XV: é a
+     * política de entrada F-05 de {@code docs/fontes.md}, aplicada pelo documento e não por este algoritmo.
      *
      * @return algoritmo do CNPJ
      */
@@ -110,7 +111,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
     public Optional<String> compute(String base) {
         Objects.requireNonNull(base, "Base obrigatória.");
         if (base.isEmpty()) {
-            throw new IllegalArgumentException("Base vazia.");
+            throw new InvalidBaseException("Base vazia.");
         }
         StringBuilder value = new StringBuilder(base);
         StringBuilder computed = new StringBuilder(digits);
@@ -128,7 +129,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
 
     private OptionalInt next(CharSequence value) {
         if (leftWeights != null && value.length() > leftWeights.length) {
-            throw new IllegalArgumentException("Base maior que a sequência de pesos.");
+            throw new InvalidBaseException("Base maior que a sequência de pesos.");
         }
         // Cada parcela é reduzida módulo 11 antes da soma, o que evita transbordamento para qualquer peso aceito.
         int sum = 0;
@@ -149,13 +150,9 @@ public final class Modulus11 implements CheckDigitAlgorithm {
 
     private int valueOf(char character) {
         if (alphabet.indexOf(character) < 0) {
-            throw new IllegalArgumentException("Caractere fora do domínio do algoritmo.");
+            throw new InvalidBaseException("Caractere fora do domínio do algoritmo.");
         }
-        int value = charValue.applyAsInt(character);
-        if (value < 0) {
-            throw new IllegalArgumentException("Valor de caractere negativo.");
-        }
-        return value;
+        return charValue.applyAsInt(character);
     }
 
     /** Construtor mutável de {@link Modulus11}. Cada chamada substitui a configuração anterior da mesma etapa. */
@@ -260,12 +257,35 @@ public final class Modulus11 implements CheckDigitAlgorithm {
         }
 
         /**
-         * Cria o algoritmo imutável com a configuração atual.
+         * Cria o algoritmo imutável com a configuração atual, conferindo antes a coerência dela.
          *
          * @return algoritmo
+         * @throws IllegalArgumentException se houver menos pesos fixos que dígitos verificadores, o que
+         *         não deixaria nenhuma base aceitável, se algum caractere do alfabeto tiver valor negativo ou se houver mais de um DV
+         *         e o alfabeto não contiver os dígitos de 0 a 9, que entram na base do DV seguinte
          */
         public Modulus11 build() {
+            if (leftWeights != null && digits > leftWeights.length) {
+                throw new IllegalArgumentException("Menos pesos que dígitos verificadores.");
+            }
+            for (int index = 0; index < alphabet.length(); index++) {
+                if (charValue.applyAsInt(alphabet.charAt(index)) < 0) {
+                    throw new IllegalArgumentException("Valor de caractere negativo.");
+                }
+            }
+            if (digits > 1 && !containsAllDigits()) {
+                throw new IllegalArgumentException("Alfabeto sem os dígitos, usados pelo DV na base do seguinte.");
+            }
             return new Modulus11(this);
+        }
+
+        private boolean containsAllDigits() {
+            for (int index = 0; index < DIGITS.length(); index++) {
+                if (alphabet.indexOf(DIGITS.charAt(index)) < 0) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
