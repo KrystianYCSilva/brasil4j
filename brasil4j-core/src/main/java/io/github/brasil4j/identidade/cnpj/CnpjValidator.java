@@ -10,7 +10,11 @@ import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.ALPHANUMERIC
  * pois essa conversão preserva seus valores numéricos.
  *
  * @see <a href="https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj">Manual de cálculo do DV da Receita Federal</a>
+ * @deprecated Use o contrato injetável {@link Cnpj#parser(CnpjValidationMode)}, por exemplo
+ *             {@code Cnpj.parser(mode).isValid(input)}, que também informa o motivo da rejeição por
+ *             {@code parse(input)}. Remoção prevista para a versão 1.0.
  */
+@Deprecated
 public final class CnpjValidator {
     private CnpjValidator() {
     }
@@ -34,13 +38,6 @@ public final class CnpjValidator {
      * @throws IllegalArgumentException se o modo for nulo
      */
     public static boolean isValid(String input, CnpjValidationMode mode) {
-        return validatedCanonical(input, mode) != null;
-    }
-
-    static String validatedCanonical(String input, CnpjValidationMode mode) {
-        if (mode == null) {
-            throw new IllegalArgumentException("Modo de validação do CNPJ obrigatório.");
-        }
-        return mode.validatedCanonical(input);
+        return Cnpj.parser(mode).isValid(input);
     }
 }

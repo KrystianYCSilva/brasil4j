@@ -64,14 +64,6 @@ public final class Nis extends AbstractDocument implements SecurityMaskedDocumen
         return parser().parseOrThrow(input);
     }
 
-    static Nis parseOrNull(String input) {
-        return parser().parse(input).getDocument().orElse(null);
-    }
-
-    static boolean hasCanonicalFormat(String input) {
-        return parser().isValid(input);
-    }
-
     /**
      * Obtém explicitamente o texto integral da inscrição.
      *

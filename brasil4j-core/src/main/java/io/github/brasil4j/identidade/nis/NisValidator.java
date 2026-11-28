@@ -3,7 +3,14 @@ package io.github.brasil4j.identidade.nis;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-/** Confere a forma de uma inscrição e permite aplicar uma política do consumidor. */
+/**
+ * Confere a forma de uma inscrição e permite aplicar uma política do consumidor.
+ *
+ * @deprecated Use o contrato injetável {@link Nis#parser()}, por exemplo
+ *             {@code Nis.parser().withPolicy(policy).isValid(input)}, ou uma configuração de
+ *             {@link NisValidationMode}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class NisValidator {
     private NisValidator() {
     }
@@ -15,7 +22,7 @@ public final class NisValidator {
      * @return se a entrada tem exatamente 11 dígitos ASCII
      */
     public static boolean isValid(String input) {
-        return Nis.hasCanonicalFormat(input);
+        return Nis.parser().isValid(input);
     }
 
     /**
@@ -29,7 +36,6 @@ public final class NisValidator {
      */
     public static boolean isValid(String input, Predicate<? super Nis> policy) {
         Objects.requireNonNull(policy, "Política de validação do NIS obrigatória.");
-        Nis nis = Nis.parseOrNull(input);
-        return nis != null && policy.test(nis);
+        return Nis.parser().withPolicy(policy).isValid(input);
     }
 }

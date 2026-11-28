@@ -1,6 +1,12 @@
 package io.github.brasil4j.identidade.cnpj;
 
-/** Converte entre as duas apresentações de um CNPJ validado no modo padrão. */
+/**
+ * Converte entre as duas apresentações de um CNPJ validado no modo padrão.
+ *
+ * @deprecated Use {@code Cnpj.parse(input).applyMask()}, {@code Cnpj.parse(input).getCanonicalValue()} ou um
+ *             {@link io.github.brasil4j.identidade.DocumentFormatter}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class CnpjFormatter {
     private CnpjFormatter() {
     }

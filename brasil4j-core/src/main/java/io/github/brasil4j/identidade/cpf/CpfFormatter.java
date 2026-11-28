@@ -1,6 +1,12 @@
 package io.github.brasil4j.identidade.cpf;
 
-/** Converte entre as apresentações do CPF com verificação de formato. */
+/**
+ * Converte entre as apresentações do CPF com verificação de formato.
+ *
+ * @deprecated Use {@code Cpf.parse(input).applyMask()}, {@code Cpf.parse(input).getCanonicalValue()} ou um
+ *             {@link io.github.brasil4j.identidade.DocumentFormatter}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class CpfFormatter {
     private CpfFormatter() {
     }

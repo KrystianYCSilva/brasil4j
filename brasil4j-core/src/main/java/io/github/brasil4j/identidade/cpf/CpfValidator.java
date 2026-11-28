@@ -2,7 +2,14 @@ package io.github.brasil4j.identidade.cpf;
 
 import static io.github.brasil4j.identidade.cpf.CpfValidationMode.FORMAT_ONLY;
 
-/** Verifica o formato de um CPF e confere seus dígitos verificadores quando solicitado. */
+/**
+ * Verifica o formato de um CPF e confere seus dígitos verificadores quando solicitado.
+ *
+ * @deprecated Use o contrato injetável {@link Cpf#parser(CpfValidationMode)}, por exemplo
+ *             {@code Cpf.parser(mode).isValid(input)}, que também informa o motivo da rejeição por
+ *             {@code parse(input)}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class CpfValidator {
     private CpfValidator() {
     }
@@ -26,13 +33,6 @@ public final class CpfValidator {
      * @throws IllegalArgumentException se o modo for nulo
      */
     public static boolean isValid(String input, CpfValidationMode mode) {
-        return validatedCanonical(input, mode) != null;
-    }
-
-    static String validatedCanonical(String input, CpfValidationMode mode) {
-        if (mode == null) {
-            throw new IllegalArgumentException("Modo de validação do CPF obrigatório.");
-        }
-        return mode.validatedCanonical(input);
+        return Cpf.parser(mode).isValid(input);
     }
 }

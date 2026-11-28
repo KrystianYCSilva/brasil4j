@@ -3,7 +3,14 @@ package io.github.brasil4j.identidade.nis;
 import java.util.Objects;
 import java.util.function.Function;
 
-/** Aplica uma apresentação fornecida explicitamente pelo consumidor da inscrição. */
+/**
+ * Aplica uma apresentação fornecida explicitamente pelo consumidor da inscrição.
+ *
+ * @deprecated Aplique a função diretamente, como {@code formatter.apply(nis)}, ou use um
+ *             {@link io.github.brasil4j.identidade.DocumentFormatter}, por exemplo
+ *             {@code DocumentFormatter.secure()}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class NisFormatter {
     private NisFormatter() {
     }
