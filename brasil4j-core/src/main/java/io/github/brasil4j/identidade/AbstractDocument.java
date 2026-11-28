@@ -5,6 +5,9 @@ import java.util.Objects;
 /**
  * Implementação esqueleto de um documento identificado pela classe concreta e pelo valor canônico.
  * Destina-se a valores sem estado além do canônico. A representação textual é oculta por padrão.
+ *
+ * <p>A subclasse é responsável por validar o valor canônico antes de chamar o construtor; esta classe
+ * só recusa {@code null}.
  */
 public abstract class AbstractDocument implements Document {
     private final String canonical;

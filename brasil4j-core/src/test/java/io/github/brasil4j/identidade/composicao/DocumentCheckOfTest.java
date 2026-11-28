@@ -83,4 +83,13 @@ class DocumentCheckOfTest {
     void recusaInterpretadorNulo() {
         assertThrows(NullPointerException.class, () -> DocumentCheck.of("123456789", null));
     }
+
+    @Test
+    void regraDoInterpretadorComMotivoQueNaoEPoliticaViraRejeicaoDeValidacao() {
+        DocumentParser<Protocolo> parser = Protocolo.PARSER.withRule(documento ->
+                Optional.of(Rejection.of(RejectionReason.UNSUPPORTED_BASE, "BASE")));
+        DocumentCheckResult result = DocumentCheck.of("123.456-789", parser).evaluate();
+        assertEquals(REJECTED_BY_VALIDATION, result.getStatus());
+        assertEquals(RejectionReason.UNSUPPORTED_BASE, result.getRejection().get().getReason());
+    }
 }

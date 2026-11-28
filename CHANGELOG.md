@@ -7,12 +7,14 @@
   - `Percentual` imutável (`de`, `deFator`, `dePontosBase`), incidência genérica preservando o subtipo monetário (`aplicarSobre`, `acrescentarEm`, `descontarDe`) e cálculo por dentro (`calcularBasePorDentro`) com reversibilidade exata nos sete modos padrão;
   - `TabelaProgressiva<T>` parametrizada pelo consumidor com modos `NO_TOTAL` (reconciliado por maiores restos sobre partes fracionárias) e `POR_FAIXA`, memória auditável (`FaixaProgressiva`, `FaixaApurada`, `ApuracaoProgressiva`), parcela a deduzir exata e alíquota efetiva;
   - Kotlin: `.porCento()`, `.pontosBase()`, operadores `+`/`-`, `aplicar`, `acrescentar`, `descontar`, `basePorDentro`, `calcularReais` e DSL `tabelaProgressivaReais`.
+- Perfil de CTPS histórica do S-2200 v2.5 em Java e Kotlin, com validação estrutural, proveniência declarada e diagnósticos que ocultam número, série e UF. A vitrine inclui exemplos de registros físicos, projeções legadas e identificação digital via CPF.
 
 - Contratos públicos de documento (Spec 010):
   - `Document`, `MaskedDocument`, `SecurityMaskedDocument`, `CheckDigitDocument` e `AbstractDocument`, adotados por CPF, CNPJ e NIS;
   - interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)`, cujo `ValidationResult` informa o motivo da rejeição sem lançar exceção;
   - regras componíveis (`ValidationRule`) e políticas com código (`withPolicy`);
   - `DocumentParsers.builder` para o consumidor criar os próprios documentos no mesmo padrão.
+- `Modulus11.builder().build()` recusa configuração incoerente (menos pesos fixos que DVs, valor de caractere negativo e vários DVs sem os dígitos no alfabeto). `InvalidBaseException` marca a base fora do domínio, e `ValidationRule.checkDigits` só converte essa exceção em `INVALID_FORMAT`; qualquer outra `IllegalArgumentException` do algoritmo se propaga.
 - Blocos reutilizáveis `verificacao.Modulus11` (equivalência com os cálculos anteriores conferida em 10 000 bases por documento) e `mascara.DocumentMask`.
 - Máscara de segurança em CPF (`***.345.678-**`), CNPJ (`**.ABC.345/01DE-**`) e NIS (`***3456789*`), com `*` padrão e caractere configurável, e apresentações reutilizáveis em `DocumentFormatter`. A representação textual padrão não muda.
 - NIS com validadores de DV opcionais nomeados pela fonte: `CAIXA_FGTS_V016` (fórmula publicada pela Caixa para PIS/Pasep no FGTS), `LEGACY_MOD11` (convenção de Declarações/UEM) e a guarda `NisRules.repeatedDigits()` (SIPREV RV_03). O padrão continua estrutural.

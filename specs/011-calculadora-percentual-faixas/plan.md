@@ -32,7 +32,7 @@ Implementar a segunda entrega do contexto `financas` (`Spec 011`): `@FunctionalI
 - [x] II. DDD (II.1–II.3): invariantes encapsuladas nos próprios objetos de valor e motores matemáticos; zero tabelas legais acopladas; `financas` depende apenas do JDK (`AR-5`).
 - [x] III. TDD (III.1–III.3): ciclos red/green/refactor registrados em `analysis.md`; consumo pelos JARs empacotados em Java e Kotlin (`FinancasJarIT`).
 - [x] IV. Platform (IV.1–IV.6): Java 8 + bytecode 52, JDK 8/21, JaCoCo >= 90/85, `japicmp` contra `v0.2.0`, limiar PIT de mutação, DocLint e Dokka limpos.
-- [x] V. Provenance (V.1–V.6): convenções matemáticas registradas como `CONVENCAO_TECNICA` (`F-19` em `docs/fontes.md`), sem atribuição normativa não confirmada.
+- [x] V. Provenance (V.1–V.6): convenções matemáticas registradas como `CONVENCAO_TECNICA` (`F-21` em `docs/fontes.md`), sem atribuição normativa não confirmada.
 - [x] VII. Delivery (VII.1–VII.4): branch `feature/011-calculadora-percentual-faixas` a partir de `develop`, PR para `develop` com checks obrigatórios e `CHANGELOG.md`.
 
 ### Design Quality Gate (VI — lenses from `.context/standards/review-checklist.md`)

@@ -4,7 +4,7 @@ Biblioteca de domínio brasileiro para Java e Kotlin, com Java 8 como versão m�
 
 | Artefato | Coordenadas | API |
 | --- | --- | --- |
-| Núcleo | `io.github.brasil4j:brasil4j-core` | Objetos de valor e regras de CNPJ, CPF, NIS, geografia e finanças/moedas |
+| Núcleo | `io.github.brasil4j:brasil4j-core` | Objetos de valor e regras de CNPJ, CPF, NIS, CTPS histórica, geografia e finanças/moedas |
 | Kotlin | `io.github.brasil4j:brasil4j-kotlin` | Value classes, operadores e extensões sobre o núcleo |
 | Exemplos *(somente repositório, sem deploy)* | [brasil4j-exemplos](brasil4j-exemplos/README.md) | Suítes de teste comentadas em Java e Kotlin demonstrando o uso prático da biblioteca |
 
@@ -23,6 +23,7 @@ Execute `sh ./mvnw clean verify` ou `.\mvnw.cmd clean verify` no Windows. O buil
 9. [Módulo vitrine de exemplos de utilização](specs/009-exemplos-utilizacao/spec.md)
 10. [Contratos, polimorfismo e composição para documentos](specs/010-contratos-documentos/spec.md)
 11. [Calculadora financeira funcional, percentuais com gross-up e tabela progressiva](specs/011-calculadora-percentual-faixas/spec.md)
+14. [Conferência histórica de CTPS](specs/014-ctps-historica/spec.md)
 
 [Contexto de engenharia](.context/README.md) · [Requisitos](docs/requisitos.md) · [Arquitetura](docs/arquitetura.md) · [Constituição](.specify/memory/constitution.md) · [Fontes](docs/fontes.md) · [Descoberta do C1](docs/descoberta/c1/README.md)
 
@@ -33,6 +34,7 @@ Execute `sh ./mvnw clean verify` ou `.\mvnw.cmd clean verify` no Windows. O buil
 - [NIS em Java e Kotlin](specs/006-nis-estrutural/quickstart.md). Use `Nis.parse(campo)` em Java ou `campo.toNis()` em Kotlin para conferir os 11 dígitos ASCII e preservar zeros à esquerda. A saída padrão oculta todo o número. Por padrão o NIS confere só a forma. Os validadores de DV são opcionais e nomeados pela fonte: `NisValidationMode.CAIXA_FGTS_V016` e `LEGACY_MOD11`, mais a guarda `NisRules.repeatedDigits()`. [Fontes e alcance](docs/fontes.md).
 - [Composição de documentos em Java e Kotlin](specs/007-composicao-identidade/quickstart.md). Use `DocumentCheck` para configurar validação nativa, política adicional e apresentação opcional em listas heterogêneas de CPF, CNPJ e NIS. `DocumentCheck.of(campo, parser)` aceita também documentos do consumidor.
 - [Contratos de documento](specs/010-contratos-documentos/quickstart.md). `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)` devolvem um `DocumentParser` injetável. `parse(campo)` devolve `ValidationResult` com o motivo da rejeição, sem exceção. `withPolicy(...)` acrescenta regras do negócio. `applyMask()` devolve a máscara completa e `applySecurityMask()` a máscara de segurança (`***.345.678-**`). Os utilitários `*Validator` e `*Formatter` continuam funcionando, mas estão deprecados.
+- [CTPS histórica em Java e Kotlin](specs/014-ctps-historica/quickstart.md). Confira os campos extraídos do S-2200 v2.5 com `CtpsProfile.ESOCIAL_S2200_V2_5`. Para a CTPS Digital, confira o CPF pelo modo adequado ao seu fluxo.
 - [Código IBGE de município e UF em Java e Kotlin](specs/005-municipio-ibge-uf/quickstart.md). Consulte o prefixo e compare a UF. Use `Uf.fromName("sao paulo")` para obter a UF e consultar nome, sigla, capital, código IBGE e DDDs.
 - [Dinheiro, Moedas, Rateio e Câmbio em Java e Kotlin](specs/008-nucleo-monetario/quickstart.md). Use `Real`, `Dolar`, `Euro` ou `Dinheiro` com política explícita (`ABNT_NBR_5891`, `FINANCEIRO`, `TRUNCAMENTO`), `ratear`/`alocar` sem perda de centavos e `TaxaCambio` reversível.
 - [Calculadora Financeira, Percentuais e Tabela Progressiva em Java e Kotlin](specs/011-calculadora-percentual-faixas/quickstart.md). Use `CalculadoraFinanceira` para fórmulas intermediárias em `DECIMAL128`, `Percentual` para descontos/acréscimos conciliáveis e *gross-up* (`calcularBasePorDentro`) e `TabelaProgressiva` para apuração marginal parametrizada.

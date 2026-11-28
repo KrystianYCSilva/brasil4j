@@ -8,6 +8,8 @@ Geografia representa o código municipal do IBGE como valor estrutural e oferece
 
 Finanças representa moedas, políticas explícitas de arredondamento, valores monetários imutáveis em hierarquia selada (`Real`, `Dolar`, `Euro` e `QuantiaMonetaria`), parcelamento/alocação proporcional sem perda de centavos e taxas de câmbio exatas e involutivas. Tabelas tributárias legais e busca de cotações online pertencem aos consumidores.
 
+Trabalhista confere o grupo histórico da CTPS segundo o leiaute S-2200 v2.5. O perfil usa a tabela de UFs de Geografia. A extração dos campos e a declaração da origem cabem ao consumidor. A identificação da CTPS Digital segue o contrato do CPF.
+
 ## Módulos e pacotes
 
 | Módulo | Pacote | Responsabilidade |
@@ -22,6 +24,7 @@ Finanças representa moedas, políticas explícitas de arredondamento, valores m
 | `brasil4j-core` | `io.github.brasil4j.identidade.composicao` | Composição tipada de conferência nativa, política do consumidor e apresentação explícita (`DocumentCheck`). |
 | `brasil4j-core` | `io.github.brasil4j.geografia` | Código municipal, comparação com UF e metadados das unidades federativas. |
 | `brasil4j-core` | `io.github.brasil4j.financas` | Moedas, políticas de arredondamento, `Dinheiro` selado (`Real`, `Dolar`, `Euro`, `QuantiaMonetaria`), rateio/alocação sem perda, `TaxaCambio`, `CalculadoraFinanceira`, `Percentual` (*gross-up*) e `TabelaProgressiva`. |
+| `brasil4j-core` | `io.github.brasil4j.trabalhista.ctps` | Perfil histórico de CTPS, conferência estrutural e proveniência. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.identidade` | Value classes e extensões de documentos delegadas ao núcleo. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.geografia` | Value class e extensão de código municipal sobre o núcleo. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.financas` | Construtores fluentes, operadores aritméticos/comutativos e DSLs (`calcularReais`, `porCento`, `tabelaProgressivaReais`) sobre os tipos monetários do núcleo. |

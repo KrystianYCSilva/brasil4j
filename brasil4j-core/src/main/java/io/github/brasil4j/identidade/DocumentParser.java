@@ -23,7 +23,8 @@ public interface DocumentParser<D extends Document> {
 
     /**
      * Interpreta o texto e lança {@link IllegalArgumentException} em caso de rejeição.
-     * A mensagem é a configurada no interpretador e não contém a entrada.
+     * Nos interpretadores montados por {@link DocumentParsers#builder}, a mensagem é a configurada
+     * no construtor e não contém a entrada.
      *
      * @param input texto, possivelmente nulo
      * @return documento aceito

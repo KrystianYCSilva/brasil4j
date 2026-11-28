@@ -46,6 +46,8 @@
                     <include>cnpj-rfb-ascii.csv</include>
                     <include>nis/nis-c1.csv</include>
                     <include>nis/esocial-2.5/*.xml</include>
+                    <include>ctps/esocial-2.5/*.xml</include>
+                    <include>ctps/esocial-2.5/cases.tsv</include>
                 </includes>
             </testResource>
         </testResources>
@@ -108,7 +110,7 @@
                     <plugin>
                         <groupId>org.jetbrains.dokka</groupId>
                         <artifactId>dokka-maven-plugin</artifactId>
-                        <version>2.2.0</version>
+                        <version>2.3.0</version>
                         <configuration>
                             <documentedVisibilities><visibility>PUBLIC</visibility></documentedVisibilities>
                             <reportUndocumented>true</reportUndocumented>
