@@ -1,16 +1,56 @@
 package io.github.brasil4j.identidade.nis;
 
+import io.github.brasil4j.identidade.AbstractDocument;
+import io.github.brasil4j.identidade.DocumentParser;
+import io.github.brasil4j.identidade.DocumentParsers;
+import io.github.brasil4j.identidade.SecurityMaskedDocument;
+import io.github.brasil4j.mascara.DocumentMask;
+
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  * Inscrição estrutural de NIS, PIS, Pasep ou NIT, com igualdade pelo valor canônico.
- * A conferência abrange somente a apresentação do campo.
+ * A conferência padrão abrange somente a apresentação do campo. Validadores de DV são opcionais,
+ * por {@link #parser(NisValidationMode)} ou por {@link NisRules}.
  */
-public final class Nis {
+public final class Nis extends AbstractDocument implements SecurityMaskedDocument {
     private static final String INVALID_FORMAT = "NIS inválido.";
+    private static final DocumentMask CANONICAL = DocumentMask.of("99999999999");
+    private static final Map<NisValidationMode, DocumentParser<Nis>> PARSERS = new EnumMap<>(NisValidationMode.class);
 
-    private final String canonical;
+    static {
+        for (NisValidationMode mode : NisValidationMode.values()) {
+            PARSERS.put(mode, mode.configure(DocumentParsers.builder(Nis::new).mask(CANONICAL))
+                    .errorMessage(INVALID_FORMAT).build());
+        }
+    }
 
     private Nis(String canonical) {
-        this.canonical = canonical;
+        super(canonical);
+    }
+
+    /**
+     * Obtém o interpretador estrutural, que confere exatamente 11 dígitos ASCII, sem máscara e sem DV.
+     *
+     * @return interpretador reutilizável
+     */
+    public static DocumentParser<Nis> parser() {
+        return parser(NisValidationMode.FORMAT_ONLY);
+    }
+
+    /**
+     * Obtém o interpretador da configuração informada.
+     *
+     * @param mode configuração de conferência
+     * @return interpretador reutilizável
+     * @throws IllegalArgumentException se a configuração for nula
+     */
+    public static DocumentParser<Nis> parser(NisValidationMode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("Modo de validação do NIS obrigatório.");
+        }
+        return PARSERS.get(mode);
     }
 
     /**
@@ -21,28 +61,7 @@ public final class Nis {
      * @throws IllegalArgumentException se a entrada for nula ou tiver formato inválido
      */
     public static Nis parse(String input) {
-        Nis nis = parseOrNull(input);
-        if (nis == null) {
-            throw new IllegalArgumentException(INVALID_FORMAT);
-        }
-        return nis;
-    }
-
-    static Nis parseOrNull(String input) {
-        return hasCanonicalFormat(input) ? new Nis(input) : null;
-    }
-
-    static boolean hasCanonicalFormat(String input) {
-        if (input == null || input.length() != 11) {
-            return false;
-        }
-        for (int index = 0; index < input.length(); index++) {
-            char digit = input.charAt(index);
-            if (digit < '0' || digit > '9') {
-                return false;
-            }
-        }
-        return true;
+        return parser().parseOrThrow(input);
     }
 
     /**
@@ -50,20 +69,22 @@ public final class Nis {
      *
      * @return os 11 dígitos na ordem recebida, inclusive zeros iniciais
      */
+    @Override
     public String getCanonicalValue() {
-        return canonical;
+        return super.getCanonicalValue();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Aplica a máscara de segurança sobre os 11 dígitos, sem pontuação, ocultando os três primeiros e
+     * o último, como em {@code ***3456789*}. O NIS não tem máscara de apresentação pronta.
+     *
+     * @param maskChar caractere de ocultação, que não pode ser letra nem dígito
+     * @return a inscrição parcialmente ocultada
+     * @throws IllegalArgumentException se o caractere for letra ou dígito
+     */
     @Override
-    public boolean equals(Object other) {
-        return other instanceof Nis && canonical.equals(((Nis) other).canonical);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        return canonical.hashCode();
+    public String applySecurityMask(char maskChar) {
+        return CANONICAL.applySecure(getCanonicalValue(), 3, 1, maskChar);
     }
 
     /**

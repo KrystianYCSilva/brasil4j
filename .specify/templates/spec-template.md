@@ -1,6 +1,6 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`
+**Feature Branch**: `feature/[NNN-name]`
 
 **Created**: [DATE]
 
@@ -97,6 +97,12 @@
 
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+
+### API Consumers and Extensibility *(include if the change touches public API)*
+
+- **Who consumes it**: [Java and/or Kotlin consumers, typical use]
+- **Extension point**: [how a consumer adds their own document, rule or presentation without editing the library]
+- **Compatibility**: [additive / deprecation / breaking — breaking only in a major release]
 
 ### Key Entities *(include if feature involves data)*
 

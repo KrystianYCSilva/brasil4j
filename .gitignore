@@ -5,7 +5,7 @@ target/
 __pycache__/
 *.pyc
 
-# Configurações, instruções e histórico locais de assistentes
+# Configurações e histórico locais de assistentes (AGENTS.md, CLAUDE.md e GEMINI.md são versionados)
 /.agents/
 /.codex/
 /.claude/
@@ -15,11 +15,8 @@ __pycache__/
 /.continue/
 /.windsurf/
 /.aider.*
-/AGENTS.md
 /AGENTS.local.md
 /AGENTS.override.md
-/CLAUDE.md
-/GEMINI.md
 /.github/agents/
 /.github/copilot-instructions.md
 /.github/instructions/

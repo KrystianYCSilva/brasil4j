@@ -1,11 +1,17 @@
-# Contexto do brasil4j
+# brasil4j context index
 
-Leia a [constituição](../.specify/memory/constitution.md) primeiro. Abra só o material da tarefa.
+Read the [constitution](../.specify/memory/constitution.md) first, then open only the files the task needs. Rule IDs (`VI.4`) refer to the constitution.
 
-| Mudança | Consulta |
+| Task | Load |
 | --- | --- |
-| API, estratégia ou módulo | [JVM](standards/jvm.md) e [arquitetura](../docs/arquitetura.md) |
-| Testes, documentação, revisão | [Qualidade](standards/qualidade.md) |
-| Regra de CNPJ/CPF | [Fontes](../docs/fontes.md) e a spec em `specs/` |
+| Plan or review any change | [review-checklist](standards/review-checklist.md) |
+| Design classes, contracts, refactors | [design-quality](standards/design-quality.md), [design-patterns](patterns/design-patterns.md) |
+| Change public Java API | [java-library-api](standards/java-library-api.md) |
+| Change the Kotlin adapter | [kotlin-library-api](standards/kotlin-library-api.md) |
+| Add a package, module or dependency | [architecture](patterns/architecture.md), [docs/arquitetura.md](../docs/arquitetura.md) |
+| Write or review tests | [testing](standards/testing.md) |
+| Branch, PR, release, CI | [git-flow](workflows/git-flow.md) |
+| Ask another LLM for a review | [llm-review](workflows/llm-review.md) |
+| Add a Brazilian rule or vector | [docs/fontes.md](../docs/fontes.md) and the spec in `specs/` |
 
-Use os comandos Spec Kit da integração instalada para especificar, planejar, derivar tarefas e analisar. Emendas usam o comando de constituição. Consulte os guias globais em `~/.agents` sob demanda.
+Delivery workflow: Spec Kit (`speckit-specify` → `clarify` → `plan` → `tasks` → `analyze` → `implement`). Global guides in `~/.agents` are optional and language-agnostic; this folder is authoritative for brasil4j.

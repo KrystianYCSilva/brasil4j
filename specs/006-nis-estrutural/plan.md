@@ -29,7 +29,7 @@ Adicionar um valor imutável de inscrição estrutural em Java e uma adaptação
 | IV · Plataforma | Reutilizar as verificações do reator. | Planejados `clean verify` em JDK 8 e 21, bytecode 52, JaCoCo ≥90% linhas e ≥85% branches, DocLint nos dois JDKs, Dokka no JDK 21 e japicmp nos dois artefatos. |
 | V · Proveniência | Matriz C1, leiautes e pareceres identificados. | Vetores sintéticos rastreados. Registrar autoridade, versão e evidência em `docs/fontes.md` junto à entrega. Forma avaliada antes de qualquer transformação e saída padrão sem dígitos. |
 
-O desenho segue os padrões de [JVM](../../.context/standards/jvm.md) e [qualidade](../../.context/standards/qualidade.md). Nenhuma exceção à constituição foi identificada.
+O desenho segue os padrões de [JVM](../../.context/standards/design-quality.md) e [qualidade](../../.context/standards/testing.md). Nenhuma exceção à constituição foi identificada.
 
 ## Project Structure
 

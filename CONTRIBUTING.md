@@ -8,10 +8,16 @@ Leia a [constituição](.specify/memory/constitution.md) e use o [índice de eng
 2. Use o Spec Kit para manter spec, plano, tarefas e análise alinhados. Atualize o contrato e o quickstart se a mudança afetar o consumidor.
 3. Para regras brasileiras, registre autoridade, revisão e vetor em [`docs/fontes.md`](docs/fontes.md). Use exemplos oficiais ou dados sintéticos conferidos.
 
+## Fluxo de branches
+
+O projeto usa gitflow. Crie `feature/NNN-nome` a partir de `develop` e abra o PR para `develop`. Releases saem de `release/X.Y.Z` para `main`, com tag `vX.Y.Z`. Nada entra em `main` ou `develop` sem PR e sem todos os checks obrigatórios verdes. [Git flow](.context/workflows/git-flow.md)
+
+Antes de abrir o PR, revise a mudança com as lentes do [checklist de revisão](.context/standards/review-checklist.md) e peça uma revisão independente a outro modelo. [Revisão por LLM](.context/workflows/llm-review.md)
+
 ## Implemente e teste
 
-- Mantenha as regras e invariantes no núcleo Java, compatível com Java 8. O módulo Kotlin delega ao núcleo e oferece uma API idiomática. [Padrões JVM](.context/standards/jvm.md)
-- Escreva primeiro um teste que falhe pelo comportamento esperado, aplique a menor correção e refatore com a suíte verde. Cubra entradas inválidas, fronteiras, modos e consumo pelo JAR quando o contrato mudar. [Padrões de qualidade](.context/standards/qualidade.md)
+- Mantenha as regras e invariantes no núcleo Java, compatível com Java 8. O módulo Kotlin delega ao núcleo e oferece uma API idiomática. [Padrões JVM](.context/standards/design-quality.md)
+- Escreva primeiro um teste que falhe pelo comportamento esperado, aplique a menor correção e refatore com a suíte verde. Cubra entradas inválidas, fronteiras, modos e consumo pelo JAR quando o contrato mudar. [Padrões de qualidade](.context/standards/testing.md)
 - Documente APIs públicas em JavaDoc ou KDoc. Explique valores padrão, retorno, falhas e limites. Use dados sintéticos nos exemplos e mantenha credenciais em variáveis de ambiente.
 
 ## Verifique antes de enviar

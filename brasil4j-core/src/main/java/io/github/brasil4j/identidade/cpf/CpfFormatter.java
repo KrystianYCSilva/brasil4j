@@ -1,13 +1,13 @@
 package io.github.brasil4j.identidade.cpf;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-/** Converte entre as apresentações do CPF com verificação de formato. */
+/**
+ * Converte entre as apresentações do CPF com verificação de formato.
+ *
+ * @deprecated Use {@code Cpf.parse(input).applyMask()}, {@code Cpf.parse(input).getCanonicalValue()} ou um
+ *             {@link io.github.brasil4j.identidade.DocumentFormatter}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class CpfFormatter {
-    private static final Pattern CANONICAL = Pattern.compile("[0-9]{11}");
-    private static final Pattern MASKED = Pattern.compile("([0-9]{3})\\.([0-9]{3})\\.([0-9]{3})-([0-9]{2})");
-
     private CpfFormatter() {
     }
 
@@ -31,13 +31,5 @@ public final class CpfFormatter {
      */
     public static String unformat(String input) {
         return Cpf.parse(input).getCanonicalValue();
-    }
-
-    static String canonicalize(String input) {
-        if (input == null || CANONICAL.matcher(input).matches()) {
-            return input;
-        }
-        Matcher match = MASKED.matcher(input);
-        return match.matches() ? match.group(1) + match.group(2) + match.group(3) + match.group(4) : null;
     }
 }

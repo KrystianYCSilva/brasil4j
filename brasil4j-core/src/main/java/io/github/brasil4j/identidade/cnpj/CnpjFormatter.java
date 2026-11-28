@@ -1,14 +1,13 @@
 package io.github.brasil4j.identidade.cnpj;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-/** Converte entre as duas apresentações de um CNPJ validado no modo padrão. */
+/**
+ * Converte entre as duas apresentações de um CNPJ validado no modo padrão.
+ *
+ * @deprecated Use {@code Cnpj.parse(input).applyMask()}, {@code Cnpj.parse(input).getCanonicalValue()} ou um
+ *             {@link io.github.brasil4j.identidade.DocumentFormatter}. Remoção prevista para a versão 1.0.
+ */
+@Deprecated
 public final class CnpjFormatter {
-    private static final Pattern CANONICAL = Pattern.compile("[A-Z0-9]{12}[0-9]{2}");
-    private static final Pattern MASKED =
-            Pattern.compile("([A-Z0-9]{2})\\.([A-Z0-9]{3})\\.([A-Z0-9]{3})/([A-Z0-9]{4})-([0-9]{2})");
-
     private CnpjFormatter() {
     }
 
@@ -32,15 +31,5 @@ public final class CnpjFormatter {
      */
     public static String unformat(String input) {
         return Cnpj.parse(input).getCanonicalValue();
-    }
-
-    static String canonicalize(String input) {
-        if (input == null || CANONICAL.matcher(input).matches()) {
-            return input;
-        }
-        Matcher match = MASKED.matcher(input);
-        return match.matches()
-                ? match.group(1) + match.group(2) + match.group(3) + match.group(4) + match.group(5)
-                : null;
     }
 }
