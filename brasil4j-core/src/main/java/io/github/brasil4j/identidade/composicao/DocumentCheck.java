@@ -123,16 +123,17 @@ public final class DocumentCheck<T> {
      * @throws NullPointerException se o formatador produzir nulo
      */
     public DocumentCheckResult evaluate() {
-        ValidationResult<T> result = parser.apply(input);
-        if (!result.isValid()) {
-            Rejection rejection = result.getRejection().get();
-            DocumentCheckResult.Status status = rejection.getReason() == RejectionReason.POLICY
-                    ? DocumentCheckResult.Status.REJECTED_BY_POLICY
-                    : DocumentCheckResult.Status.REJECTED_BY_VALIDATION;
-            return new DocumentCheckResult(status, null, rejection);
-        }
-        T document = result.getDocument().get();
+        return parser.apply(input).fold(this::evaluateDocument, DocumentCheck::rejected);
+    }
 
+    private static DocumentCheckResult rejected(Rejection rejection) {
+        DocumentCheckResult.Status status = rejection.getReason() == RejectionReason.POLICY
+                ? DocumentCheckResult.Status.REJECTED_BY_POLICY
+                : DocumentCheckResult.Status.REJECTED_BY_VALIDATION;
+        return new DocumentCheckResult(status, null, rejection);
+    }
+
+    private DocumentCheckResult evaluateDocument(T document) {
         if (policy != null && !policy.test(document)) {
             return new DocumentCheckResult(DocumentCheckResult.Status.REJECTED_BY_POLICY, null, POLICY);
         }

@@ -12,7 +12,7 @@
 | `Rejection` | Motivo obrigatório e código simbólico opcional, não vazio. Não contém entrada, canônico nem saída. | Produzida por regras e interpretadores |
 | `ValidationResult<D>` | Exatamente um estado. `Valid` tem documento não nulo; `Invalid` tem rejeição não nula. | Saída de `DocumentParser` |
 | `ValidationRule<T>` | Função pura que, para um valor, devolve uma rejeição ou nada. | Compõe-se por `and` |
-| `DocumentParser<D>` | Nunca lança exceção para entrada inválida. É sem estado e reutilizável. | Construído por `DocumentParsers.Builder` ou implementado pelo consumidor |
+| `DocumentParser<D>` | Devolve uma rejeição para entrada inválida. Pode propagar `IllegalStateException` de um algoritmo de DV do consumidor com defeito de configuração (objeto em estado inadequado). O `Modulus11` confere a configuração no `build()` e não a lança no cálculo. É sem estado e reutilizável. | Construído por `DocumentParsers.Builder` ou implementado pelo consumidor |
 | `CheckDigitAlgorithm` | `digitCount ≥ 1`. `compute` é determinístico e rejeita nulo, comprimento ou domínio inválidos. | Usado pelo builder e por regras |
 | `DocumentMask` | Padrão com pelo menos um slot. O comprimento canônico é o número de slots. | Usado pelo builder e pelos documentos mascarados |
 

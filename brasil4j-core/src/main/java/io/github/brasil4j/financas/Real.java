@@ -1,6 +1,7 @@
 package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ public final class Real extends Dinheiro implements Comparable<Real> {
 
     /** Zero reais ({@code BRL 0.00}) com política {@link MetodoArredondamento#ABNT_NBR_5891}. */
     public static final Real ZERO =
-            new Real(BigDecimal.ZERO.setScale(ESCALA), MetodoArredondamento.ABNT_NBR_5891);
+            new Real(BigDecimal.ZERO.setScale(ESCALA, RoundingMode.UNNECESSARY), MetodoArredondamento.ABNT_NBR_5891);
 
     Real(BigDecimal valorEscalado, MetodoArredondamento arredondamento) {
         super((MoedaPadrao) Moeda.BRL, valorEscalado, arredondamento);

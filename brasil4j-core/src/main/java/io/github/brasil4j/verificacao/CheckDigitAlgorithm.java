@@ -5,9 +5,9 @@ import java.util.Optional;
 
 /**
  * Estratégia de cálculo de dígitos verificadores, independente do documento.
- * Implementações recusam explicitamente entradas fora do domínio, sem produzir DV inválido, com
- * {@link InvalidBaseException}. Qualquer outra {@link IllegalArgumentException} é tratada como defeito
- * do algoritmo e não é convertida em rejeição de formato pelas regras da biblioteca.
+ * Use {@link InvalidBaseException} para sinalizar entradas fora do domínio. As regras da biblioteca
+ * tratam qualquer {@link IllegalArgumentException} (argumento inadequado) como esse caso.
+ * Use {@link IllegalStateException} (objeto em estado inadequado) para defeitos de configuração do algoritmo.
  */
 public interface CheckDigitAlgorithm {
     /**
@@ -23,7 +23,8 @@ public interface CheckDigitAlgorithm {
      * @param base caracteres sem os dígitos verificadores
      * @return dígitos calculados, ou vazio quando a base não admite DV válido
      * @throws NullPointerException se a base for nula
-     * @throws InvalidBaseException se a base estiver fora do domínio do algoritmo
+     * @throws IllegalArgumentException se a base estiver fora do domínio do algoritmo, de preferência
+     *         com {@link InvalidBaseException}
      */
     Optional<String> compute(String base);
 
@@ -35,7 +36,7 @@ public interface CheckDigitAlgorithm {
      * @param canonical valor completo, com os dígitos verificadores ao final
      * @return verdadeiro quando os dígitos informados coincidem
      * @throws NullPointerException se o valor for nulo
-     * @throws InvalidBaseException se o valor não tiver base ou se a base estiver fora do domínio
+     * @throws IllegalArgumentException se o valor não tiver base ou se a base estiver fora do domínio
      */
     default boolean verify(String canonical) {
         Objects.requireNonNull(canonical, "Valor obrigatório.");

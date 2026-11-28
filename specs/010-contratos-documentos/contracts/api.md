@@ -98,6 +98,8 @@ public interface DocumentFormatter<D extends Document> extends Function<D, Strin
 
 O builder rejeita nulos com NPE e rejeita configurar tanto `mask` quanto `normalizer`. O parser construído por ele trata `null` e `""` como `MISSING`. Uma normalização vazia vira `INVALID_FORMAT`. As regras canônicas rodam em ordem, seguidas do DV (`INVALID_CHECK_DIGITS`), da fábrica do documento e das regras de documento. Os interpretadores nativos sobrescrevem a mensagem por `errorMessage`. Um `parseOrThrow` de interpretador nativo usa essa mensagem por meio de uma implementação interna que sobrescreve o método default.
 
+`ValidationRule.checkDigits` converte `InvalidBaseException` e qualquer outra `IllegalArgumentException` (argumento inadequado) em `INVALID_FORMAT`. Outras exceções propagam-se. Algoritmos devem usar `InvalidBaseException` para recusar uma base fora do domínio e `IllegalStateException` (objeto em estado inadequado) para defeitos de configuração.
+
 `withPolicy(policy)` rejeita com `Rejection.of(POLICY)` e `withPolicy(policy, code)` com `Rejection.of(POLICY, code)`. As decorações preservam a mensagem de erro do interpretador de origem. As decorações são achatadas: a origem não decorada é interpretada uma única vez por chamada, e as regras rodam na ordem em que foram acrescentadas. Em `parseOrThrow`, a rejeição da origem mantém a exceção dela, inclusive a de um interpretador do consumidor, em qualquer profundidade. A rejeição por regra usa a mensagem da origem configurada, ou "Documento inválido." para interpretadores do consumidor. `redacted` exige `visiblePrefix ≥ 0` e `visibleSuffix ≥ 0`. Quando a soma é maior ou igual ao comprimento do canônico, oculta tudo.
 
 ## `io.github.brasil4j.verificacao`
@@ -116,7 +118,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
         public Builder weightsFromRight(int first, int last);  // cíclicos da direita: first..last, recomeça em first
         public Builder weightsFromLeft(int... weights);         // pesos fixos da esquerda para a direita
         public Builder remainder(IntFunction<OptionalInt> mapping); // resto → DV; vazio = base sem DV válido
-        public Builder digits(int count);                       // padrão 1; cada DV entra na base do seguinte
+        public Builder digits(int count);                       // padrão 1; cada DV intermediário entra na base do seguinte
         public Modulus11 build();
     }
     public static Modulus11 cpf();
@@ -126,7 +128,9 @@ public final class Modulus11 implements CheckDigitAlgorithm {
 }
 ```
 
-O mapeamento de resto padrão é `r < 2 → 0, senão 11 − r`. Os pesos padrão são `weightsFromRight(2, 9)`. `weightsFromLeft` aplica pesos fixos; quando a base é maior que a lista de pesos, a configuração é inválida (IAE). `compute` e `verify` lançam `NullPointerException` para nulo e `IllegalArgumentException` para base vazia, maior que os pesos fixos ou com caractere fora do alfabeto. Em `verify`, só a base é conferida contra o domínio: um sufixo divergente, inclusive não numérico, devolve `false`. Cada parcela é reduzida módulo 11, o que evita transbordamento para qualquer peso aceito. Os presets são instâncias imutáveis compartilhadas.
+O mapeamento de resto padrão é `r < 2 → 0, senão 11 − r`. Os pesos padrão são `weightsFromRight(2, 9)`. `compute` e `verify` lançam `NullPointerException` para nulo e `InvalidBaseException` para base vazia, maior que os pesos fixos ou com caractere fora do alfabeto. Em `verify`, só a base é conferida contra o domínio. Um sufixo divergente, inclusive não numérico, devolve `false`. Cada parcela é reduzida módulo 11, o que evita transbordamento para qualquer peso aceito. Os presets são instâncias imutáveis compartilhadas.
+
+O alfabeto pode conter apenas um subconjunto dos dígitos decimais. O `build()` avalia o mapeamento do resto para os restos de 0 a 10 (a função deve ser pura e determinística) e lança `IllegalArgumentException` se algum resultado for nulo ou fora de 0 a 9 e, com vários DVs, se algum dígito produzido não pertencer ao alfabeto, pois os DVs anteriores ao último voltam à base e o mesmo mapeamento gera todos. Com um único DV, o dígito pode estar fora do alfabeto da base. Como o build garante o mapeamento, o cálculo não lança `IllegalStateException` por esse motivo.
 
 - `cpf()`: `weightsFromRight(2, 11)` com 2 DVs. O peso não recomeça, porque a base tem no máximo 10 caracteres.
 - `cnpj()`: alfabeto `0-9A-Z` com ASCII − 48, `weightsFromRight(2, 9)` e 2 DVs.

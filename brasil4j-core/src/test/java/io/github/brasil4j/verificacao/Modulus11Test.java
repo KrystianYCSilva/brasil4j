@@ -87,12 +87,28 @@ class Modulus11Test {
     }
 
     @Test
-    void recusaValoresDeCaractereOuDvForaDoIntervalo() {
+    void recusaValorNegativoDeCaractereNoBuild() {
         assertThrows(IllegalArgumentException.class, () -> Modulus11.builder().charValue(c -> -1, "0").build());
-        Modulus11 dvLongo = Modulus11.builder().remainder(resto -> OptionalInt.of(10)).build();
-        assertThrows(IllegalStateException.class, () -> dvLongo.compute("1"));
-        Modulus11 mapeamentoNulo = Modulus11.builder().remainder(resto -> null).build();
-        assertThrows(NullPointerException.class, () -> mapeamentoNulo.compute("1"));
+    }
+
+    @Test
+    void recusaNoBuildMapeamentoQueProduzDigitoForaDeZeroANove() {
+        Modulus11.Builder dez = Modulus11.builder().remainder(resto -> OptionalInt.of(10));
+        assertThrows(IllegalArgumentException.class, dez::build);
+        // Só o resto 10 sai do intervalo: o build confere todos os restos de 0 a 10, não só os usados.
+        Modulus11.Builder soNoUltimoResto = Modulus11.builder()
+                .remainder(resto -> OptionalInt.of(resto == 10 ? 10 : 0));
+        assertThrows(IllegalArgumentException.class, soNoUltimoResto::build);
+        Modulus11.Builder negativo = Modulus11.builder().remainder(resto -> OptionalInt.of(resto == 0 ? -1 : 0));
+        assertThrows(IllegalArgumentException.class, negativo::build);
+    }
+
+    @Test
+    void recusaNoBuildMapeamentoQueDevolveNulo() {
+        Modulus11.Builder nulo = Modulus11.builder().remainder(resto -> null);
+        assertThrows(IllegalArgumentException.class, nulo::build);
+        Modulus11.Builder nuloSoNoUltimoResto = Modulus11.builder().remainder(resto -> resto == 10 ? null : OptionalInt.empty());
+        assertThrows(IllegalArgumentException.class, nuloSoNoUltimoResto::build);
     }
 
     @Test
@@ -128,9 +144,52 @@ class Modulus11Test {
     }
 
     @Test
-    void construcaoRecusaAlfabetoSemOsDigitosQuandoHaMaisDeUmDv() {
-        // O primeiro DV calculado entra na base do segundo e precisa pertencer ao alfabeto.
-        assertThrows(IllegalArgumentException.class, () -> Modulus11.builder().charValue(c -> c - 'A', "AB").digits(2).build());
-        assertEquals(1, Modulus11.builder().charValue(c -> c - 'A', "AB").build().digitCount());
+    void aceitaDoisDvsComAlfabetoReduzidoQuandoOMapeamentoECompativel() {
+        Modulus11 algoritmo = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .remainder(resto -> OptionalInt.of(resto % 2))
+                .digits(2)
+                .build();
+
+        assertEquals(Optional.of("01"), algoritmo.compute("1"));
+        assertTrue(algoritmo.verify("101"));
+    }
+
+    @Test
+    void umUnicoDvPodeEstarForaDoAlfabetoDaBase() {
+        Modulus11 algoritmo = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .remainder(resto -> OptionalInt.of(9))
+                .build();
+
+        assertEquals(Optional.of("9"), algoritmo.compute("1"));
+        assertTrue(algoritmo.verify("19"));
+        assertThrows(InvalidBaseException.class, () -> algoritmo.compute("A"));
+    }
+
+    @Test
+    void recusaNoBuildVariosDvsQuandoOMapeamentoProduzDigitoForaDoAlfabeto() {
+        // O mesmo mapeamento gera todos os DVs e todos, menos o último, voltam à base: o alfabeto precisa conter
+        // todo dígito que o mapeamento pode produzir, mesmo que o último DV não volte à base.
+        Modulus11.Builder semNove = Modulus11.builder().charValue(c -> c - '0', "012345678").digits(2);
+        assertThrows(IllegalArgumentException.class, semNove::build);
+        Modulus11.Builder soNoUltimoDv = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .remainder(resto -> OptionalInt.of(resto == 2 ? 0 : 9))
+                .digits(2);
+        assertThrows(IllegalArgumentException.class, soNoUltimoDv::build);
+    }
+
+    @Test
+    void mapeamentoVazioNaoExigeDigitoNoAlfabeto() {
+        Modulus11 algoritmo = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .weightsFromRight(1, 1)
+                .remainder(resto -> resto == 1 ? OptionalInt.empty() : OptionalInt.of(0))
+                .digits(2)
+                .build();
+
+        // Base "1" com peso 1: resto 1, sem DV. Vazio não precisa pertencer ao alfabeto.
+        assertEquals(Optional.empty(), algoritmo.compute("1"));
     }
 }

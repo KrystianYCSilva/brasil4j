@@ -66,10 +66,10 @@ class ValidationRuleTest {
 
             @Override
             public Optional<String> compute(String base) {
-                throw new IllegalArgumentException("configuração incoerente");
+                throw new IllegalStateException("configuração incoerente");
             }
         };
-        IllegalArgumentException erro = assertThrows(IllegalArgumentException.class,
+        IllegalStateException erro = assertThrows(IllegalStateException.class,
                 () -> ValidationRule.checkDigits(defeituoso).check("123"));
         assertEquals("configuração incoerente", erro.getMessage());
     }
@@ -99,5 +99,28 @@ class ValidationRuleTest {
         };
         assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)),
                 ValidationRule.checkDigits(proprio).check("123"));
+    }
+
+    @Test
+    void algoritmoLegadoPodeSinalizarBaseForaDoDominioComIllegalArgumentException() {
+        CheckDigitAlgorithm legado = new CheckDigitAlgorithm() {
+            @Override
+            public int digitCount() {
+                return 1;
+            }
+
+            @Override
+            public Optional<String> compute(String base) {
+                if (!base.equals("12")) {
+                    throw new IllegalArgumentException("base recusada");
+                }
+                return Optional.of("3");
+            }
+        };
+        ValidationRule<String> regra = ValidationRule.checkDigits(legado);
+
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_FORMAT)), regra.check("1A3"));
+        assertEquals(Optional.of(Rejection.of(RejectionReason.INVALID_CHECK_DIGITS)), regra.check("124"));
+        assertEquals(Optional.empty(), regra.check("123"));
     }
 }

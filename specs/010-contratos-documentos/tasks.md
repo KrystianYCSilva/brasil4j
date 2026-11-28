@@ -159,3 +159,10 @@
 ## Estratégia
 
 O MVP é a Fase 2 mais as US2 e US1: contratos, builder e documento do consumidor. A US3 e a US4 completam a entrega. Cada etapa deixa o reator verde e compatível.
+
+## Correção para a v0.3.0
+
+- [X] T055 Reproduzir em Java 8 a rejeição de alfabetos reduzidos com dois DVs e a propagação de `IllegalArgumentException` de algoritmo legado.
+- [X] T056 Distinguir DV intermediário incompatível de base inválida, preservar o DV final fora do alfabeto e restaurar `INVALID_FORMAT` para a exceção legada. Confirmar o GREEN dos testes focados.
+- [X] T057 Revisar com Claude, atualizar o contrato, o modelo e o changelog e preservar as entradas financeiras já integradas.
+- [X] T058 Executar o Verify local em JDK 8 e 21, conferir bytecode, compatibilidade e mutação e registrar a evidência na análise.

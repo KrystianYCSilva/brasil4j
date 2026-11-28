@@ -5,7 +5,6 @@ import io.github.brasil4j.identidade.cnpj.CnpjValidationMode;
 import io.github.brasil4j.identidade.cpf.Cpf;
 import io.github.brasil4j.identidade.cpf.CpfValidationMode;
 import io.github.brasil4j.identidade.nis.Nis;
-import io.github.brasil4j.identidade.nis.NisValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,19 +35,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+// Exercita também as fachadas legadas enquanto elas fizerem parte da API.
+@SuppressWarnings("deprecation")
 class DocumentCheckJarIT {
     @Test
     void carregaOsTiposDeComposicaoDoJarDoNucleo() throws IOException, URISyntaxException {
         assertOrigemNoNucleo(DocumentCheck.class);
         assertOrigemNoNucleo(DocumentCheckResult.class);
-        assertOrigemNoNucleo(NisValidator.class);
+        assertOrigemNoNucleo(io.github.brasil4j.identidade.nis.NisValidator.class);
     }
 
     @Test
     void percorreListaMistaEConservaOResultadoDeCadaCampo() {
         String campo = "01234567898";
         Predicate<Nis> politicaDoImportador = nis -> nis.getCanonicalValue().startsWith("00");
-        assertFalse(NisValidator.isValid(campo, politicaDoImportador));
+        assertFalse(io.github.brasil4j.identidade.nis.NisValidator.isValid(campo, politicaDoImportador));
 
         List<DocumentCheck<?>> itens = Arrays.asList(
                 DocumentCheck.cpf(campo, CpfValidationMode.FORMAT_ONLY).withFormatter(Cpf::applyMask),
@@ -101,7 +102,8 @@ class DocumentCheckJarIT {
             return nis.getCanonicalValue().startsWith("00");
         };
         List<String> esperados = esperado == REJECTED_BY_VALIDATION ? emptyList() : singletonList(entrada);
-        assertEquals(esperado == ACCEPTED, NisValidator.isValid(entrada, politica));
+        assertEquals(esperado == ACCEPTED,
+                io.github.brasil4j.identidade.nis.NisValidator.isValid(entrada, politica));
         assertEquals(esperados, conferidos);
         conferidos.clear();
 

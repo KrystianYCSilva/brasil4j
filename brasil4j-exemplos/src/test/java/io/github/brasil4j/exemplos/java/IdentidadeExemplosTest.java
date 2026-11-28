@@ -1,19 +1,15 @@
 package io.github.brasil4j.exemplos.java;
 
+import io.github.brasil4j.identidade.DocumentFormatter;
+import io.github.brasil4j.identidade.DocumentParser;
 import io.github.brasil4j.identidade.cnpj.Cnpj;
-import io.github.brasil4j.identidade.cnpj.CnpjFormatter;
 import io.github.brasil4j.identidade.cnpj.CnpjType;
 import io.github.brasil4j.identidade.cnpj.CnpjValidationMode;
-import io.github.brasil4j.identidade.cnpj.CnpjValidator;
 import io.github.brasil4j.identidade.composicao.DocumentCheck;
 import io.github.brasil4j.identidade.composicao.DocumentCheckResult;
 import io.github.brasil4j.identidade.cpf.Cpf;
-import io.github.brasil4j.identidade.cpf.CpfFormatter;
 import io.github.brasil4j.identidade.cpf.CpfValidationMode;
-import io.github.brasil4j.identidade.cpf.CpfValidator;
 import io.github.brasil4j.identidade.nis.Nis;
-import io.github.brasil4j.identidade.nis.NisFormatter;
-import io.github.brasil4j.identidade.nis.NisValidator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -61,20 +57,20 @@ class IdentidadeExemplosTest {
         assertEquals("35", cnpjAlfanumerico.getCheckDigits());
         assertEquals(CnpjType.ALPHANUMERIC, cnpjAlfanumerico.getType());
 
-        // 3. CnpjValidator trata null com segurança (false) e permite restringir sistemas legados a NUMERIC:
-        assertFalse(CnpjValidator.isValid(null));
-        assertTrue(CnpjValidator.isValid("12.ABC.345/01DE-35"));
-        assertTrue(CnpjValidator.isValid("11.222.333/0001-81", CnpjValidationMode.NUMERIC));
-        assertFalse(CnpjValidator.isValid("12.ABC.345/01DE-35", CnpjValidationMode.NUMERIC));
+        // 3. O interpretador trata null com segurança (false) e permite restringir sistemas legados a NUMERIC:
+        assertFalse(Cnpj.parser().isValid(null));
+        assertTrue(Cnpj.parser().isValid("12.ABC.345/01DE-35"));
+        assertTrue(Cnpj.parser(CnpjValidationMode.NUMERIC).isValid("11.222.333/0001-81"));
+        assertFalse(Cnpj.parser(CnpjValidationMode.NUMERIC).isValid("12.ABC.345/01DE-35"));
 
         // 4. Modo FORMAT_ONLY confere estrutura/apresentação sem validar o dígito verificador:
         Cnpj apenasFormato = Cnpj.parse("12ABC34501DE99", CnpjValidationMode.FORMAT_ONLY);
         assertEquals("12.ABC.345/01DE-99", apenasFormato.applyMask());
         assertThrows(IllegalArgumentException.class, () -> Cnpj.parse("12ABC34501DE99"));
 
-        // 5. Utilitário estático para formatar/desformatar texto diretamente (exige DV válido no modo padrão):
-        assertEquals("12.ABC.345/01DE-35", CnpjFormatter.format("12ABC34501DE35"));
-        assertEquals("12ABC34501DE35", CnpjFormatter.unformat("12.ABC.345/01DE-35"));
+        // 5. Apresentação e valor canônico disponíveis no próprio documento:
+        assertEquals("12.ABC.345/01DE-35", Cnpj.parse("12ABC34501DE35").applyMask());
+        assertEquals("12ABC34501DE35", Cnpj.parse("12.ABC.345/01DE-35").getCanonicalValue());
     }
 
     @Test
@@ -107,14 +103,14 @@ class IdentidadeExemplosTest {
     }
 
     @Test
-    @DisplayName("CPF: modo padrão de formato, conferência opcional de DV, zeros à esquerda e CpfFormatter")
+    @DisplayName("CPF: modo padrão de formato, conferência opcional de DV, zeros à esquerda e máscara")
     void exemploCpfModosZerosAEsquerdaEFormatacao() {
         // 1. Por padrão (FORMAT_ONLY), Cpf.parse valida tamanho/apresentação sem descartar registros por DV:
         Cpf cpfComDvDivergente = Cpf.parse("280.012.389-39");
         assertEquals("28001238939", cpfComDvDivergente.getCanonicalValue());
         assertFalse(cpfComDvDivergente.hasValidCheckDigits());
-        assertTrue(CpfValidator.isValid("280.012.389-39")); // FORMAT_ONLY padrão
-        assertFalse(CpfValidator.isValid(null));
+        assertTrue(Cpf.parser().isValid("280.012.389-39")); // FORMAT_ONLY padrão
+        assertFalse(Cpf.parser().isValid(null));
 
         // 2. Para exigir conferência matemática pelo módulo 11 na entrada, use CpfValidationMode.NUMERIC:
         Cpf cpfValidoMatematicamente = Cpf.parse("28001238938", CpfValidationMode.NUMERIC);
@@ -122,13 +118,13 @@ class IdentidadeExemplosTest {
         assertEquals("280012389", cpfValidoMatematicamente.getBase());
         assertEquals("38", cpfValidoMatematicamente.getCheckDigits());
         assertEquals("280.012.389-38", cpfValidoMatematicamente.applyMask());
-        assertFalse(CpfValidator.isValid("280.012.389-39", CpfValidationMode.NUMERIC));
+        assertFalse(Cpf.parser(CpfValidationMode.NUMERIC).isValid("280.012.389-39"));
 
         // 3. Preservação integral de zeros à esquerda e formatação/desformatação direta:
         Cpf cpfComZerosIniciais = Cpf.parse("000.123.456-01", CpfValidationMode.NUMERIC);
         assertEquals("00012345601", cpfComZerosIniciais.getCanonicalValue());
-        assertEquals("000.123.456-01", CpfFormatter.format("00012345601"));
-        assertEquals("00012345601", CpfFormatter.unformat("000.123.456-01"));
+        assertEquals("000.123.456-01", Cpf.parse("00012345601").applyMask());
+        assertEquals("00012345601", Cpf.parse("000.123.456-01").getCanonicalValue());
     }
 
     @Test
@@ -162,10 +158,10 @@ class IdentidadeExemplosTest {
     @DisplayName("NIS/PIS/Pasep/NIT: escopo estritamente estrutural, política módulo 11 do consumidor e formatação")
     void exemploNisFolhaDePagamentoComPoliticasEFormatadores() {
         // 1. Por contrato, Nis valida APENAS a estrutura de 11 dígitos ASCII (sem conferir dígito verificador por padrão):
-        assertFalse(NisValidator.isValid(null));
-        assertTrue(NisValidator.isValid("00000000280"));
-        assertTrue(NisValidator.isValid("00000000281")); // estruturalmente válido (11 dígitos), mesmo com final diferente!
-        assertFalse(NisValidator.isValid("000.00000.28-0")); // máscara não é forma canônica de entrada
+        assertFalse(Nis.parser().isValid(null));
+        assertTrue(Nis.parser().isValid("00000000280"));
+        assertTrue(Nis.parser().isValid("00000000281")); // estruturalmente válido (11 dígitos), mesmo com final diferente!
+        assertFalse(Nis.parser().isValid("000.00000.28-0")); // máscara não é forma canônica de entrada
 
         Nis inscricao = Nis.parse("00000000280");
         assertEquals("00000000280", inscricao.getCanonicalValue());
@@ -190,22 +186,23 @@ class IdentidadeExemplosTest {
         };
         Predicate<Nis> politicaFolha = naoTodosDigitosIguais.and(moduloOnzePis);
 
-        assertTrue(NisValidator.isValid("00000000280", politicaFolha));
-        assertFalse(NisValidator.isValid("00000000281", politicaFolha)); // rejeitado pela política de módulo 11 do consumidor
-        assertFalse(NisValidator.isValid("00000000000", politicaFolha));
+        DocumentParser<Nis> interpretadorFolha = Nis.parser().withPolicy(politicaFolha);
+        assertTrue(interpretadorFolha.isValid("00000000280"));
+        assertFalse(interpretadorFolha.isValid("00000000281")); // rejeitado pela política de módulo 11 do consumidor
+        assertFalse(interpretadorFolha.isValid("00000000000"));
 
         // 3. Apresentações distintas definidas explicitamente pelo consumidor conforme o canal de saída:
-        String mascaraHolerite = NisFormatter.format(inscricao, n -> {
+        DocumentFormatter<Nis> mascaraHolerite = n -> {
             String d = n.getCanonicalValue();
             return d.substring(0, 3) + "." + d.substring(3, 8) + "." + d.substring(8, 10) + "-" + d.substring(10);
-        });
-        String mascaraParcialPortal = NisFormatter.format(inscricao, n -> {
+        };
+        DocumentFormatter<Nis> mascaraParcialPortal = n -> {
             String d = n.getCanonicalValue();
             return "***." + d.substring(3, 8) + ".**-" + d.substring(10);
-        });
+        };
 
-        assertEquals("000.00000.28-0", mascaraHolerite);
-        assertEquals("***.00000.**-0", mascaraParcialPortal);
+        assertEquals("000.00000.28-0", mascaraHolerite.apply(inscricao));
+        assertEquals("***.00000.**-0", mascaraParcialPortal.apply(inscricao));
         assertEquals("[NIS oculto]", inscricao.toString()); // continua oculto após a formatação!
     }
 

@@ -11,6 +11,8 @@ import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.FORMAT_ONLY;
 import static io.github.brasil4j.identidade.cnpj.CnpjValidationMode.NUMERIC;
 import static org.junit.jupiter.api.Assertions.*;
 
+// Exercita também as fachadas legadas enquanto elas fizerem parte da API.
+@SuppressWarnings("deprecation")
 class CnpjTest {
     @ParameterizedTest
     @CsvFileSource(resources = {"/cnpj-c1.csv", "/cnpj-rfb-ascii.csv"}, nullValues = "<null>", ignoreLeadingAndTrailingWhitespace = false)

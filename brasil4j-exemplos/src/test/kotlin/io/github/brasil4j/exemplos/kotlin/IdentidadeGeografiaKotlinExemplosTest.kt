@@ -1,7 +1,6 @@
 package io.github.brasil4j.exemplos.kotlin
 
 import io.github.brasil4j.geografia.Uf
-import io.github.brasil4j.identidade.cnpj.CnpjFormatter
 import io.github.brasil4j.identidade.cnpj.CnpjType
 import io.github.brasil4j.identidade.cnpj.CnpjValidationMode
 import io.github.brasil4j.identidade.composicao.DocumentCheck
@@ -58,7 +57,7 @@ class IdentidadeGeografiaKotlinExemplosTest {
         assertEquals(listOf("01DE", "02DE"), porEmpresa.getValue("12ABC345").map { it.branch })
 
         // 3. Ponte sem cópia para APIs Java via .toJava():
-        assertEquals(CnpjFormatter.unformat("12.ABC.345/01DE-35"), matrizAlfa.toJava().canonicalValue)
+        assertEquals("12ABC34501DE35", matrizAlfa.toJava().canonicalValue)
     }
 
     @Test

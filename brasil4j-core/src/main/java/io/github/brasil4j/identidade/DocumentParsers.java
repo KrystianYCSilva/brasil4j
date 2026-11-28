@@ -71,11 +71,9 @@ public final class DocumentParsers {
         @Override
         public ValidationResult<D> parse(String input) {
             ValidationResult<D> result = origin.parse(input);
-            if (!result.isValid()) {
-                return result;
-            }
-            Optional<Rejection> rejection = check(result.getDocument().get());
-            return rejection.isPresent() ? ValidationResult.invalid(rejection.get()) : result;
+            return result.fold(
+                    document -> check(document).<ValidationResult<D>>map(ValidationResult::invalid).orElse(result),
+                    rejection -> result);
         }
 
         @Override

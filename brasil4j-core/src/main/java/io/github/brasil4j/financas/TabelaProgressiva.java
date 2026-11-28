@@ -1,6 +1,7 @@
 package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -133,7 +134,7 @@ public final class TabelaProgressiva<T extends Dinheiro> {
 
         int n = faixas.size();
         int casas = moeda.getCasasDecimais();
-        BigDecimal zeroEscalado = BigDecimal.ZERO.setScale(casas);
+        BigDecimal zeroEscalado = BigDecimal.ZERO.setScale(casas, RoundingMode.UNNECESSARY);
         BigDecimal valorBase = baseCalculo.valor;
 
         List<T> basesNaFaixa = new ArrayList<>(n);
@@ -263,7 +264,7 @@ public final class TabelaProgressiva<T extends Dinheiro> {
             this.moeda = moeda;
             this.construtorTipo = construtorTipo;
             this.ultimoLimite =
-                    construtorTipo.apply(BigDecimal.ZERO.setScale(moeda.getCasasDecimais()), MetodoArredondamento.ABNT_NBR_5891);
+                    construtorTipo.apply(BigDecimal.ZERO.setScale(moeda.getCasasDecimais(), RoundingMode.UNNECESSARY), MetodoArredondamento.ABNT_NBR_5891);
         }
 
         /**

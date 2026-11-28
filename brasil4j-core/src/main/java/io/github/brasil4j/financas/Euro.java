@@ -1,6 +1,7 @@
 package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ public final class Euro extends Dinheiro implements Comparable<Euro> {
 
     /** Zero euros ({@code EUR 0.00}) com política {@link MetodoArredondamento#ABNT_NBR_5891}. */
     public static final Euro ZERO =
-            new Euro(BigDecimal.ZERO.setScale(ESCALA), MetodoArredondamento.ABNT_NBR_5891);
+            new Euro(BigDecimal.ZERO.setScale(ESCALA, RoundingMode.UNNECESSARY), MetodoArredondamento.ABNT_NBR_5891);
 
     Euro(BigDecimal valorEscalado, MetodoArredondamento arredondamento) {
         super((MoedaPadrao) Moeda.EUR, valorEscalado, arredondamento);

@@ -8,7 +8,9 @@ import java.util.function.IntUnaryOperator;
 
 /**
  * Módulo 11 configurável pelo valor de cada caractere, pela sequência de pesos e pelo mapeamento do resto.
- * Cada dígito calculado entra na base do dígito seguinte. As instâncias são imutáveis.
+ * Cada dígito intermediário entra na base do dígito seguinte. Por isso, com vários DVs, o alfabeto precisa
+ * conter todo dígito que o mapeamento do resto pode produzir, o que o {@link Builder#build()} confere.
+ * As instâncias são imutáveis.
  *
  * <p>Os presets citam a fonte e o alcance de cada regra. Um documento do consumidor pode montar o
  * próprio cálculo com {@link #builder()}.
@@ -141,11 +143,8 @@ public final class Modulus11 implements CheckDigitAlgorithm {
                     : leftWeights[value.length() - 1 - offset];
             sum = (int) ((sum + (valueOf(character) % 11) * (weight % 11)) % 11);
         }
-        OptionalInt digit = Objects.requireNonNull(remainder.apply(sum), "Mapeamento do resto produziu nulo.");
-        if (digit.isPresent() && (digit.getAsInt() < 0 || digit.getAsInt() > 9)) {
-            throw new IllegalStateException("Mapeamento do resto produziu DV fora de 0 a 9.");
-        }
-        return digit;
+        // O build já conferiu o mapeamento para os restos de 0 a 10, os únicos possíveis aqui.
+        return remainder.apply(sum);
     }
 
     private int valueOf(char character) {
@@ -230,7 +229,10 @@ public final class Modulus11 implements CheckDigitAlgorithm {
         }
 
         /**
-         * Define como o resto da divisão por 11 vira dígito.
+         * Define como o resto da divisão por 11 vira dígito. A função precisa ser pura e determinística: o
+         * {@link #build()} a avalia uma vez para cada resto de 0 a 10 e o cálculo confia nesse resultado.
+         * Com vários DVs, todo dígito que ela pode produzir precisa pertencer ao alfabeto, porque os DVs
+         * anteriores ao último voltam à base e o mesmo mapeamento gera todos eles.
          *
          * @param mapping função do resto para um dígito de 0 a 9, ou vazio quando a base não admite DV
          * @return este construtor
@@ -260,9 +262,10 @@ public final class Modulus11 implements CheckDigitAlgorithm {
          * Cria o algoritmo imutável com a configuração atual, conferindo antes a coerência dela.
          *
          * @return algoritmo
-         * @throws IllegalArgumentException se houver menos pesos fixos que dígitos verificadores, o que
-         *         não deixaria nenhuma base aceitável, se algum caractere do alfabeto tiver valor negativo ou se houver mais de um DV
-         *         e o alfabeto não contiver os dígitos de 0 a 9, que entram na base do DV seguinte
+         * @throws IllegalArgumentException se houver menos pesos fixos que dígitos verificadores,
+         *         se algum caractere do alfabeto tiver valor negativo, se o mapeamento do resto devolver nulo
+         *         ou dígito fora de 0 a 9 para algum resto de 0 a 10, ou, com vários DVs, se devolver
+         *         dígito fora do alfabeto
          */
         public Modulus11 build() {
             if (leftWeights != null && digits > leftWeights.length) {
@@ -273,19 +276,28 @@ public final class Modulus11 implements CheckDigitAlgorithm {
                     throw new IllegalArgumentException("Valor de caractere negativo.");
                 }
             }
-            if (digits > 1 && !containsAllDigits()) {
-                throw new IllegalArgumentException("Alfabeto sem os dígitos, usados pelo DV na base do seguinte.");
-            }
+            checkRemainderMapping();
             return new Modulus11(this);
         }
 
-        private boolean containsAllDigits() {
-            for (int index = 0; index < DIGITS.length(); index++) {
-                if (alphabet.indexOf(DIGITS.charAt(index)) < 0) {
-                    return false;
+        private void checkRemainderMapping() {
+            for (int rest = 0; rest <= 10; rest++) {
+                OptionalInt digit = remainder.apply(rest);
+                if (digit == null) {
+                    throw new IllegalArgumentException("Mapeamento do resto devolveu nulo para o resto " + rest + ".");
+                }
+                if (!digit.isPresent()) {
+                    continue;
+                }
+                if (digit.getAsInt() < 0 || digit.getAsInt() > 9) {
+                    throw new IllegalArgumentException("Mapeamento do resto devolveu DV fora de 0 a 9 para o resto "
+                            + rest + ".");
+                }
+                if (digits > 1 && alphabet.indexOf('0' + digit.getAsInt()) < 0) {
+                    throw new IllegalArgumentException("Mapeamento do resto devolveu DV fora do alfabeto para o resto "
+                            + rest + ".");
                 }
             }
-            return true;
         }
     }
 }

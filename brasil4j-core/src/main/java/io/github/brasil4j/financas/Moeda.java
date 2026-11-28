@@ -13,13 +13,13 @@ import java.util.Locale;
  */
 public interface Moeda {
     /** Real brasileiro ({@code BRL}, {@code 2} casas decimais, símbolo {@code R$}). */
-    Moeda BRL = ValidacaoMoeda.criarConstanteInicial("BRL", 2, "R$");
+    Moeda BRL = ValidacaoMoeda.criarConstanteInicial("BRL", "R$");
 
     /** Dólar americano ({@code USD}, {@code 2} casas decimais, símbolo {@code US$}). */
-    Moeda USD = ValidacaoMoeda.criarConstanteInicial("USD", 2, "US$");
+    Moeda USD = ValidacaoMoeda.criarConstanteInicial("USD", "US$");
 
     /** Euro ({@code EUR}, {@code 2} casas decimais, símbolo {@code €}). */
-    Moeda EUR = ValidacaoMoeda.criarConstanteInicial("EUR", 2, "€");
+    Moeda EUR = ValidacaoMoeda.criarConstanteInicial("EUR", "€");
 
     /**
      * Retorna o código identificador ASCII visível ({@code 1..16} caracteres, sem espaços).

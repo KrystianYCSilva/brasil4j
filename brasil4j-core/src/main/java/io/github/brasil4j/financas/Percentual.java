@@ -1,6 +1,7 @@
 package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Taxa relativa exata e imutável com conversão sem ambiguidade entre pontos percentuais
@@ -36,7 +37,7 @@ public final class Percentual implements Comparable<Percentual> {
             return ZERO;
         }
         BigDecimal stripped = fatorBruto.stripTrailingZeros();
-        BigDecimal canon = stripped.scale() < 0 ? stripped.setScale(0) : stripped;
+        BigDecimal canon = stripped.scale() < 0 ? stripped.setScale(0, RoundingMode.UNNECESSARY) : stripped;
         if (canon.scale() > ESCALA_MAXIMA_FATOR
                 || canon.unscaledValue().bitLength() > 130
                 || canon.precision() > AritmeticaMonetaria.PRECISAO_MAXIMA) {

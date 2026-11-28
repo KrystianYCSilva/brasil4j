@@ -98,6 +98,12 @@ Cada etapa segue TDD (vermelho, verde, refatoração) e tem um commit próprio. 
 
 A comparação reconstrói as baselines em diretórios separados e roda `scripts/check-api-compatibility.py` com JDK 21. Se a migração de `getCanonicalValue`, `equals` e `hashCode` para a superclasse gerar alerta, `Cpf` e `Cnpj` mantêm overrides finos que delegam.
 
+### Correção de compatibilidade para a v0.3.0
+
+Seguir a convenção Java: `IllegalArgumentException` para argumento inadequado, que `ValidationRule.checkDigits` converte em `INVALID_FORMAT`, e `IllegalStateException` para objeto em estado inadequado, que se propaga. O `Modulus11` confere o mapeamento do resto no `build()` para os restos de 0 a 10, de modo que o erro de configuração aparece cedo e para qualquer entrada. Com vários DVs, o alfabeto precisa conter todo dígito que o mapeamento produz. Caracterizar os casos em Java, rodar o reator em JDK 8 e 21 e comparar os JARs com a `v0.2.0` e com a base da correção.
+
+Pela convenção, qualquer `IllegalArgumentException` lançada pelo algoritmo, inclusive subclasses, se torna `INVALID_FORMAT`. Algoritmos do consumidor devem usar `IllegalStateException` para distinguir defeitos de configuração.
+
 ### Coordenação com 008 e 009
 
 Constituição, README, CHANGELOG, `arquitetura.md` e `fontes.md` são compartilhados. A 010 rebaseia sobre `main` depois do merge de `008-nucleo-monetario` e `009-exemplos-utilizacao`. Os exemplos da 009 que usam fachadas deprecadas migram na etapa 12. Os pacotes `verificacao` e `mascara` ficam disponíveis para a 008.

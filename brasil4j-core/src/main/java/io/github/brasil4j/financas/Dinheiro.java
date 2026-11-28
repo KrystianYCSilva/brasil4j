@@ -1,6 +1,7 @@
 package io.github.brasil4j.financas;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -237,7 +238,7 @@ public abstract class Dinheiro {
             }
         }
         return new QuantiaMonetaria(
-                m, BigDecimal.ZERO.setScale(m.getCasasDecimais()), MetodoArredondamento.ABNT_NBR_5891);
+                m, BigDecimal.ZERO.setScale(m.getCasasDecimais(), RoundingMode.UNNECESSARY), MetodoArredondamento.ABNT_NBR_5891);
     }
 
     /**
