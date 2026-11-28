@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.brasil4j</groupId>
         <artifactId>brasil4j</artifactId>
-        <version>0.2.0</version>
+        <version>0.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>brasil4j-kotlin</artifactId>
     <name>brasil4j-kotlin</name>

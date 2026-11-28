@@ -14,7 +14,7 @@
 - **TQ-7 Consumer tests** `*JarIT` tests run against packaged JARs (Failsafe) in Java and Kotlin and assert `codeSource`.
 - **TQ-8 Examples are tests** `brasil4j-exemplos` is didactic and must pass unchanged unless the change is a documented break.
 - **TQ-9 Architecture tests** Package and module rules from [architecture](../patterns/architecture.md) run as ArchUnit tests.
-- **TQ-10 Mutation testing** PIT (`-Pmutation`, JDK 21) on the Java core; the build fails below the threshold. Heavy vector suites (`*EquivalenceTest`) are excluded from mutation runs. Threshold: see `pom.xml` property `pitest.mutationThreshold` (raise only).
+- **TQ-10 Mutation testing** PIT (`-Pmutation`, JDK 21) on the Java core; the build fails below the threshold. Heavy vector suites (`*EquivalenceTest`) are excluded from mutation runs. Threshold: `pitest.mutationThreshold` in `brasil4j-core/pom.xml` (raise only). Baseline 2026-11-28: 89.5% (826/923); lowest packages `financas`, `identidade.cnpj`, `identidade.nis` (~84–86%).
 - **TQ-11 Smells to reject** Tests that depend on order or time, sleep, network or the file system outside `src/test/resources`; duplicated setup instead of fixtures; tests named after methods instead of behavior.
 
 ## Gates

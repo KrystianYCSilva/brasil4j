@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.brasil4j</groupId>
         <artifactId>brasil4j</artifactId>
-        <version>0.2.0</version>
+        <version>0.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>brasil4j-core</artifactId>
     <name>brasil4j-core</name>
@@ -65,4 +65,50 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <!-- TQ-10 / IV.5: mutation testing of the Java core. Run on JDK 21:
+             ./mvnw -pl brasil4j-core -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage -->
+        <profile>
+            <id>mutation</id>
+            <properties>
+                <pitest.mutationThreshold>89</pitest.mutationThreshold>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>${pitest.version}</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.pitest</groupId>
+                                <artifactId>pitest-junit5-plugin</artifactId>
+                                <version>${pitest.junit5.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <targetClasses>
+                                <param>io.github.brasil4j.*</param>
+                            </targetClasses>
+                            <targetTests>
+                                <param>io.github.brasil4j.*</param>
+                            </targetTests>
+                            <excludedTestClasses>
+                                <param>*EquivalenceTest</param>
+                                <param>*JarIT</param>
+                                <param>io.github.brasil4j.ArchitectureTest</param>
+                            </excludedTestClasses>
+                            <mutationThreshold>${pitest.mutationThreshold}</mutationThreshold>
+                            <timestampedReports>false</timestampedReports>
+                            <outputFormats>
+                                <param>HTML</param>
+                                <param>XML</param>
+                            </outputFormats>
+                            <threads>4</threads>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
