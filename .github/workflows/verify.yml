@@ -54,7 +54,7 @@ jobs:
       - name: Compare with the latest release tag (IV.4)
         shell: bash
         run: |
-          baseline_tag="$(git tag --list 'v*' --sort=-v:refname | head -n 1)"
+          baseline_tag="$(git tag --list 'v*' --sort=-v:refname | grep -vx "${GITHUB_REF_TYPE:+$([ "$GITHUB_REF_TYPE" = tag ] && echo "$GITHUB_REF_NAME")}" | head -n 1)"
           test -n "$baseline_tag" || { echo "no release tag found"; exit 1; }
           echo "Baseline: $baseline_tag"
           baseline="$RUNNER_TEMP/brasil4j-$baseline_tag"

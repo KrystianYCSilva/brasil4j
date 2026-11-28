@@ -43,14 +43,14 @@ function Invoke-Gh {
     return $out
 }
 
-$branches = & gh api "repos/$Repo/branches" --jq '.[].name'
-if ($branches -notcontains $DefaultBranch) {
+& gh api "repos/$Repo/branches/$DefaultBranch" --silent 2>$null
+if ($LASTEXITCODE -ne 0) {
     throw "Branch '$DefaultBranch' does not exist on $Repo; push it before applying settings."
 }
 
 $settings = @{
     default_branch          = $DefaultBranch
-    delete_branch_on_merge  = $true
+    delete_branch_on_merge  = $false
     allow_auto_merge        = $true
     allow_update_branch     = $true
     allow_merge_commit      = $true
@@ -61,7 +61,7 @@ Invoke-Gh -Arguments @('api', '-X', 'PATCH', "repos/$Repo") -Body $settings | Ou
 Write-Host "Repository settings: $settings"
 
 $existing = @{}
-foreach ($line in (& gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)`t\(.name)"')) {
+foreach ($line in (& gh api "repos/$Repo/rulesets" --jq '.[] | "\(.id)	\(.name)"')) {
     if ($line) {
         $parts = $line -split "`t"
         $existing[$parts[1]] = $parts[0]

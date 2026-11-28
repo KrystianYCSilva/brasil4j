@@ -13,11 +13,11 @@
 ## Rules
 
 - **GF-1** No direct push to `main` or `develop`; rulesets in `.github/rulesets/` require a PR, all required checks green, an up-to-date branch and resolved conversations. No bypass, including admins.
-- **GF-2** Required checks: `verify (8)`, `verify (21)`, `api-compatibility`, `mutation`.
+- **GF-2** Required checks: `verify (8)`, `verify (21)`, `api-compatibility`, `mutation`; PRs into `main` also need `branch-policy`.
 - **GF-3** `main` only receives PRs from `release/*` or `hotfix/*`.
-- **GF-4** A release: create `release/X.Y.Z` from `develop` → set version `X.Y.Z` → CHANGELOG section → PR to `main` → merge → tag `vX.Y.Z` on `main` → `release.yml` publishes the GitHub Release → merge `main` back into `develop` and set `X.Y+1.0-SNAPSHOT`.
+- **GF-4** A release: create `release/X.Y.Z` from `develop` → set version `X.Y.Z` → CHANGELOG section → PR to `main` → merge → tag `vX.Y.Z` on `main` → `release.yml` publishes the GitHub Release → back-merge through `chore/back-merge-X.Y.Z` (from `develop`, merge `main` into it, set `X.Y+1.0-SNAPSHOT`) → PR into `develop`. Use merge commits (not squash) for `release/*` and `hotfix/*` into `main` to keep ancestry; delete those branches manually after the back-merge.
 - **GF-5** Tags `v*` are protected; never move or delete a published tag.
-- **GF-6** Repository settings (default branch `develop`, delete merged branches, auto-merge, no rebase merge) and rulesets are applied with `pwsh scripts/github/apply-repo-settings.ps1 -Apply` (dry run without `-Apply`); edit the JSON, never the GitHub UI.
+- **GF-6** Repository settings (default branch `develop`, no automatic branch deletion, auto-merge, no rebase merge) and rulesets are applied with `pwsh scripts/github/apply-repo-settings.ps1 -Apply` (dry run without `-Apply`); edit the JSON, never the GitHub UI.
 
 ## Versions
 
