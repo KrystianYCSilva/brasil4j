@@ -8,7 +8,8 @@ import java.util.function.IntUnaryOperator;
 
 /**
  * Módulo 11 configurável pelo valor de cada caractere, pela sequência de pesos e pelo mapeamento do resto.
- * Cada dígito calculado entra na base do dígito seguinte. As instâncias são imutáveis.
+ * Cada dígito intermediário entra na base do dígito seguinte e precisa pertencer ao alfabeto.
+ * O último dígito pode ficar fora do alfabeto da base. As instâncias são imutáveis.
  *
  * <p>Os presets citam a fonte e o alcance de cada regra. Um documento do consumidor pode montar o
  * próprio cálculo com {@link #builder()}.
@@ -106,7 +107,12 @@ public final class Modulus11 implements CheckDigitAlgorithm {
         return digits;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException se o mapeamento gerar um DV fora de 0 a 9
+     *         ou um DV intermediário fora do alfabeto da base
+     */
     @Override
     public Optional<String> compute(String base) {
         Objects.requireNonNull(base, "Base obrigatória.");
@@ -121,7 +127,12 @@ public final class Modulus11 implements CheckDigitAlgorithm {
                 return Optional.empty();
             }
             char character = (char) ('0' + digit.getAsInt());
-            value.append(character);
+            if (index < digits - 1) {
+                if (alphabet.indexOf(character) < 0) {
+                    throw new IllegalStateException("DV intermediário fora do alfabeto.");
+                }
+                value.append(character);
+            }
             computed.append(character);
         }
         return Optional.of(computed.toString());
@@ -230,7 +241,8 @@ public final class Modulus11 implements CheckDigitAlgorithm {
         }
 
         /**
-         * Define como o resto da divisão por 11 vira dígito.
+         * Define como o resto da divisão por 11 vira dígito. Quando houver vários DVs,
+         * cada dígito intermediário produzido precisa pertencer ao alfabeto.
          *
          * @param mapping função do resto para um dígito de 0 a 9, ou vazio quando a base não admite DV
          * @return este construtor
@@ -260,9 +272,8 @@ public final class Modulus11 implements CheckDigitAlgorithm {
          * Cria o algoritmo imutável com a configuração atual, conferindo antes a coerência dela.
          *
          * @return algoritmo
-         * @throws IllegalArgumentException se houver menos pesos fixos que dígitos verificadores, o que
-         *         não deixaria nenhuma base aceitável, se algum caractere do alfabeto tiver valor negativo ou se houver mais de um DV
-         *         e o alfabeto não contiver os dígitos de 0 a 9, que entram na base do DV seguinte
+         * @throws IllegalArgumentException se houver menos pesos fixos que dígitos verificadores
+         *         ou se algum caractere do alfabeto tiver valor negativo
          */
         public Modulus11 build() {
             if (leftWeights != null && digits > leftWeights.length) {
@@ -273,19 +284,7 @@ public final class Modulus11 implements CheckDigitAlgorithm {
                     throw new IllegalArgumentException("Valor de caractere negativo.");
                 }
             }
-            if (digits > 1 && !containsAllDigits()) {
-                throw new IllegalArgumentException("Alfabeto sem os dígitos, usados pelo DV na base do seguinte.");
-            }
             return new Modulus11(this);
-        }
-
-        private boolean containsAllDigits() {
-            for (int index = 0; index < DIGITS.length(); index++) {
-                if (alphabet.indexOf(DIGITS.charAt(index)) < 0) {
-                    return false;
-                }
-            }
-            return true;
         }
     }
 }

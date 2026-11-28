@@ -151,3 +151,18 @@ O checkpoint `6db94c3` do Claude foi reaplicado em uma worktree própria sobre a
 Em ambos os JDKs, foram zero falhas, erros ou pulos. A comparação por japicmp dos dois JARs reconstruídos com os da `v0.2.0`, da Spec 006 (`5fd9dae`) e da Spec 007 (`18bfe9c`) passou com os critérios binário e de fonte.
 
 Os ensaios de consumo executaram interpretador e formatador injetáveis, documento sintético do consumidor em uma lista heterogênea, regras com rejeição por motivo e preservação do NIS estrutural. A revisão também alinhou o contrato de `Modulus11` ao comportamento e ao JavaDoc existentes para argumentos nulos. Os relatórios locais desta rodada ficam em `.tmp/review010/`.
+
+## Fechamento dos contratos para a v0.3.0 · 2026-11-28
+
+Esta rodada substitui a exigência de todos os dígitos no alfabeto e a conversão exclusiva de `InvalidBaseException` registradas na revisão pós-merge. O TDD começou na base `d0164a3` e a worktree foi atualizada para `73af5d0`. A entrada de changelog da Spec 011 veio dessa base.
+
+| Caso | RED em JDK 8 | GREEN em JDK 8 |
+| --- | --- | --- |
+| Alfabeto reduzido | O builder recusava três configurações antes de calcular. | O alfabeto `01` permite calcular `01` e `09` para a base sintética `1`, conforme o mapeamento. O último DV pode ficar fora do alfabeto. Um DV intermediário incompatível lança `IllegalStateException`. A base fora do domínio continua lançando `InvalidBaseException`. |
+| Algoritmo do consumidor anterior ao PR #12 | A regra propagava a `IllegalArgumentException` que sinalizava a base recusada. | A regra retorna `INVALID_FORMAT`. DV divergente continua retornando `INVALID_CHECK_DIGITS`, e uma falha de configuração sinalizada com `IllegalStateException` se propaga. |
+
+Os quatro cenários novos falharam pelas razões acima. Após a correção, os 27 testes focados passaram. As assinaturas públicas permanecem iguais, e `InvalidBaseException` fica disponível para novos algoritmos.
+
+O Claude Sonnet aprovou com ajustes. Foram acrescentados o registro de RED/GREEN, as tarefas da rodada, a distinção entre erro de configuração e rejeição de entrada no modelo e o custo da compatibilidade no plano. Uma `IllegalArgumentException` que sinalize um defeito do algoritmo também vira `INVALID_FORMAT`. O contrato recomenda `IllegalStateException` para distinguir esse caso.
+
+Na base `73af5d0`, o `clean verify` passou em Corretto 8u512 e 21.0.13. Em cada JDK foram 20.992 testes, com 20.776 no core, 165 no Kotlin e 51 nos exemplos, sem falhas, erros ou pulos. Os dois JARs de cada JDK passaram na checagem de bytecode Java 8 e no japicmp contra a `v0.2.0` e a base `d0164a3`, com critérios de fonte e binário. O PIT matou 1.143 de 1.243 mutantes (92%). Os relatórios locais ficam em `.tmp/spec010-release/`.

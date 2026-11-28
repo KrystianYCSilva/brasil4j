@@ -2,28 +2,40 @@
 
 ## Não lançado
 
+<!-- Notas preparadas para a v0.3.0. A data será registrada na branch de release. -->
+
+### Documentos
+
+- Inscrição estrutural de NIS, PIS, Pasep e NIT em Java e Kotlin (Spec 006). A API confere 11 dígitos ASCII, preserva zeros iniciais e oculta o valor na saída padrão. Os testes de consumo incluem o campo histórico `nisTrab` do S-2200 v2.5.
+- Composição de listas mistas de CPF, CNPJ e NIS com `DocumentCheck` (Spec 007). Cada item pode escolher o modo de validação, uma regra do consumidor e a apresentação do documento.
+- Perfil de CTPS histórica do S-2200 v2.5 em Java e Kotlin, com validação estrutural, proveniência declarada e diagnósticos que ocultam número, série e UF. A vitrine inclui exemplos de registros físicos, projeções legadas e identificação digital via CPF.
+
+### Contratos públicos de documento (Spec 010)
+
+- `Document`, `MaskedDocument`, `SecurityMaskedDocument`, `CheckDigitDocument` e `AbstractDocument`, adotados por CPF, CNPJ e NIS.
+- Interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)` com `ValidationResult` para rejeições de entrada. `ValidationRule` e `withPolicy` compõem regras, e `DocumentParsers.builder` permite criar interpretadores de documentos do consumidor.
+- `Modulus11` aceita alfabetos reduzidos. Cada DV intermediário que retorna à base precisa pertencer ao alfabeto. Um mapeamento incompatível lança `IllegalStateException` durante o cálculo. O builder recusa menos pesos fixos que DVs e valores negativos para caracteres do alfabeto.
+- `ValidationRule.checkDigits` converte base fora do domínio em `INVALID_FORMAT` tanto com `InvalidBaseException` quanto com `IllegalArgumentException` legada. Falhas de configuração sinalizadas com `IllegalStateException` se propagam.
+- Blocos reutilizáveis `verificacao.Modulus11` (equivalência com os cálculos anteriores conferida em 10 000 bases por documento) e `mascara.DocumentMask`.
+- Máscara de segurança em CPF (`***.345.678-**`), CNPJ (`**.ABC.345/01DE-**`) e NIS (`***3456789*`), com `*` padrão e caractere configurável, e apresentações reutilizáveis em `DocumentFormatter`. A representação textual padrão não muda.
+- Validação opcional de DV no NIS com `CAIXA_FGTS_V016` (fórmula da Caixa para PIS/Pasep no FGTS) e `LEGACY_MOD11` (convenção de Declarações/UEM). A guarda `NisRules.repeatedDigits()` segue a RV_03 do SIPREV. O padrão é estrutural.
+- `DocumentCheck.of(input, parser)` aceita qualquer interpretador, e `DocumentCheckResult.getRejection()` expõe o motivo.
+- Kotlin: `toCpfOrNull`, `toCnpjOrNull`, `toNisOrNull`, `DocumentParser.parseOrNull`, `toNis(mode)`, `Cnpj.hasValidCheckDigits()` e `applySecurityMask()`.
+- Deprecados, sem mudança de comportamento: `CpfValidator`, `CpfFormatter`, `CnpjValidator`, `CnpjFormatter`, `NisValidator` e `NisFormatter`. Remoção prevista para a 1.0.
+
+### Finanças
+
+- Núcleo monetário em Java e Kotlin (Spec 008) com políticas explícitas de arredondamento, rateio e alocação sem perda de centavos e conversão cambial. Divisões terminantes entregam o quociente decimal exato à política customizada.
+
 - Calculadora financeira funcional, percentuais com *gross-up* e tabela progressiva (Spec 011):
   - `CalculoFinanceiro` e `CalculadoraFinanceira` para expressões compostas em `MathContext.DECIMAL128` (ou precisão `1..90`) com arredondamento monetário final único para `Real`, `Dolar`, `Euro` ou `Moeda`;
   - `Percentual` imutável (`de`, `deFator`, `dePontosBase`), incidência genérica preservando o subtipo monetário (`aplicarSobre`, `acrescentarEm`, `descontarDe`) e cálculo por dentro (`calcularBasePorDentro`) com reversibilidade exata nos sete modos padrão;
   - `TabelaProgressiva<T>` parametrizada pelo consumidor com modos `NO_TOTAL` (reconciliado por maiores restos sobre partes fracionárias) e `POR_FAIXA`, memória auditável (`FaixaProgressiva`, `FaixaApurada`, `ApuracaoProgressiva`), parcela a deduzir exata e alíquota efetiva;
   - Kotlin: `.porCento()`, `.pontosBase()`, operadores `+`/`-`, `aplicar`, `acrescentar`, `descontar`, `basePorDentro`, `calcularReais` e DSL `tabelaProgressivaReais`.
-- Perfil de CTPS histórica do S-2200 v2.5 em Java e Kotlin, com validação estrutural, proveniência declarada e diagnósticos que ocultam número, série e UF. A vitrine inclui exemplos de registros físicos, projeções legadas e identificação digital via CPF.
 
-- Contratos públicos de documento (Spec 010):
-  - `Document`, `MaskedDocument`, `SecurityMaskedDocument`, `CheckDigitDocument` e `AbstractDocument`, adotados por CPF, CNPJ e NIS;
-  - interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)`, cujo `ValidationResult` informa o motivo da rejeição sem lançar exceção;
-  - regras componíveis (`ValidationRule`) e políticas com código (`withPolicy`);
-  - `DocumentParsers.builder` para o consumidor criar os próprios documentos no mesmo padrão.
-- `Modulus11.builder().build()` recusa configuração incoerente (menos pesos fixos que DVs, valor de caractere negativo e vários DVs sem os dígitos no alfabeto). `InvalidBaseException` marca a base fora do domínio, e `ValidationRule.checkDigits` só converte essa exceção em `INVALID_FORMAT`; qualquer outra `IllegalArgumentException` do algoritmo se propaga.
-- Blocos reutilizáveis `verificacao.Modulus11` (equivalência com os cálculos anteriores conferida em 10 000 bases por documento) e `mascara.DocumentMask`.
-- Máscara de segurança em CPF (`***.345.678-**`), CNPJ (`**.ABC.345/01DE-**`) e NIS (`***3456789*`), com `*` padrão e caractere configurável, e apresentações reutilizáveis em `DocumentFormatter`. A representação textual padrão não muda.
-- NIS com validadores de DV opcionais nomeados pela fonte: `CAIXA_FGTS_V016` (fórmula publicada pela Caixa para PIS/Pasep no FGTS), `LEGACY_MOD11` (convenção de Declarações/UEM) e a guarda `NisRules.repeatedDigits()` (SIPREV RV_03). O padrão continua estrutural.
-- `DocumentCheck.of(input, parser)` aceita qualquer interpretador, e `DocumentCheckResult.getRejection()` expõe o motivo.
-- Kotlin: `toCpfOrNull`, `toCnpjOrNull`, `toNisOrNull`, `DocumentParser.parseOrNull`, `toNis(mode)`, `Cnpj.hasValidCheckDigits()` e `applySecurityMask()`.
-- Deprecados, sem mudança de comportamento: `CpfValidator`, `CpfFormatter`, `CnpjValidator`, `CnpjFormatter`, `NisValidator` e `NisFormatter`. Remoção prevista para a 1.0.
+### Exemplos
 
-- Inscrição estrutural de NIS, PIS, Pasep e NIT em Java e Kotlin. A API confere exatamente 11 dígitos ASCII, preserva zeros iniciais e oculta o valor na saída padrão. A verificação de arquivos históricos cobre o campo `nisTrab` do S-2200 v2.5.
-- `NisValidator` oferece verificação estrutural booleana e política opcional do consumidor. `NisFormatter` usa uma função de apresentação explícita. Kotlin delega aos mesmos contratos.
+- O módulo `brasil4j-exemplos` (Spec 009) reúne exemplos executáveis em Java e Kotlin para identidade, geografia e finanças. A vitrine é exercitada no build do repositório.
 
 ## 0.2.0 — 2026-11-26
 

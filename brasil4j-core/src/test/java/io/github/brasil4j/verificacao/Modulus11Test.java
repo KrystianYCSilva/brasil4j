@@ -128,9 +128,38 @@ class Modulus11Test {
     }
 
     @Test
-    void construcaoRecusaAlfabetoSemOsDigitosQuandoHaMaisDeUmDv() {
-        // O primeiro DV calculado entra na base do segundo e precisa pertencer ao alfabeto.
-        assertThrows(IllegalArgumentException.class, () -> Modulus11.builder().charValue(c -> c - 'A', "AB").digits(2).build());
-        assertEquals(1, Modulus11.builder().charValue(c -> c - 'A', "AB").build().digitCount());
+    void aceitaDoisDvsComAlfabetoReduzidoQuandoOMapeamentoECompativel() {
+        Modulus11 algoritmo = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .remainder(resto -> OptionalInt.of(resto % 2))
+                .digits(2)
+                .build();
+
+        assertEquals(Optional.of("01"), algoritmo.compute("1"));
+        assertTrue(algoritmo.verify("101"));
+    }
+
+    @Test
+    void digitoFinalPodeEstarForaDoAlfabetoDaBase() {
+        Modulus11 algoritmo = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .remainder(resto -> OptionalInt.of(resto == 2 ? 0 : 9))
+                .digits(2)
+                .build();
+
+        assertEquals(Optional.of("09"), algoritmo.compute("1"));
+        assertTrue(algoritmo.verify("109"));
+    }
+
+    @Test
+    void digitoIntermediarioForaDoAlfabetoLancaErroDeConfiguracao() {
+        Modulus11 algoritmo = Modulus11.builder()
+                .charValue(c -> c - '0', "01")
+                .remainder(resto -> OptionalInt.of(9))
+                .digits(2)
+                .build();
+
+        assertThrows(IllegalStateException.class, () -> algoritmo.compute("1"));
+        assertThrows(InvalidBaseException.class, () -> algoritmo.compute("A"));
     }
 }
