@@ -88,3 +88,27 @@ A pedido do usuário, a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f
   - **Codex: APROVA PARA MERGE.** Confirmou os cinco achados resolvidos, o merge fast-forward e o `git diff --check` limpo. Também conferiu nos XMLs locais os 20 839 testes, a cobertura e o bytecode 52.
 - **T053 · Coordenação.** Concluída: a 010 está rebaseada sobre a `main` em `5405591`, com a 008 e a 009 integradas, sem divergência e com merge fast-forward possível.
 - **Pendência de ambiente.** Um `install` acidental na etapa 10 gravou `~/.m2/repository/io/github/brasil4j/brasil4j-core/0.2.0` com o JAR candidato. A remoção foi bloqueada pela política de ações destrutivas e aguarda decisão do usuário. Nenhum build da 010 depende desse artefato, porque todos usam o reator.
+
+## Expansão: governança, automação e CI (2026-11-28)
+
+O usuário aprovou o [plano v2](../../docs/descoberta/010-contratos-documentos/plano-governanca-qualidade.md) para que planejamentos e revisões futuras cobrem explicitamente qualidade de desenho, padrões, arquitetura, regras de biblioteca e qualidade de testes. Todas as entregas abaixo foram verificadas em `8105a4e`.
+
+| Trilha | Commit | Entrega e evidência |
+| --- | --- | --- |
+| A · Governança | `ed1b9ba` | Constituição v0.6.0 em inglês, com regras numeradas e os princípios VI (qualidade de desenho e testes) e VII (entrega). `.context` em inglês, com nove arquivos de cerca de 300 a 700 tokens e um `review-checklist` de 12 lentes. `AGENTS.md`, `CLAUDE.md` e `GEMINI.md` versionados, ligando todo o `.context`. Templates do Spec Kit com Design Quality Gate e Design Decisions. Template de PR. |
+| B1 · Kotlin explicit API | `00736d3` | RED: a compilação exigiu visibilidade explícita em 119 declarações. GREEN: `public` explícito, sem mudar a visibilidade efetiva. |
+| B2 · Nome de módulo | `ab83a89` | RED: `ModuleNameJarIT` falhou (atributo ausente). GREEN: `io.github.brasil4j.core` e `io.github.brasil4j.kotlin` no manifest dos JARs. |
+| B3 · ArchUnit | `1598ca2` | `archunit` 1.5.1 em escopo de teste, com testes JUnit comuns, porque o engine JUnit 5 do ArchUnit descobria 0 testes na Platform 5.12. RED: uma violação semeada em `mascara` fez AR-4 e AR-7 falharem. GREEN em JDK 8 e 21. |
+| B4/B5 · PIT e versão | `ef24730` | Perfil `mutation` com pitest 1.30.2. Baseline de 89,5% (826 de 923 mutantes) e gate de 89%. Versão `0.3.0-SNAPSHOT`. |
+| C · CI e GitHub | `8105a4e` | `verify.yml` com `verify (8)`, `verify (21)`, `api-compatibility` (contra a última tag), `mutation` e `branch-policy`. `release.yml` por tag na `main`, sem Maven Central, porque o namespace aguarda aprovação. Dependabot. Rulesets sem bypass e `scripts/github/apply-repo-settings.ps1`, testado em dry-run. |
+| D · Global | `~/.agents@804436f` | A skill `multi-llm-cli-delegation` ganhou o comportamento verificado do `agy` e o inventário dos 13 CLIs da máquina. Commit local, sem push. |
+
+**Verificação final em `8105a4e`:**
+- `clean verify` passou em JDK 8 e 21, com 20 848 testes e zero falhas.
+- JaCoCo do núcleo com 98,8% e 94,1%, e do Kotlin com 99,3% e 100%.
+- Bytecode 52 nos dois JARs.
+- japicmp sem incompatibilidades contra `v0.2.0`, `5fd9dae` e `18bfe9c`.
+
+**Ocorrências de ambiente:**
+- O `~/.gitconfig` do usuário desapareceu durante a sessão, por ação externa: nenhum comando desta sessão tocou nele. Os commits seguintes usaram identidade por comando (`git -c`), sem recriar o arquivo.
+- A validação do `~/.agents` confirmou que o Codex desktop continua importando skills para a biblioteca, porque "Keep import in sync" está ativo.
