@@ -2,6 +2,12 @@
 
 ## Não lançado
 
+- Calculadora financeira funcional, percentuais com *gross-up* e tabela progressiva (Spec 011):
+  - `CalculoFinanceiro` e `CalculadoraFinanceira` para expressões compostas em `MathContext.DECIMAL128` (ou precisão `1..90`) com arredondamento monetário final único para `Real`, `Dolar`, `Euro` ou `Moeda`;
+  - `Percentual` imutável (`de`, `deFator`, `dePontosBase`), incidência genérica preservando o subtipo monetário (`aplicarSobre`, `acrescentarEm`, `descontarDe`) e cálculo por dentro (`calcularBasePorDentro`) com reversibilidade exata nos sete modos padrão;
+  - `TabelaProgressiva<T>` parametrizada pelo consumidor com modos `NO_TOTAL` (reconciliado por maiores restos sobre partes fracionárias) e `POR_FAIXA`, memória auditável (`FaixaProgressiva`, `FaixaApurada`, `ApuracaoProgressiva`), parcela a deduzir exata e alíquota efetiva;
+  - Kotlin: `.porCento()`, `.pontosBase()`, operadores `+`/`-`, `aplicar`, `acrescentar`, `descontar`, `basePorDentro`, `calcularReais` e DSL `tabelaProgressivaReais`.
+
 - Contratos públicos de documento (Spec 010):
   - `Document`, `MaskedDocument`, `SecurityMaskedDocument`, `CheckDigitDocument` e `AbstractDocument`, adotados por CPF, CNPJ e NIS;
   - interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)`, cujo `ValidationResult` informa o motivo da rejeição sem lançar exceção;

@@ -22,6 +22,7 @@ Execute `sh ./mvnw clean verify` ou `.\mvnw.cmd clean verify` no Windows. O buil
 8. [Núcleo monetário, rateio sem perda e conversão cambial](specs/008-nucleo-monetario/spec.md)
 9. [Módulo vitrine de exemplos de utilização](specs/009-exemplos-utilizacao/spec.md)
 10. [Contratos, polimorfismo e composição para documentos](specs/010-contratos-documentos/spec.md)
+11. [Calculadora financeira funcional, percentuais com gross-up e tabela progressiva](specs/011-calculadora-percentual-faixas/spec.md)
 
 [Contexto de engenharia](.context/README.md) · [Requisitos](docs/requisitos.md) · [Arquitetura](docs/arquitetura.md) · [Constituição](.specify/memory/constitution.md) · [Fontes](docs/fontes.md) · [Descoberta do C1](docs/descoberta/c1/README.md)
 
@@ -34,6 +35,7 @@ Execute `sh ./mvnw clean verify` ou `.\mvnw.cmd clean verify` no Windows. O buil
 - [Contratos de documento](specs/010-contratos-documentos/quickstart.md). `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)` devolvem um `DocumentParser` injetável. `parse(campo)` devolve `ValidationResult` com o motivo da rejeição, sem exceção. `withPolicy(...)` acrescenta regras do negócio. `applyMask()` devolve a máscara completa e `applySecurityMask()` a máscara de segurança (`***.345.678-**`). Os utilitários `*Validator` e `*Formatter` continuam funcionando, mas estão deprecados.
 - [Código IBGE de município e UF em Java e Kotlin](specs/005-municipio-ibge-uf/quickstart.md). Consulte o prefixo e compare a UF. Use `Uf.fromName("sao paulo")` para obter a UF e consultar nome, sigla, capital, código IBGE e DDDs.
 - [Dinheiro, Moedas, Rateio e Câmbio em Java e Kotlin](specs/008-nucleo-monetario/quickstart.md). Use `Real`, `Dolar`, `Euro` ou `Dinheiro` com política explícita (`ABNT_NBR_5891`, `FINANCEIRO`, `TRUNCAMENTO`), `ratear`/`alocar` sem perda de centavos e `TaxaCambio` reversível.
+- [Calculadora Financeira, Percentuais e Tabela Progressiva em Java e Kotlin](specs/011-calculadora-percentual-faixas/quickstart.md). Use `CalculadoraFinanceira` para fórmulas intermediárias em `DECIMAL128`, `Percentual` para descontos/acréscimos conciliáveis e *gross-up* (`calcularBasePorDentro`) e `TabelaProgressiva` para apuração marginal parametrizada.
 
 ## Criando seu próprio documento
 

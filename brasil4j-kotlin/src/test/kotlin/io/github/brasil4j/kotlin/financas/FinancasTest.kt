@@ -2,10 +2,13 @@ package io.github.brasil4j.kotlin.financas
 
 import io.github.brasil4j.financas.Dinheiro
 import io.github.brasil4j.financas.MetodoArredondamento
+import io.github.brasil4j.financas.ModoApuracaoProgressiva
 import io.github.brasil4j.financas.Moeda
+import io.github.brasil4j.financas.Percentual
 import io.github.brasil4j.financas.QuantiaMonetaria
 import io.github.brasil4j.financas.TaxaCambio
 import java.math.BigDecimal
+import java.math.MathContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -113,5 +116,79 @@ class FinancasTest {
         val ptax = TaxaCambio.umDolarEmReais("5.4832")
         assertEquals("548.32".reais(), "100.00".dolares().paraReal(ptax))
         assertEquals("100.00".dolares(), "548.32".reais().paraDolar(ptax))
+    }
+
+    @Test
+    fun `opera Percentual, DSLs de CalculadoraFinanceira e TabelaProgressiva em Kotlin`() {
+        // 1. Construtores e operadores de Percentual
+        val carga = "17.5".porCento()
+        assertEquals(BigDecimal("17.5").porCento(), carga)
+        assertEquals(1750.pontosBase(), carga)
+        assertEquals(1750L.pontosBase(), carga)
+        assertEquals(20.porCento(), carga + "2.5".porCento())
+        assertEquals(15L.porCento(), carga - "2.5".porCento())
+        assertEquals("-17.5%", "${-carga}")
+
+        // Extensões genéricas preservam subtipo estático (Real, Dolar, Euro, QuantiaMonetaria, Dinheiro)
+        assertEquals("175.00".reais(), "1000.00".reais().aplicar(carga))
+        assertEquals("1175.00".reais(), "1000.00".reais().acrescentar(carga))
+        assertEquals("825.00".reais(), "1000.00".reais().descontar(carga))
+        assertEquals("1000.00".reais(), "825.00".reais().basePorDentro(carga))
+        assertEquals("110.00".dolares(), "100.00".dolares().acrescentar(10.porCento()))
+
+        // 2. DSL de CalculadoraFinanceira em todas as moedas + MathContext customizado
+        val proRataBrl = calcularReais(MetodoArredondamento.FINANCEIRO, MathContext.DECIMAL128) { mc ->
+            BigDecimal("1000.00").multiply(BigDecimal("17"), mc).divide(BigDecimal("30"), mc)
+        }
+        assertEquals("566.67".reais(), proRataBrl)
+        assertEquals("33.33".dolares(), calcularDolares { mc -> BigDecimal("100").divide(BigDecimal("3"), mc) })
+        assertEquals("33.34".euros(), calcularEuros(MetodoArredondamento.TETO) { mc -> BigDecimal("100").divide(BigDecimal("3"), mc) })
+        val kwd = Moeda.iso("KWD", 3)
+        assertEquals("1.235".emMoeda(kwd), calcularEmMoeda(kwd, MetodoArredondamento.FINANCEIRO) { BigDecimal("1.2345") })
+
+        // 3. DSL de TabelaProgressiva (BRL, USD, EUR, Moeda) e erro se faltar faixaAcima
+        val tabelaBrl = tabelaProgressivaReais {
+            faixaAte("2000.00".reais(), Percentual.ZERO)
+            faixaAte("4000.00", 10.porCento())
+            faixaAcima(20.porCento())
+        }
+        assertEquals("400.00".reais(), tabelaBrl.apurar("5000.00".reais()).valorTotal)
+
+        val tabelaUsd = tabelaProgressivaDolares {
+            faixaAte("100.00", Percentual.ZERO)
+            faixaAcima(10.porCento())
+        }
+        assertEquals("5.00".dolares(), tabelaUsd.apurar("150.00".dolares()).valorTotal)
+
+        val tabelaEur = tabelaProgressivaEuros {
+            faixaAte("100.00", Percentual.ZERO)
+            faixaAcima(10.porCento())
+        }
+        assertEquals("5.00".euros(), tabelaEur.apurar("150.00".euros(), ModoApuracaoProgressiva.POR_FAIXA).valorTotal)
+
+        val tabelaKwd = tabelaProgressivaEmMoeda(kwd) {
+            faixaAte("10.000", Percentual.ZERO)
+            faixaAcima(10.porCento())
+        }
+        assertEquals("0.500".emMoeda(kwd), tabelaKwd.apurar("15.000".emMoeda(kwd)).valorTotal)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            tabelaProgressivaReais {
+                faixaAte("1000.00", Percentual.ZERO)
+            }
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            tabelaProgressivaReais {
+                faixaAte("1000.00", Percentual.ZERO)
+                faixaAcima(10.porCento())
+                faixaAcima(20.porCento())
+            }
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            tabelaProgressivaReais {
+                faixaAcima(10.porCento())
+                faixaAte("2000.00", 20.porCento())
+            }
+        }
     }
 }

@@ -308,6 +308,11 @@ public final class Dolar extends Dinheiro implements Comparable<Dolar> {
     }
 
     @Override
+    Dolar criarMesmoSubtipo(BigDecimal valorEscalado, MetodoArredondamento novoArredondamento) {
+        return new Dolar(valorEscalado, novoArredondamento);
+    }
+
+    @Override
     public int compareTo(Dolar outro) {
         if (outro == null) {
             throw new IllegalArgumentException("O operando em Dólar não pode ser nulo.");

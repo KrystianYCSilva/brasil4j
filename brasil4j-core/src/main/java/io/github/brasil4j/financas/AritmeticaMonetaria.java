@@ -47,6 +47,12 @@ final class AritmeticaMonetaria {
     }
 
     static BigDecimal parseDecimalCanonico(String texto) {
+        BigDecimal parsed = parseDecimalSemLimitesEscala(texto);
+        validarLimitesDecimal(parsed);
+        return parsed;
+    }
+
+    static BigDecimal parseDecimalSemLimitesEscala(String texto) {
         if (texto == null || texto.isEmpty() || texto.length() > TAMANHO_MAXIMO_STRING) {
             throw new IllegalArgumentException("Representação textual monetária inválida.");
         }
@@ -81,16 +87,15 @@ final class AritmeticaMonetaria {
         if (digitosAntes == 0 || (indicePonto >= 0 && digitosDepois == 0)) {
             throw new IllegalArgumentException("Representação textual monetária inválida.");
         }
-        BigDecimal parsed = new BigDecimal(texto);
-        validarLimitesDecimal(parsed);
-        return parsed;
+        return new BigDecimal(texto);
     }
 
     static void validarLimitesDecimal(BigDecimal valor) {
         exigirBigDecimalPadrao(valor);
-        if (valor.precision() > PRECISAO_MAXIMA
-                || valor.scale() < ESCALA_MINIMA
-                || valor.scale() > ESCALA_MAXIMA) {
+        if (valor.scale() < ESCALA_MINIMA
+                || valor.scale() > ESCALA_MAXIMA
+                || valor.unscaledValue().bitLength() > 130
+                || valor.precision() > PRECISAO_MAXIMA) {
             throw new IllegalArgumentException(
                     "O valor decimal excede os limites suportados de precisão (38) ou escala (-18..38).");
         }
@@ -98,11 +103,103 @@ final class AritmeticaMonetaria {
 
     static void validarLimitesIntermediariosArredondamento(BigDecimal valor) {
         exigirBigDecimalPadrao(valor);
-        if (valor.precision() > PRECISAO_INTERMEDIARIA_MAXIMA
-                || valor.scale() < ESCALA_INTERMEDIARIA_MINIMA
-                || valor.scale() > ESCALA_INTERMEDIARIA_MAXIMA) {
+        if (valor.scale() < ESCALA_INTERMEDIARIA_MINIMA
+                || valor.scale() > ESCALA_INTERMEDIARIA_MAXIMA
+                || valor.unscaledValue().bitLength() > 600
+                || valor.precision() > PRECISAO_INTERMEDIARIA_MAXIMA) {
             throw new IllegalArgumentException(
                     "O valor decimal excede os limites suportados de arredondamento.");
+        }
+    }
+
+    static BigDecimal aplicarArredondamentoIntermediario(
+            BigDecimal valorIntermediario, int casasDecimais, MetodoArredondamento arredondamento) {
+        validarLimitesIntermediariosArredondamento(valorIntermediario);
+        ValidacaoMoeda.validarCasasDecimais(casasDecimais);
+        exigirArredondamento(arredondamento);
+
+        if (arredondamento instanceof ModoArredondamentoPadrao) {
+            BigDecimal res = valorIntermediario.setScale(
+                    casasDecimais, ((ModoArredondamentoPadrao) arredondamento).roundingMode());
+            validarResultadoMonetario(res);
+            return normalizarZero(res, casasDecimais);
+        }
+        return aplicarPoliticaCustomizadaValidandoVizinhos(valorIntermediario, casasDecimais, arredondamento);
+    }
+
+    static BigDecimal multiplicarPorFatorValidado(
+            BigDecimal valor, BigDecimal fatorCanonico, int casasDecimais, MetodoArredondamento arredondamento) {
+        exigirArredondamento(arredondamento);
+        BigDecimal prodExato = valor.multiply(fatorCanonico);
+        if (arredondamento instanceof ModoArredondamentoPadrao) {
+            BigDecimal res =
+                    prodExato.setScale(casasDecimais, ((ModoArredondamentoPadrao) arredondamento).roundingMode());
+            validarResultadoMonetario(res);
+            return normalizarZero(res, casasDecimais);
+        }
+        return aplicarPoliticaCustomizadaValidandoVizinhos(prodExato, casasDecimais, arredondamento);
+    }
+
+    static BigDecimal normalizarDecimalPlano(BigDecimal valor) {
+        if (valor.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal stripped = valor.stripTrailingZeros();
+        return stripped.scale() < 0 ? stripped.setScale(0) : stripped;
+    }
+
+    static BigDecimal[] reconciliarFaixasMaioresRestos(
+            BigDecimal totalEscalado, int casasDecimais, BigDecimal[] valoresExatosNaoNegativos) {
+        int k = valoresExatosNaoNegativos.length;
+        BigInteger[] cotas = new BigInteger[k];
+        BigDecimal[] fracoes = new BigDecimal[k];
+        int escalaMax = 0;
+        BigInteger somaCotas = BigInteger.ZERO;
+
+        for (int i = 0; i < k; i++) {
+            BigDecimal emUnidadesMinimas = valoresExatosNaoNegativos[i].movePointRight(casasDecimais);
+            BigDecimal parteInteira = emUnidadesMinimas.setScale(0, RoundingMode.DOWN);
+            BigDecimal fracao = emUnidadesMinimas.subtract(parteInteira);
+            cotas[i] = parteInteira.unscaledValue();
+            fracoes[i] = fracao;
+            somaCotas = somaCotas.add(cotas[i]);
+            if (fracao.scale() > escalaMax) {
+                escalaMax = fracao.scale();
+            }
+        }
+
+        BigInteger[] restos = new BigInteger[k];
+        for (int i = 0; i < k; i++) {
+            restos[i] = fracoes[i].setScale(escalaMax).unscaledValue();
+        }
+
+        int faltantes = totalEscalado.unscaledValue().subtract(somaCotas).intValueExact();
+        distribuirUnidadesMaioresRestos(cotas, restos, faltantes);
+
+        BigDecimal[] resultado = new BigDecimal[k];
+        for (int i = 0; i < k; i++) {
+            resultado[i] = normalizarZero(new BigDecimal(cotas[i], casasDecimais), casasDecimais);
+        }
+        return resultado;
+    }
+
+    private static void distribuirUnidadesMaioresRestos(
+            BigInteger[] cotas, BigInteger[] restos, int faltantes) {
+        if (faltantes <= 0) {
+            return;
+        }
+        int k = cotas.length;
+        Integer[] indices = new Integer[k];
+        for (int i = 0; i < k; i++) {
+            indices[i] = i;
+        }
+        Arrays.sort(indices, (a, b) -> {
+            int cmp = restos[b].compareTo(restos[a]);
+            return cmp != 0 ? cmp : a.compareTo(b);
+        });
+        for (int r = 0; r < faltantes; r++) {
+            int idx = indices[r];
+            cotas[idx] = cotas[idx].add(BigInteger.ONE);
         }
     }
 
@@ -341,20 +438,7 @@ final class AritmeticaMonetaria {
         }
 
         int faltantes = totalAbs.subtract(somaCotas).intValueExact();
-        if (faltantes > 0) {
-            Integer[] indices = new Integer[k];
-            for (int i = 0; i < k; i++) {
-                indices[i] = i;
-            }
-            Arrays.sort(indices, (a, b) -> {
-                int cmp = restos[b].compareTo(restos[a]);
-                return cmp != 0 ? cmp : a.compareTo(b);
-            });
-            for (int r = 0; r < faltantes; r++) {
-                int idx = indices[r];
-                cotas[idx] = cotas[idx].add(BigInteger.ONE);
-            }
-        }
+        distribuirUnidadesMaioresRestos(cotas, restos, faltantes);
 
         for (int i = 0; i < k; i++) {
             BigInteger cotaComSinal = sinal < 0 ? cotas[i].negate() : cotas[i];

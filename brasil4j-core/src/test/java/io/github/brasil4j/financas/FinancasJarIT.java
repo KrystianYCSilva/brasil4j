@@ -41,6 +41,19 @@ class FinancasJarIT {
                         QuantiaMonetaria.de("33", jpy),
                         QuantiaMonetaria.de("33", jpy)),
                 ienes.ratear(3));
+
+        // Spec 011 pelo JAR empacotado: CalculadoraFinanceira, Percentual e TabelaProgressiva
+        Real calculado = CalculadoraFinanceira.emReais(MetodoArredondamento.FINANCEIRO, mc ->
+                new BigDecimal("1000.00").multiply(new BigDecimal("17"), mc).divide(new BigDecimal("30"), mc));
+        assertEquals(Real.de("566.67"), calculado);
+
+        Percentual aliq = Percentual.de("17.5");
+        assertEquals(Real.de("1000.00"), aliq.calcularBasePorDentro(Real.de("825.00")));
+
+        TabelaProgressiva<Real> tab = TabelaProgressiva.emReais()
+                .faixaAte("1000.00", Percentual.ZERO)
+                .faixaAcima(Percentual.de(10L));
+        assertEquals(Real.de("50.00"), tab.apurar(Real.de("1500.00")).getValorTotal());
     }
 
     @Test

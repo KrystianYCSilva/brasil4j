@@ -506,6 +506,8 @@ public abstract class Dinheiro {
         return Objects.hash(moeda, valor);
     }
 
+    abstract Dinheiro criarMesmoSubtipo(BigDecimal valorEscalado, MetodoArredondamento novoArredondamento);
+
     /**
      * Retorna a representação textual canônica independente de localidade: {@code "<CODIGO> <VALOR>"}.
      *

@@ -308,6 +308,11 @@ public final class Real extends Dinheiro implements Comparable<Real> {
     }
 
     @Override
+    Real criarMesmoSubtipo(BigDecimal valorEscalado, MetodoArredondamento novoArredondamento) {
+        return new Real(valorEscalado, novoArredondamento);
+    }
+
+    @Override
     public int compareTo(Real outro) {
         if (outro == null) {
             throw new IllegalArgumentException("O operando em Real não pode ser nulo.");
