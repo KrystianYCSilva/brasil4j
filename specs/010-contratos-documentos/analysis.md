@@ -26,3 +26,37 @@ A pedido do usuário, a 010 foi rebaseada sobre `009-exemplos-utilizacao` (`ad3f
 | 7 · Validadores opcionais do NIS (US3) | `Modulus11PisTest` e o novo `NisParserContractTest` não compilavam: `cannot find symbol class NisValidationMode`. | `Modulus11.pisCaixaFgtsV016()` e `pisLegacyMod11()`; `NisValidationMode { FORMAT_ONLY, CAIXA_FGTS_V016, LEGACY_MOD11 }` como Strategy do builder; `NisRules.repeatedDigits()` (SIPREV RV_03, código `REPEATED_DIGITS`) e `NisRules.checkDigits(algoritmo)`; `Nis.parser(mode)`. Os vetores C1 07, 09 e 15–21 produziram os desfechos da D6 nas duas fórmulas. O padrão continua estrutural e aceita 09, 16, 18 e 20. | `Nis.parse`, `parseOrNull` e `hasCanonicalFormat` delegam ao interpretador estrutural. `docs/fontes.md` ganhou F-15 a F-18 com fonte e alcance, sem rótulo de oficial. |
 | 10 · Kotlin e consumo pelos JARs (US4) | `ContractExtensionsTest.kt` não compilava: `Unresolved reference 'toCpfOrNull'`. | `toCpfOrNull`, `toCnpjOrNull` e `toNisOrNull`, que devolvem as value classes; `DocumentParser<D>.parseOrNull`; `String.toNis(mode)`; `Cnpj.hasValidCheckDigits()`; `applySecurityMask(maskChar = '*')` nas três value classes. `Nis.kt` passou a delegar a `Nis.parser()`, sem fachadas. `ContratosJarIT` (Java e Kotlin) consome contratos e extensões pelos JARs, com `codeSource` conferido. `clean verify` no JDK 21 passou: DocLint, Dokka, JaCoCo e bytecode. | Um `install` acidental gravou `io/github/brasil4j/brasil4j-core/0.2.0` no `~/.m2` local, que não existia antes. A remoção foi bloqueada pela política de ações destrutivas e aguarda decisão do usuário. Os builds seguintes usam só o reator. |
 | 11 · Fachadas deprecadas e gate final (US4) | Não se aplica: a deprecação não muda comportamento. A rede foi a suíte existente, que precisava continuar verde sem alteração. | `CpfValidator`, `CpfFormatter`, `CnpjValidator`, `CnpjFormatter`, `NisValidator` e `NisFormatter` receberam `@Deprecated` e `@deprecated`, com o substituto e a remoção prevista para a 1.0. Os validadores passaram a Facades sobre `parser(mode)`. `clean verify` no JDK 21 passou, com 7 avisos de deprecação vindos de testes e exemplos, que continuam inalterados. **japicmp final** (T047), no JDK 21, contra `v0.2.0`, `5fd9dae` e `18bfe9c`: as três saídas foram 0, só com `MODIFIED` compatíveis. O "field removed" dos enums é o campo privado `strategy`. | `Nis.parseOrNull` e `Nis.hasCanonicalFormat` ficaram sem uso e foram removidos. |
+| 12 · Documentação e exemplos (T048, T049, T054) | Não se aplica. | README com a Spec 010 na lista, uso por contrato e a seção "Criando seu próprio documento". `docs/arquitetura.md` com os pacotes `identidade`, `verificacao` e `mascara`, os padrões GoF e o diagrama de classes Mermaid. CHANGELOG. `ContratosExemplosTest.java` (4 casos) e `ContratosKotlinExemplosTest.kt` (3 casos) em `brasil4j-exemplos`, com o índice do README do módulo atualizado. Os exemplos existentes não foram alterados. | T045 foi feito em arquivos novos (`ContratosJarIT` Java e Kotlin) em vez de estender os `DocumentCheckJarIT`, para não tocar nas suítes da 007. |
+
+## Verificação final (2026-11-28)
+
+- **T051 · Build.** `clean verify` offline passou em Corretto 21.0.13 e em Corretto 8u512 (Standard Doclet 1.8.0_512). Zero falhas e erros:
+
+  | Módulo | Surefire | Failsafe |
+  | --- | --- | --- |
+  | Núcleo | 20 557 | 88 |
+  | Kotlin | 53 | 88 |
+  | Exemplos | 35 | — |
+  | **Total** | | **20 821** |
+
+  As 20 001 + 10 000 linhas parametrizadas dos CSVs de equivalência entram na contagem do núcleo.
+- **T051 · Gates.**
+  - JaCoCo: núcleo com 98,8% das linhas (1291/1307) e 94,2% dos branches (588/624); Kotlin com 99,3% (145/146) e 100% (6/6).
+  - DocLint passou nos dois JDKs, e Dokka no JDK 21.
+  - `scripts/check-bytecode.py` confirmou bytecode Java 8 nos dois JARs.
+  - O log do JDK 21 tem 7 avisos de deprecação, todos de testes e exemplos que exercitam as fachadas de propósito.
+- **T020 e T047 · Compatibilidade.** japicmp 0.26.1 (SHA-256 `4b4f0301…f858`, baixado com autorização do usuário) contra baselines empacotadas em JDK 21 a partir de `git archive`. Código de saída 0 nas três:
+
+  | Baseline | `MODIFIED` compatíveis | Incompatíveis | `NEW` |
+  | --- | --- | --- | --- |
+  | `v0.2.0` | 14 | 0 | 39 |
+  | `5fd9dae` | 17 | 0 | 34 |
+  | `18bfe9c` | 19 | 0 | 31 |
+
+  O "field removed" dos enums de modo é o campo privado `strategy`. A primeira rodada da etapa 5 acusou `METHOD_NOW_FINAL` e foi corrigida (`055da9b`).
+- **T050 · Proveniência.** Todas as linhas acrescentadas pela 010 que mencionam "oficial" negam a oficialidade: `recorte.md`, `revisao.md`, F-15 em `fontes.md`, `NisRules.java` e `NisValidationMode.java`. Nenhuma regra nova foi rotulada como oficial. F-15 a F-17 usam CONVENCAO_TECNICA com fonte e alcance, e F-18 usa ESTRUTURAL como escolha de projeto.
+- **T052 · Revisão independente.**
+  - O agente `quality-gatekeeper` deu FAIL só por rastreabilidade: tarefas desmarcadas e evidência final ausente neste registro. Os dois pontos foram corrigidos aqui. Ele não encontrou placeholders, segredos, testes vazios, JavaDoc faltando nem divergência entre `contracts/api.md` e o código conferido.
+  - A primeira chamada ao `agy` estourou o limite de 9m30s sem conteúdo. Uma segunda chamada, de escopo menor, está em andamento.
+- **T053 · Coordenação.** Aberta. A 010 está sobre `009-exemplos-utilizacao` (`ad3f6e7`). O rebase sobre `main` depende da integração da 009.
+- **Pendência de ambiente.** Um `install` acidental na etapa 10 gravou `~/.m2/repository/io/github/brasil4j/brasil4j-core/0.2.0` com o JAR candidato. A remoção foi bloqueada pela política de ações destrutivas e aguarda decisão do usuário. Nenhum build da 010 depende desse artefato, porque todos usam o reator.
