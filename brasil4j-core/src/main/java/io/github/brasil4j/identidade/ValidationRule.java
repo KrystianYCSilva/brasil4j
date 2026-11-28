@@ -41,8 +41,9 @@ public interface ValidationRule<T> {
      * Cria a regra de dígitos verificadores sobre o valor canônico. Uma divergência gera
      * {@link RejectionReason#INVALID_CHECK_DIGITS}; um valor fora do domínio do algoritmo gera
      * {@link RejectionReason#INVALID_FORMAT}. A regra interpreta {@link IllegalArgumentException}
-     * como entrada fora do domínio, inclusive para algoritmos legados. Outras exceções se
-     * propagam. Algoritmos podem sinalizar falhas de configuração com {@link IllegalStateException}.
+     * como entrada fora do domínio (argumento inadequado). Outras exceções se
+     * propagam. Algoritmos sinalizam defeitos de configuração com {@link IllegalStateException}
+     * (objeto em estado inadequado).
      *
      * @param algorithm algoritmo de dígitos verificadores
      * @return regra sobre o valor canônico

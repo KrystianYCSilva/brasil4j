@@ -5,8 +5,7 @@ package io.github.brasil4j.verificacao;
  * por comprimento ou caractere não aceito. É uma entrada inválida, não um defeito de configuração.
  *
  * <p>{@code ValidationRule.checkDigits} converte esta exceção em rejeição de formato.
- * A regra também reconhece outras {@link IllegalArgumentException} para compatibilidade
- * com algoritmos legados.
+ * A regra trata do mesmo modo qualquer {@link IllegalArgumentException}, pela convenção de argumento inadequado.
  */
 public class InvalidBaseException extends IllegalArgumentException {
     private static final long serialVersionUID = 1L;

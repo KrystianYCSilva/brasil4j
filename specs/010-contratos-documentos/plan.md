@@ -100,9 +100,9 @@ A comparação reconstrói as baselines em diretórios separados e roda `scripts
 
 ### Correção de compatibilidade para a v0.3.0
 
-Preservar as assinaturas públicas e o uso de `ValidationRule.checkDigits` por algoritmos legados que rejeitam a base com `IllegalArgumentException`. Falhas de configuração durante o cálculo podem usar `IllegalStateException`, que se propaga. O `Modulus11` confere apenas dígitos intermediários que efetivamente voltam à base, permitindo mapeamentos compatíveis com alfabetos reduzidos. Caracterizar os dois casos em Java, rodar o reator em JDK 8 e 21 e comparar os JARs com a `v0.2.0` e com a base da correção.
+Seguir a convenção Java: `IllegalArgumentException` para argumento inadequado, que `ValidationRule.checkDigits` converte em `INVALID_FORMAT`, e `IllegalStateException` para objeto em estado inadequado, que se propaga. O `Modulus11` confere o mapeamento do resto no `build()` para os restos de 0 a 10, de modo que o erro de configuração aparece cedo e para qualquer entrada. Com vários DVs, o alfabeto precisa conter todo dígito que o mapeamento produz. Caracterizar os casos em Java, rodar o reator em JDK 8 e 21 e comparar os JARs com a `v0.2.0` e com a base da correção.
 
-A compatibilidade com algoritmos legados implica que qualquer `IllegalArgumentException` lançada pelo algoritmo, inclusive subclasses, se torna `INVALID_FORMAT`. Algoritmos do consumidor devem usar `IllegalStateException` para distinguir defeitos de configuração.
+Pela convenção, qualquer `IllegalArgumentException` lançada pelo algoritmo, inclusive subclasses, se torna `INVALID_FORMAT`. Algoritmos do consumidor devem usar `IllegalStateException` para distinguir defeitos de configuração.
 
 ### Coordenação com 008 e 009
 

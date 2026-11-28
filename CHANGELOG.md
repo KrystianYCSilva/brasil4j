@@ -14,8 +14,8 @@
 
 - `Document`, `MaskedDocument`, `SecurityMaskedDocument`, `CheckDigitDocument` e `AbstractDocument`, adotados por CPF, CNPJ e NIS.
 - Interpretadores injetáveis `Cpf.parser(mode)`, `Cnpj.parser(mode)` e `Nis.parser(mode)` com `ValidationResult` para rejeições de entrada. `ValidationRule` e `withPolicy` compõem regras, e `DocumentParsers.builder` permite criar interpretadores de documentos do consumidor.
-- `Modulus11` aceita alfabetos reduzidos. Cada DV intermediário que retorna à base precisa pertencer ao alfabeto. Um mapeamento incompatível lança `IllegalStateException` durante o cálculo. O builder recusa menos pesos fixos que DVs e valores negativos para caracteres do alfabeto.
-- `ValidationRule.checkDigits` converte base fora do domínio em `INVALID_FORMAT` tanto com `InvalidBaseException` quanto com `IllegalArgumentException` legada. Falhas de configuração sinalizadas com `IllegalStateException` se propagam.
+- `Modulus11` aceita alfabetos reduzidos. O `build()` avalia o mapeamento do resto para os restos de 0 a 10 e lança `IllegalArgumentException` para resultado nulo ou fora de 0 a 9 e, com vários DVs, para dígito fora do alfabeto. O builder também recusa menos pesos fixos que DVs e valores negativos para caracteres do alfabeto.
+- `ValidationRule.checkDigits` converte base fora do domínio em `INVALID_FORMAT` tanto com `InvalidBaseException` quanto com qualquer `IllegalArgumentException`, pela convenção de argumento inadequado. Defeitos de configuração sinalizados com `IllegalStateException` se propagam.
 - Blocos reutilizáveis `verificacao.Modulus11` (equivalência com os cálculos anteriores conferida em 10 000 bases por documento) e `mascara.DocumentMask`.
 - Máscara de segurança em CPF (`***.345.678-**`), CNPJ (`**.ABC.345/01DE-**`) e NIS (`***3456789*`), com `*` padrão e caractere configurável, e apresentações reutilizáveis em `DocumentFormatter`. A representação textual padrão não muda.
 - Validação opcional de DV no NIS com `CAIXA_FGTS_V016` (fórmula da Caixa para PIS/Pasep no FGTS) e `LEGACY_MOD11` (convenção de Declarações/UEM). A guarda `NisRules.repeatedDigits()` segue a RV_03 do SIPREV. O padrão é estrutural.

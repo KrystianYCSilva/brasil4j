@@ -158,12 +158,12 @@ Esta rodada substitui a exigência de todos os dígitos no alfabeto e a convers�
 
 | Caso | RED em JDK 8 | GREEN em JDK 8 |
 | --- | --- | --- |
-| Alfabeto reduzido | O builder recusava três configurações antes de calcular. | O alfabeto `01` permite calcular `01` e `09` para a base sintética `1`, conforme o mapeamento. O último DV pode ficar fora do alfabeto. Um DV intermediário incompatível lança `IllegalStateException`. A base fora do domínio continua lançando `InvalidBaseException`. |
-| Algoritmo do consumidor anterior ao PR #12 | A regra propagava a `IllegalArgumentException` que sinalizava a base recusada. | A regra retorna `INVALID_FORMAT`. DV divergente continua retornando `INVALID_CHECK_DIGITS`, e uma falha de configuração sinalizada com `IllegalStateException` se propaga. |
+| Alfabeto reduzido | O builder recusava três configurações antes de calcular. | O alfabeto `01` permite calcular `01` para a base sintética `1`, conforme o mapeamento. A conferência do mapeamento passou para o `build()` na rodada seguinte (ver abaixo). A base fora do domínio continua lançando `InvalidBaseException`. |
+| Algoritmo do consumidor que lança `IllegalArgumentException` | A regra propagava a `IllegalArgumentException` que sinalizava a base recusada. | A regra retorna `INVALID_FORMAT`. DV divergente continua retornando `INVALID_CHECK_DIGITS`, e uma falha de configuração sinalizada com `IllegalStateException` se propaga. |
 
 Os quatro cenários novos falharam pelas razões acima. Após a correção, os 27 testes focados passaram. As assinaturas públicas permanecem iguais, e `InvalidBaseException` fica disponível para novos algoritmos.
 
-O Claude Sonnet aprovou com ajustes. Foram acrescentados o registro de RED/GREEN, as tarefas da rodada, a distinção entre erro de configuração e rejeição de entrada no modelo e o custo da compatibilidade no plano. Uma `IllegalArgumentException` que sinalize um defeito do algoritmo também vira `INVALID_FORMAT`. O contrato recomenda `IllegalStateException` para distinguir esse caso.
+O Claude Sonnet aprovou com ajustes. Foram acrescentados o registro de RED/GREEN, as tarefas da rodada, a distinção entre erro de configuração e rejeição de entrada no modelo e o custo da compatibilidade no plano. Uma `IllegalArgumentException` que sinalize um defeito do algoritmo também vira `INVALID_FORMAT`. O contrato recomenda `IllegalStateException` para distinguir esse caso. A distinção segue a convenção Java: `IllegalArgumentException` para argumento inadequado e `IllegalStateException` para objeto em estado inadequado. A API não foi publicada antes (o pacote `verificacao` não existe na `v0.2.0`), então não há compatibilidade a preservar.
 
 Na base `73af5d0`, o `clean verify` passou em Corretto 8u512 e 21.0.13. Em cada JDK foram 20.992 testes, com 20.776 no core, 165 no Kotlin e 51 nos exemplos, sem falhas, erros ou pulos. Os dois JARs de cada JDK passaram na checagem de bytecode Java 8 e no japicmp contra a `v0.2.0` e a base `d0164a3`, com critérios de fonte e binário. O PIT matou 1.143 de 1.243 mutantes (92%). Os relatórios locais ficam em `.tmp/spec010-release/`.
 
@@ -172,3 +172,20 @@ Na base `73af5d0`, o `clean verify` passou em Corretto 8u512 e 21.0.13. Em cada 
 Os ajustes da `develop` local foram revisados sobre `73af5d0`. Os consumidores de `ValidationResult` usam `fold`, o perfil de CTPS preserva a precedência da incompletude e as operações monetárias explicitam onde a escala e a divisão são exatas. Os exemplos usam a API vigente. Os testes dedicados às fachadas deprecadas preservam as asserções de compatibilidade.
 
 O Claude Sonnet aprovou a equivalência do patch e indicou um comentário obsoleto no exemplo de CNPJ, corrigido na mesma rodada. O core compilou com `javac --release 8 -Xlint:all,-options -Werror` em JDK 21. O aviso do compilador sobre o alvo Java 8 segue associado à versão mínima suportada.
+
+### Falha rápida na configuração do `Modulus11` · 2026-11-28
+
+A rodada anterior detectava o defeito de configuração só no cálculo e apenas para algumas bases, de modo que `DocumentParser.parse` podia lançar para entradas específicas. O `build()` agora avalia o mapeamento do resto para os restos de 0 a 10, os únicos possíveis depois da redução módulo 11. Resultado nulo, dígito fora de 0 a 9 e, com vários DVs, dígito fora do alfabeto lançam `IllegalArgumentException` com mensagem em português. O resultado vazio é aceito, como no preset da Caixa. Os testes de mapeamento puro e determinístico ficam como contrato do `remainder(...)`.
+
+Com a garantia do build, as conferências de `IllegalStateException` em `compute` e `next` ficaram inalcançáveis e foram removidas, o que evita mutantes sobreviventes. A semântica das exceções não mudou: `IllegalArgumentException` para base ou configuração recusada e `IllegalStateException` para defeito de configuração de algoritmos do consumidor.
+
+| Teste | RED em JDK 8 (antes da implementação) | GREEN |
+| --- | --- | --- |
+| Mapeamento devolve 10 (e só no resto 10, e negativo) | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` | `build()` lança `IllegalArgumentException` |
+| Mapeamento devolve nulo (inclusive só no resto 10) | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` | idem |
+| `digits(2)` com alfabeto sem um dígito que o mapeamento produz | `Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.` | idem |
+| Alfabeto reduzido com mapeamento compatível; um DV fora do alfabeto; mapeamento vazio | já passavam ou passaram sem mudança | mantidos |
+
+Os testes `digitoIntermediarioForaDoAlfabetoLancaErroDeConfiguracao` e `digitoFinalPodeEstarForaDoAlfabetoDaBase` da PR #14 e a parte de `recusaValoresDeCaractereOuDvForaDoIntervalo` que esperava `IllegalStateException` ou `NullPointerException` no cálculo foram substituídos: o defeito agora aparece no build. O caso "último DV fora do alfabeto com vários DVs" deixou de ser aceito, porque o mesmo mapeamento gera todos os DVs e os anteriores ao último voltam à base. Esse caso passou a ser recusado no build, e o de um único DV com alfabeto reduzido continua aceito. Os testes congelados dos presets seguiram verdes.
+
+Resultados do `clean verify`: em Corretto 8u512 e 21.0.13, 20.671 testes no core, 57 no Kotlin e 51 nos exemplos, sem falhas, erros ou pulos, e a checagem de bytecode Java 8 passou nos dois. O PIT matou 1.145 de 1.284 mutantes (89%), dentro do gate. Os três sobreviventes de `Modulus11` são equivalentes: o limite de `digits(int)` e o laço do último DV, cujo acréscimo à base não é lido depois.

@@ -6,8 +6,8 @@ import java.util.Optional;
 /**
  * Estratégia de cálculo de dígitos verificadores, independente do documento.
  * Use {@link InvalidBaseException} para sinalizar entradas fora do domínio. As regras da biblioteca
- * também reconhecem {@link IllegalArgumentException} em algoritmos legados para o mesmo fim.
- * Use {@link IllegalStateException} para sinalizar falhas de configuração durante o cálculo.
+ * tratam qualquer {@link IllegalArgumentException} (argumento inadequado) como esse caso.
+ * Use {@link IllegalStateException} (objeto em estado inadequado) para defeitos de configuração do algoritmo.
  */
 public interface CheckDigitAlgorithm {
     /**
