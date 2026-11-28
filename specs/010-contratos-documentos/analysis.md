@@ -132,3 +132,22 @@ Os presets não mudaram: `CpfModulus11EquivalenceTest` e `CnpjModulus11Equivalen
 **Sem comportamento:** `scripts/github/apply-repo-settings.ps1` agora lança erro quando a listagem de rulesets falha, em vez de seguir para o POST (sem harness de teste). Comentários corrigidos: bloqueio de 14 zeros atribuído a F-05 e Anexo XV só para o cálculo (`Modulus11`, `Cnpj`, `CnpjValidationMode`), máscara `999.999.999-99` no `CpfFormatter`, mensagem de `parseOrThrow` restrita aos interpretadores de `DocumentParsers.builder` e uso `withRule(NisRules.checkDigits(...))` no `Nis`.
 
 **Verificação:** `clean verify` passou em JDK 8 (Corretto 1.8.0_512) e JDK 21 (Corretto 21.0.13), com 20 590 testes no núcleo, 89 no Kotlin e zero falhas; JaCoCo do núcleo com 98,9% (instruções) e 94,3% (ramos), e do Kotlin com 99,0% e 100%; bytecode 52 nos dois JARs. PIT (perfil `mutation`): 937 mutantes, 840 mortos, 90%, acima do gate de 89%.
+
+## Revisão independente na worktree do Codex · 2026-11-28
+
+> Rodada feita sobre um checkpoint intermediário da 010 (`93ca2e6`), anterior às correções dos pareceres e ao merge do PR #1 (`b4ad5ec`). Os números abaixo valem para esse checkpoint; os finais estão nas seções anteriores.
+
+O checkpoint `6db94c3` do Claude foi reaplicado em uma worktree própria sobre a versão integrada dos Exemplos (`5405591`). O candidato `93ca2e6` mantém os exemplos da Spec 007 e acrescenta os da 010. O ajuste de integração preservou os links das duas specs no README. As árvores de código dos módulos `brasil4j-core` e `brasil4j-kotlin` são idênticas no checkpoint e no candidato.
+
+| Verificação | Corretto 8u512 | Corretto 21.0.13 |
+| --- | --- | --- |
+| `clean verify` | 20.823 testes | 20.823 testes |
+| Testes por módulo | 20.645 núcleo, 141 Kotlin, 37 exemplos | 20.645 núcleo, 141 Kotlin, 37 exemplos |
+| JaCoCo do núcleo · linhas / branches | 98,77% / 94,23% | 98,78% / 94,23% |
+| JaCoCo Kotlin · linhas / branches | 99,32% / 100% | 99,32% / 100% |
+| JARs Java e Kotlin | Bytecode 52 e suítes `ContratosJarIT` | Bytecode 52 e suítes `ContratosJarIT` |
+| Documentação | Javadoc com DocLint | Javadoc com DocLint e Dokka |
+
+Em ambos os JDKs, foram zero falhas, erros ou pulos. A comparação por japicmp dos dois JARs reconstruídos com os da `v0.2.0`, da Spec 006 (`5fd9dae`) e da Spec 007 (`18bfe9c`) passou com os critérios binário e de fonte.
+
+Os ensaios de consumo executaram interpretador e formatador injetáveis, documento sintético do consumidor em uma lista heterogênea, regras com rejeição por motivo e preservação do NIS estrutural. A revisão também alinhou o contrato de `Modulus11` ao comportamento e ao JavaDoc existentes para argumentos nulos. Os relatórios locais desta rodada ficam em `.tmp/review010/`.
