@@ -49,9 +49,17 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize [language] project with [framework] dependencies
-- [ ] T003 [P] Configure linting and formatting tools
+- [ ] T001 Create `feature/NNN-name` from `develop` and record the base commit (VII.1)
+- [ ] T002 Characterization tests for behavior the change touches; baseline `clean verify` on JDK 8 and 21 (TQ-2)
+- [ ] T003 Design review of the plan's Design Decisions against `.context/standards/review-checklist.md` (VI); fix the plan before code
+
+<!-- Mandatory when applicable (keep in the generated tasks.md):
+  - Contract test (abstract) for every new public interface, extended by each implementation (TQ-3)
+  - Equivalence test against the old algorithm before replacing it, frozen vectors before deletion (TQ-2)
+  - ArchUnit rule update for any new package or dependency (TQ-9, AR-*)
+  - japicmp vs latest release tag and mutation threshold after the last code task (IV.4, IV.5)
+-->
+
 
 ---
 
@@ -151,12 +159,10 @@ Examples of foundational tasks (adjust based on your project):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in docs/
-- [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
-- [ ] TXXX Security hardening
-- [ ] TXXX Run quickstart.md validation
+- [ ] TXXX [P] Documentation: README, CHANGELOG, `docs/`, contracts and quickstart; new examples in `brasil4j-exemplos` without changing existing ones (TQ-8)
+- [ ] TXXX Final gates: `clean verify` JDK 8 and 21, bytecode, japicmp vs latest release tag, mutation (IV)
+- [ ] TXXX Independent LLM review with `.context/workflows/llm-review.md`; fix MUST FIX with TDD and record verdicts in `analysis.md` (VI.9)
+- [ ] TXXX Open the PR from `feature/*` into `develop` with all required checks green (VII.2)
 
 ---
 

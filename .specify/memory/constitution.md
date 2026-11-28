@@ -1,45 +1,70 @@
-# Constituição do brasil4j
+# brasil4j Constitution
+
+Rules are numbered so plans, tasks and reviews can cite them (for example `VI.4`). Detail lives in `.context/`; this file only states the rules. Human-facing docs (specs, README, `docs/`) stay in Brazilian Portuguese; AI-facing files are in English.
 
 ## Core Principles
 
-### I. SDD — contrato antes do código
+### I. SDD: contract before code
 
-Cada incremento define o comportamento em spec, detalha decisões no plano, deriva tarefas e passa por análise de consistência antes da implementação. Mudanças de API pública registram impacto e compatibilidade para os consumidores.
+- **I.1** Every increment defines observable behavior in a spec, records decisions in a plan, derives tasks and passes a consistency analysis before implementation.
+- **I.2** Public API changes record consumer impact and binary/source/behavioral compatibility in the plan.
+- **I.3** The plan's Design Quality Gate (principle VI) and Design Decisions section are mandatory.
 
-### II. DDD — invariantes e fronteiras
+### II. DDD: invariants and boundaries
 
-CNPJ e CPF são valores imutáveis de Identidade Brasileira. A regra fica no tipo que detém a invariante. Cadastro, titularidade e situação pertencem aos consumidores. Novos contextos exigem demanda identificada e um contrato próprio.
+- **II.1** Brazilian domain values (Identity, Geography, Finance) are immutable value objects; the rule lives in the type that owns the invariant.
+- **II.2** Registration, ownership, status and external effects belong to consumers.
+- **II.3** A new bounded context requires an identified demand and its own contract. Contexts do not depend on each other; shared building blocks (`verificacao`, `mascara`) depend on no context. [Architecture](../../.context/patterns/architecture.md)
 
-### III. TDD — uma invariante por ciclo
+### III. TDD: one invariant per cycle
 
-Escrever um teste determinístico de comportamento, observar a falha esperada, fazer a menor mudança que passe e revisar o desenho com a suíte verde. Registrar as três etapas. Testar bordas, modos e regressões. Exercitar o JAR como consumidor Java e Kotlin.
+- **III.1** Write a deterministic behavior test, watch it fail for the expected reason, make the smallest change that passes, then refactor with the suite green. Record red/green/refactor.
+- **III.2** Cover boundaries, modes, invalid input and regressions; characterize current behavior before refactoring it.
+- **III.3** Exercise the packaged JARs as Java and Kotlin consumers.
 
-### IV. Plataforma e qualidade
+### IV. Platform and build gates
 
-O runtime mínimo é Java 8. Compilar contra APIs Java 8 e verificar bytecode 52, Maven Wrapper, Enforcer e execução em JDK 8 e 21. O núcleo depende apenas do JDK. O módulo Kotlin depende do núcleo e da biblioteca padrão. Aplicar JaCoCo a partir do domínio, com ≥90% de linhas e ≥85% de branches. Usar japicmp a partir da v0.2.
+- **IV.1** Runtime minimum is Java 8: Java 8 APIs, bytecode 52, Maven Wrapper and Enforcer; `clean verify` passes on JDK 8 and 21.
+- **IV.2** `brasil4j-core` depends only on the JDK at runtime; `brasil4j-kotlin` depends only on the core and the Kotlin stdlib.
+- **IV.3** JaCoCo from the domain: ≥90% lines and ≥85% branches per module.
+- **IV.4** japicmp against the latest release tag fails on binary or source incompatibility.
+- **IV.5** Mutation score of the Java core does not drop below the threshold in `.context/standards/testing.md`.
+- **IV.6** Public docs are part of the contract: DocLint on JDK 8/21, Dokka on JDK 21; generated docs stay in build directories.
 
-### V. Proveniência e escopo
+### V. Provenance and scope
 
-Implementar de forma independente sob Apache-2.0. Registrar autoridade, revisão e evidência de cada regra em `docs/fontes.md`. Usar vetores oficiais ou sintéticos conferidos. Validar a apresentação antes da normalização, preservar zeros e explicitar tolerâncias. Ocultar CPF e NIS na representação textual padrão.
+- **V.1** Independent implementation under Apache-2.0.
+- **V.2** Every rule records authority, revision and evidence in `docs/fontes.md`; tests use official or verified synthetic vectors.
+- **V.3** Validate presentation before normalization, preserve leading zeros and make tolerances explicit.
+- **V.4** CPF and NIS are hidden in the default text representation; library diagnostics never contain input, canonical value or formatted output.
+- **V.5** A rule is called "official" only with a confirmed normative source (technical note, ordinance, normative instruction, official manual or layout) recording authority, version or validity and scope. Otherwise describe it as a formula published in a named document with its stated scope, or as a technical convention observed in named systems.
+- **V.6** A rule with restricted or unconfirmed scope is only an explicit consumer option, never default behavior.
 
-Só descrever uma regra como oficial com fonte normativa confirmada, seja nota técnica, portaria, instrução normativa, manual ou leiaute oficial, registrando autoridade, versão ou vigência e alcance. Sem essa confirmação, descrever a regra como fórmula publicada em um documento com o alcance nele indicado, ou como convenção técnica observada em sistemas identificados. Uma regra de alcance restrito ou não confirmado entra apenas como opção explícita do consumidor, nunca como comportamento padrão.
+### VI. Design and test quality
 
-## Engenharia JVM
+Reviewers and planners apply the lenses in [`review-checklist.md`](../../.context/standards/review-checklist.md); each finding cites a rule ID.
 
-Aplicar Clean Code, KISS, DRY e SOLID pela legibilidade, responsabilidades coesas e uma fonte para cada regra de domínio. Preferir composição e encapsulamento.
+- **VI.1 Clean code and SOLID.** Intent-revealing names, small single-purpose units, guard clauses, no boolean mode flags; SRP, OCP, LSP, ISP and DIP applied as in [design-quality](../../.context/standards/design-quality.md).
+- **VI.2 DRY, KISS, YAGNI and reuse.** One source per rule; extend by composition over inheritance; no speculative abstraction; the simplest design that expresses the rule wins.
+- **VI.3 Contracts and extensibility.** The library exposes public contracts for value, parsing, rule, result and presentation, and builds its own types with the same public blocks a consumer would use. Injectable strategies over static utilities.
+- **VI.4 Design patterns.** A pattern is applied only to solve a named problem (variation, coupling, duplication or consumer extensibility); the plan names patterns considered, applied and rejected. [Catalog](../../.context/patterns/design-patterns.md)
+- **VI.5 Java library API.** Minimal visibility, immutability, explicit compatibility rules and staged deprecation as in [java-library-api](../../.context/standards/java-library-api.md).
+- **VI.6 Kotlin library API and functional style.** The adapter delegates to the core; explicit API mode; idiomatic null safety, immutability and pure functions as in [kotlin-library-api](../../.context/standards/kotlin-library-api.md).
+- **VI.7 Architecture conformance.** Package and module dependency rules are verified by automated tests.
+- **VI.8 Test quality.** Tests assert behavior, not implementation; every public interface has a reusable contract test; refactors are guarded by characterization or equivalence tests; mutation testing measures test strength. [Testing](../../.context/standards/testing.md)
+- **VI.9 Independent review.** Before integration, a second model reviews the change with the checklist lenses. [LLM review](../../.context/workflows/llm-review.md)
 
-A biblioteca oferece contratos públicos para valor, interpretação, regra, resultado e apresentação dos documentos. O reuso vem da composição e o comportamento varia por polimorfismo. Assim o consumidor consegue criar seus próprios documentos e regras no mesmo padrão dos tipos da biblioteca. Preferir estratégias injetáveis a classes utilitárias estáticas. Escolher padrões de projeto do catálogo GoF ([refactoring.guru](https://refactoring.guru/design-patterns)) pelo problema que resolvem e nomeá-los no plano. Cada padrão ou abstração precisa de justificativa por variação, acoplamento, duplicação ou extensibilidade concreta pelo consumidor.
+### VII. Delivery
 
-Em Java, preservar os contratos OO e a compatibilidade 8. Em Kotlin, aproveitar null safety, imutabilidade, funções puras e APIs idiomáticas. Escolher laços ou composição funcional pela clareza. A adaptação Kotlin delega a regra ao núcleo Java. [Padrões de aplicação](../../.context/standards/jvm.md).
-
-## Fluxo e verificação
-
-A documentação pública é parte do contrato. Verificar JavaDoc com DocLint no build e KDoc com Dokka no `verify` em JDK 21. Conferir exemplos, erros e políticas públicas na revisão. Documentação gerada fica em diretórios de build. [Critérios de revisão](../../.context/standards/qualidade.md).
+- **VII.1** Git flow: work happens on `feature/*` branches from `develop`; releases go `release/*` → PR → `main` → tag `vX.Y.Z`; hotfixes go `hotfix/*` from `main`. [Git flow](../../.context/workflows/git-flow.md)
+- **VII.2** No direct pushes to `main` or `develop`: every change enters through a pull request with all required checks green, without bypass.
+- **VII.3** Required checks are the CI jobs that enforce principle IV; rulesets and repository settings are versioned in `.github/` and applied by script.
+- **VII.4** Every release has a tag, a GitHub Release and a CHANGELOG entry; the version on `develop` is the next `-SNAPSHOT`.
 
 ## Governance
 
-- **Emendas.** Um escritor por rodada. Aplicar o procedimento do Spec Kit, registrar versão e impacto, e alinhar em etapa própria os artefatos versionados afetados. O README e o índice em `.context` orientam a leitura. Remover o relatório temporário de impacto antes do commit.
-- **Versão.** MAJOR para remoção ou redefinição incompatível, MINOR para princípio ou orientação materialmente ampliados e PATCH para redação sem alteração de sentido.
-- **Conformidade.** Revisar a constituição antes da pesquisa e após o desenho. Analisar spec, plano e tarefas antes da implementação. Justificar exceções no plano. Registrar evidência de execução, fontes e data ISO 8601.
+- **Amendments.** One writer per round. Apply the Spec Kit procedure, record version and impact, and align affected versioned artifacts in their own step. `AGENTS.md` and the `.context` index guide reading. Remove the temporary impact report before committing.
+- **Versioning.** MAJOR for incompatible removal or redefinition, MINOR for a new or materially expanded principle or guidance, PATCH for wording without change of meaning.
+- **Compliance.** Review this constitution before research and after design. Analyze spec, plan and tasks before implementation. Justify exceptions in the plan. Record execution evidence, sources and ISO 8601 dates.
 
-**Version**: 0.5.0 | **Ratified**: 2026-11-26 | **Last Amended**: 2026-11-27
+**Version**: 0.6.0 | **Ratified**: 2026-11-26 | **Last Amended**: 2026-11-28

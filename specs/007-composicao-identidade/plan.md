@@ -29,7 +29,7 @@ Adicionar ao núcleo um item de conferência tipado `DocumentCheck<T>` que assoc
 | IV · Plataforma | Gates do reator já existem. | JDK 8 e 21, bytecode 52, JaCoCo ≥90% linhas e ≥85% branches, DocLint nos dois JDKs, Dokka no JDK 21, japicmp nos dois artefatos. |
 | V · Proveniência | Vetores CPF/CNPJ existentes e matriz C1 identificados. | Política da UEM representada por resultados sintéticos nos testes. A entrega registrará em `docs/fontes.md` a procedência dos vetores e da política externa. As novas representações omitem conteúdo dos documentos. |
 
-O desenho segue os padrões de [JVM](../../.context/standards/jvm.md) e de [qualidade](../../.context/standards/qualidade.md). Nenhuma exceção à constituição foi identificada.
+O desenho segue os padrões de [JVM](../../.context/standards/design-quality.md) e de [qualidade](../../.context/standards/testing.md). Nenhuma exceção à constituição foi identificada.
 
 ## Project Structure
 
