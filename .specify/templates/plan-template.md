@@ -1,8 +1,8 @@
 # Implementation Plan: [FEATURE]
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `feature/[NNN-name]` | **Date**: [DATE] | **Spec**: [link]
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Input**: Feature specification from `specs/[NNN-name]/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command; its definition describes the execution workflow.
 
@@ -18,23 +18,21 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Language/Version**: Java 8 core (bytecode 52, JDK 8/21) + Kotlin adapter [or NEEDS CLARIFICATION]
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Primary Dependencies**: [none in core (AR-*); Kotlin stdlib in the adapter]
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**: JUnit + ArchUnit, JaCoCo, PIT mutation, japicmp, JarIT (`.context/standards/testing.md`)
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Target Platform**: JVM library (Maven Central)
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: library (`brasil4j-core`, `brasil4j-kotlin`)
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: [domain-specific or N/A]
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**: [compatibility class, no new core dependencies, or NEEDS CLARIFICATION]
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: [packages and public API touched]
 
 ## Constitution Check
 
@@ -65,6 +63,10 @@ Cite rule IDs from `.specify/memory/constitution.md`. An unchecked item needs a 
 
 | Topic | Decision | Alternatives rejected and why | Rule IDs |
 | --- | --- | --- | --- |
+| Clean code | [naming, small functions, no dead code, error signalling] | | DQ-1…DQ-6 |
+| DRY / KISS / YAGNI / reuse | [existing blocks reused; nothing speculative] | | DQ-12…DQ-15 |
+| Java OO shape | [visibility, immutability, final/value types, static factories] | | JA-1…JA-7 |
+| Kotlin adapter and functional style | [extensions over core, nullability, pure functions] | | KA-1…KA-3, KF-1…KF-4 |
 | Responsibilities and types | [types introduced or changed, one responsibility each] | | DQ-7…DQ-11 |
 | Patterns | [applied pattern → problem it solves] | [pattern considered → why not] | DP-* |
 | Public API impact | [new/changed members; binary, source and behavioral compatibility] | | JA-8…JA-14, KA-4…KA-12 |
@@ -77,7 +79,7 @@ Cite rule IDs from `.specify/memory/constitution.md`. An unchecked item needs a 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/[NNN-name]/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
 ├── data-model.md        # Phase 1 output (/speckit.plan command)
@@ -87,47 +89,12 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+brasil4j-core/src/main/java/io/github/brasil4j/[package]/
+brasil4j-core/src/test/java/io/github/brasil4j/[package]/
+brasil4j-kotlin/src/main/kotlin/[package]/
+brasil4j-kotlin/src/test/kotlin/[package]/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real

@@ -5,7 +5,7 @@ description: "Task list template for feature implementation"
 
 # Tasks: [FEATURE NAME]
 
-**Input**: Design documents from `/specs/[###-feature-name]/`
+**Input**: Design documents from `specs/[NNN-name]/`
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
@@ -21,10 +21,9 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- Core: `brasil4j-core/src/main/java/io/github/brasil4j/[package]/`; tests in `brasil4j-core/src/test/java/io/github/brasil4j/[package]/`
+- Kotlin adapter: `brasil4j-kotlin/src/main/kotlin/`; tests in `brasil4j-kotlin/src/test/kotlin/`
+- Adjust to the plan.md structure
 
 <!--
   ============================================================================
@@ -33,8 +32,8 @@ description: "Task list template for feature implementation"
   The /speckit.tasks command MUST replace these with actual tasks based on:
   - User stories from spec.md (with their priorities P1, P2, P3...)
   - Feature requirements from plan.md
-  - Entities from data-model.md
-  - Endpoints from contracts/
+  - Types from data-model.md
+  - Public API from contracts/
 
   Tasks MUST be organized by user story so each story can be:
   - Implemented independently
@@ -53,13 +52,10 @@ description: "Task list template for feature implementation"
 - [ ] T002 Characterization tests for behavior the change touches; baseline `clean verify` on JDK 8 and 21 (TQ-2)
 - [ ] T003 Design review of the plan's Design Decisions against `.context/standards/review-checklist.md` (VI); fix the plan before code
 
-<!-- Mandatory when applicable (keep in the generated tasks.md):
-  - Contract test (abstract) for every new public interface, extended by each implementation (TQ-3)
-  - Equivalence test against the old algorithm before replacing it, frozen vectors before deletion (TQ-2)
-  - ArchUnit rule update for any new package or dependency (TQ-9, AR-*)
-  - japicmp vs latest release tag and mutation threshold after the last code task (IV.4, IV.5)
--->
-
+- [ ] T004 [P] When applicable: abstract contract test for every new public interface, extended by each implementation (TQ-3)
+- [ ] T005 [P] When applicable: equivalence test against the old algorithm before replacing it; frozen vectors before deletion (TQ-2)
+- [ ] T006 When applicable: ArchUnit rule update for any new package or dependency (TQ-9, AR-*)
+- [ ] T007 When applicable, after the last code task: japicmp vs latest release tag and mutation threshold (IV.4, IV.5)
 
 ---
 
@@ -69,14 +65,11 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-Examples of foundational tasks (adjust based on your project):
+Examples of foundational tasks (adjust to the plan):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T008 Create the package and `package-info.java` under `brasil4j-core/src/main/java/io/github/brasil4j/[package]/`
+- [ ] T009 [P] Define the public interface/value type in `brasil4j-core/src/main/java/io/github/brasil4j/[package]/[Type].java` (JA-*)
+- [ ] T010 [P] Shared test fixtures/frozen vectors in `brasil4j-core/src/test/java/io/github/brasil4j/[package]/`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -88,23 +81,21 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (MANDATORY — TDD, principle III) ⚠️
+### Tests for User Story 1 (MANDATORY — TDD, principle III.1) ⚠️
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> Write these tests FIRST and run them red for the expected reason
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T011 [P] [US1] Behavior test for [rule] in brasil4j-core/src/test/java/io/github/brasil4j/[package]/[Type]Test.java
+- [ ] T012 [P] [US1] Kotlin adapter test in brasil4j-kotlin/src/test/kotlin/[package]/[Type]Test.kt
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T013 [P] [US1] Implement [Type] in brasil4j-core/src/main/java/io/github/brasil4j/[package]/[Type].java
+- [ ] T014 [US1] Validate input and signal invalid values via exceptions/results, no logging (AR-8)
+- [ ] T015 [US1] Add Kotlin extension in brasil4j-kotlin/src/main/kotlin/[package]/[Type].kt (KA-*)
+- [ ] T016 [US1] Refactor with the suite green; record red/green/refactor evidence
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
+**Checkpoint**: User Story 1 is functional and testable independently
 
 ---
 
@@ -114,19 +105,21 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (MANDATORY — TDD, principle III) ⚠️
+### Tests for User Story 2 (MANDATORY — TDD, principle III.1) ⚠️
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+> Write these tests FIRST and run them red for the expected reason
+
+- [ ] T017 [P] [US2] Behavior test for [rule] in brasil4j-core/src/test/java/io/github/brasil4j/[package]/[Type]Test.java
+- [ ] T018 [P] [US2] Kotlin adapter test in brasil4j-kotlin/src/test/kotlin/[package]/[Type]Test.kt
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T019 [P] [US2] Implement [Type] in brasil4j-core/src/main/java/io/github/brasil4j/[package]/[Type].java
+- [ ] T020 [US2] Validate input and signal invalid values via exceptions/results, no logging (AR-8)
+- [ ] T021 [US2] Add Kotlin extension in brasil4j-kotlin/src/main/kotlin/[package]/[Type].kt (KA-*)
+- [ ] T022 [US2] Refactor with the suite green; record red/green/refactor evidence
 
-**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
+**Checkpoint**: User Story 2 is functional and testable independently
 
 ---
 
@@ -136,18 +129,21 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (MANDATORY — TDD, principle III) ⚠️
+### Tests for User Story 3 (MANDATORY — TDD, principle III.1) ⚠️
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+> Write these tests FIRST and run them red for the expected reason
+
+- [ ] T023 [P] [US3] Behavior test for [rule] in brasil4j-core/src/test/java/io/github/brasil4j/[package]/[Type]Test.java
+- [ ] T024 [P] [US3] Kotlin adapter test in brasil4j-kotlin/src/test/kotlin/[package]/[Type]Test.kt
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T025 [P] [US3] Implement [Type] in brasil4j-core/src/main/java/io/github/brasil4j/[package]/[Type].java
+- [ ] T026 [US3] Validate input and signal invalid values via exceptions/results, no logging (AR-8)
+- [ ] T027 [US3] Add Kotlin extension in brasil4j-kotlin/src/main/kotlin/[package]/[Type].kt (KA-*)
+- [ ] T028 [US3] Refactor with the suite green; record red/green/refactor evidence
 
-**Checkpoint**: All user stories should now be independently functional
+**Checkpoint**: User Story 3 is functional and testable independently
 
 ---
 
@@ -185,10 +181,9 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Within Each User Story
 
-- Tests (if included) MUST be written and FAIL before implementation
-- Models before services
-- Services before endpoints
-- Core implementation before integration
+- Tests MUST be written and FAIL before implementation (III.1)
+- Types before their consumers
+- Core before the Kotlin adapter
 - Story complete before moving to next priority
 
 ### Parallel Opportunities
@@ -197,7 +192,7 @@ Examples of foundational tasks (adjust based on your project):
 - All Foundational tasks marked [P] can run in parallel (within Phase 2)
 - Once Foundational phase completes, all user stories can start in parallel (if team capacity allows)
 - All tests for a user story marked [P] can run in parallel
-- Models within a story marked [P] can run in parallel
+- Types within a story marked [P] can run in parallel
 - Different user stories can be worked on in parallel by different team members
 
 ---
@@ -205,13 +200,9 @@ Examples of foundational tasks (adjust based on your project):
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together (if tests requested):
-Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
-Task: "Integration test for [user journey] in tests/integration/test_[name].py"
-
-# Launch all models for User Story 1 together:
-Task: "Create [Entity1] model in src/models/[entity1].py"
-Task: "Create [Entity2] model in src/models/[entity2].py"
+# Launch all tests for User Story 1 together:
+Task: "Behavior test for [rule] in brasil4j-core/src/test/java/io/github/brasil4j/[package]/[Type]Test.java"
+Task: "Kotlin adapter test in brasil4j-kotlin/src/test/kotlin/[package]/[Type]Test.kt"
 ```
 
 ---
