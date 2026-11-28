@@ -71,6 +71,12 @@
                         <id>compile-kotlin</id>
                         <phase>compile</phase>
                         <goals><goal>compile</goal></goals>
+                        <configuration>
+                            <!-- KA-4: explicit API mode for the public library surface (main sources only). -->
+                            <args combine.children="append">
+                                <arg>-Xexplicit-api=strict</arg>
+                            </args>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile-kotlin</id>

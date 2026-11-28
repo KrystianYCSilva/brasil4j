@@ -8,19 +8,19 @@ import java.util.function.Predicate
 
 /** Inscrição estrutural baseada no valor imutável do núcleo Java. */
 @JvmInline
-value class Nis private constructor(private val delegate: JavaNis) {
+public value class Nis private constructor(private val delegate: JavaNis) {
     /**
      * Confere a apresentação literal de [input], com exatamente 11 dígitos ASCII.
      *
      * @throws IllegalArgumentException se a entrada for nula ou tiver formato inválido
      */
-    constructor(input: String?) : this(JavaNis.parse(input))
+    public constructor(input: String?) : this(JavaNis.parse(input))
 
     /** Obtém explicitamente os 11 dígitos na ordem recebida, inclusive zeros iniciais. */
-    val canonicalValue: String get() = delegate.canonicalValue
+    public val canonicalValue: String get() = delegate.canonicalValue
 
     /** Devolve o valor imutável do núcleo para comparação explícita com Java. */
-    fun toJava(): JavaNis = delegate
+    public fun toJava(): JavaNis = delegate
 
     /**
      * Aplica a apresentação escolhida em [formatter] ao valor estrutural Java.
@@ -28,7 +28,7 @@ value class Nis private constructor(private val delegate: JavaNis) {
      *
      * @throws NullPointerException se a função produzir nulo
      */
-    fun format(formatter: Function<in JavaNis, String>): String =
+    public fun format(formatter: Function<in JavaNis, String>): String =
         Objects.requireNonNull(formatter.apply(delegate), "Resultado de formatação do NIS obrigatório.")
 
     /**
@@ -37,7 +37,7 @@ value class Nis private constructor(private val delegate: JavaNis) {
      *
      * @throws IllegalArgumentException se [maskChar] for letra ou dígito
      */
-    fun applySecurityMask(maskChar: Char = '*'): String = delegate.applySecurityMask(maskChar)
+    public fun applySecurityMask(maskChar: Char = '*'): String = delegate.applySecurityMask(maskChar)
 
     /** Devolve o marcador fixo de ocultação, sem dígitos da inscrição. */
     override fun toString(): String = delegate.toString()
@@ -52,7 +52,7 @@ value class Nis private constructor(private val delegate: JavaNis) {
  *
  * @throws IllegalArgumentException se a entrada tiver formato inválido
  */
-fun String.toNis(): Nis = Nis(this)
+public fun String.toNis(): Nis = Nis(this)
 
 /**
  * Interpreta o texto como inscrição na configuração [mode], que pode acrescentar um validador de DV
@@ -60,17 +60,17 @@ fun String.toNis(): Nis = Nis(this)
  *
  * @throws IllegalArgumentException se a entrada for rejeitada
  */
-fun String.toNis(mode: NisValidationMode): Nis = Nis.of(JavaNis.parser(mode).parseOrThrow(this))
+public fun String.toNis(mode: NisValidationMode): Nis = Nis.of(JavaNis.parser(mode).parseOrThrow(this))
 
 /** Interpreta o texto como inscrição na configuração [mode], ou devolve `null` para entrada ausente ou rejeitada. */
-fun String?.toNisOrNull(mode: NisValidationMode = NisValidationMode.FORMAT_ONLY): Nis? =
+public fun String?.toNisOrNull(mode: NisValidationMode = NisValidationMode.FORMAT_ONLY): Nis? =
     JavaNis.parser(mode).parseOrNull(this)?.let(Nis::of)
 
 /** Confere se o texto tem exatamente 11 dígitos ASCII. Devolve `false` para nulo. */
-fun String?.isValidNis(): Boolean = JavaNis.parser().isValid(this)
+public fun String?.isValidNis(): Boolean = JavaNis.parser().isValid(this)
 
 /**
  * Confere a forma e aplica [policy] uma vez ao valor estrutural Java.
  * A política é executada somente para entrada canônica e suas exceções são propagadas.
  */
-fun String?.isValidNis(policy: Predicate<in JavaNis>): Boolean = JavaNis.parser().withPolicy(policy).isValid(this)
+public fun String?.isValidNis(policy: Predicate<in JavaNis>): Boolean = JavaNis.parser().withPolicy(policy).isValid(this)
