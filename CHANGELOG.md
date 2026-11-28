@@ -2,6 +2,11 @@
 
 ## Não lançado
 
+- Calculadora financeira funcional, percentuais com *gross-up* e tabela progressiva (Spec 011):
+  - `CalculoFinanceiro` e `CalculadoraFinanceira` para expressões compostas em `MathContext.DECIMAL128` (ou precisão `1..90`) com arredondamento monetário final único para `Real`, `Dolar`, `Euro` ou `Moeda`;
+  - `Percentual` imutável (`de`, `deFator`, `dePontosBase`), incidência genérica preservando o subtipo monetário (`aplicarSobre`, `acrescentarEm`, `descontarDe`) e cálculo por dentro (`calcularBasePorDentro`) com reversibilidade exata nos sete modos padrão;
+  - `TabelaProgressiva<T>` parametrizada pelo consumidor com modos `NO_TOTAL` (reconciliado por maiores restos sobre partes fracionárias) e `POR_FAIXA`, memória auditável (`FaixaProgressiva`, `FaixaApurada`, `ApuracaoProgressiva`), parcela a deduzir exata e alíquota efetiva;
+  - Kotlin: `.porCento()`, `.pontosBase()`, operadores `+`/`-`, `aplicar`, `acrescentar`, `descontar`, `basePorDentro`, `calcularReais` e DSL `tabelaProgressivaReais`.
 - Perfil de CTPS histórica do S-2200 v2.5 em Java e Kotlin, com validação estrutural, proveniência declarada e diagnósticos que ocultam número, série e UF. A vitrine inclui exemplos de registros físicos, projeções legadas e identificação digital via CPF.
 
 - Contratos públicos de documento (Spec 010):

@@ -28,5 +28,16 @@ class FinancasJarIT {
         val jpy = Moeda.iso("JPY", 0)
         val ienes = "100".emMoeda(jpy)
         assertEquals("300".emMoeda(jpy), 3 * ienes)
+
+        // Spec 011 pelos JARs empacotados:
+        val p = "17.5".porCento()
+        assertEquals("1000.00".reais(), "825.00".reais().basePorDentro(p))
+        val calc = calcularReais { mc -> java.math.BigDecimal("100").divide(java.math.BigDecimal("3"), mc) }
+        assertEquals("33.33".reais(), calc)
+        val tab = tabelaProgressivaReais {
+            faixaAte("1000.00", io.github.brasil4j.financas.Percentual.ZERO)
+            faixaAcima(10.porCento())
+        }
+        assertEquals("50.00".reais(), tab.apurar("1500.00".reais()).valorTotal)
     }
 }

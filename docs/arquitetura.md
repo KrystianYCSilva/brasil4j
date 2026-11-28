@@ -23,11 +23,11 @@ Trabalhista confere o grupo histórico da CTPS segundo o leiaute S-2200 v2.5. O 
 | `brasil4j-core` | `io.github.brasil4j.identidade.nis` | Inscrição estrutural de NIS, PIS, Pasep ou NIT, com consulta de forma e composição explícita com regras e apresentações do consumidor. |
 | `brasil4j-core` | `io.github.brasil4j.identidade.composicao` | Composição tipada de conferência nativa, política do consumidor e apresentação explícita (`DocumentCheck`). |
 | `brasil4j-core` | `io.github.brasil4j.geografia` | Código municipal, comparação com UF e metadados das unidades federativas. |
-| `brasil4j-core` | `io.github.brasil4j.financas` | Moedas, políticas de arredondamento (`ABNT_NBR_5891`, `FINANCEIRO`, `TRUNCAMENTO`, etc.), `Dinheiro` selado (`Real`, `Dolar`, `Euro`, `QuantiaMonetaria`), rateio/alocação sem perda e `TaxaCambio`. |
+| `brasil4j-core` | `io.github.brasil4j.financas` | Moedas, políticas de arredondamento, `Dinheiro` selado (`Real`, `Dolar`, `Euro`, `QuantiaMonetaria`), rateio/alocação sem perda, `TaxaCambio`, `CalculadoraFinanceira`, `Percentual` (*gross-up*) e `TabelaProgressiva`. |
 | `brasil4j-core` | `io.github.brasil4j.trabalhista.ctps` | Perfil histórico de CTPS, conferência estrutural e proveniência. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.identidade` | Value classes e extensões de documentos delegadas ao núcleo. |
 | `brasil4j-kotlin` | `io.github.brasil4j.kotlin.geografia` | Value class e extensão de código municipal sobre o núcleo. |
-| `brasil4j-kotlin` | `io.github.brasil4j.kotlin.financas` | Construtores fluentes e operadores aritméticos/comutativos sobre os tipos monetários do núcleo. |
+| `brasil4j-kotlin` | `io.github.brasil4j.kotlin.financas` | Construtores fluentes, operadores aritméticos/comutativos e DSLs (`calcularReais`, `porCento`, `tabelaProgressivaReais`) sobre os tipos monetários do núcleo. |
 
 ## Contratos de documento (Spec 010)
 

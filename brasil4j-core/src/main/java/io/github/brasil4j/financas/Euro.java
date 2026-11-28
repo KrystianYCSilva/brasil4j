@@ -308,6 +308,11 @@ public final class Euro extends Dinheiro implements Comparable<Euro> {
     }
 
     @Override
+    Euro criarMesmoSubtipo(BigDecimal valorEscalado, MetodoArredondamento novoArredondamento) {
+        return new Euro(valorEscalado, novoArredondamento);
+    }
+
+    @Override
     public int compareTo(Euro outro) {
         if (outro == null) {
             throw new IllegalArgumentException("O operando em Euro não pode ser nulo.");

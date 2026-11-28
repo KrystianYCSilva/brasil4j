@@ -297,6 +297,11 @@ public final class QuantiaMonetaria extends Dinheiro implements Comparable<Quant
     }
 
     @Override
+    QuantiaMonetaria criarMesmoSubtipo(BigDecimal valorEscalado, MetodoArredondamento novoArredondamento) {
+        return new QuantiaMonetaria(moeda, valorEscalado, novoArredondamento);
+    }
+
+    @Override
     public int compareTo(QuantiaMonetaria outro) {
         return compararMesmaMoeda(outro);
     }

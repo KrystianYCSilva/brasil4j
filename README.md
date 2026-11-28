@@ -22,6 +22,7 @@ Execute `sh ./mvnw clean verify` ou `.\mvnw.cmd clean verify` no Windows. O buil
 8. [Núcleo monetário, rateio sem perda e conversão cambial](specs/008-nucleo-monetario/spec.md)
 9. [Módulo vitrine de exemplos de utilização](specs/009-exemplos-utilizacao/spec.md)
 10. [Contratos, polimorfismo e composição para documentos](specs/010-contratos-documentos/spec.md)
+11. [Calculadora financeira funcional, percentuais com gross-up e tabela progressiva](specs/011-calculadora-percentual-faixas/spec.md)
 14. [Conferência histórica de CTPS](specs/014-ctps-historica/spec.md)
 
 [Contexto de engenharia](.context/README.md) · [Requisitos](docs/requisitos.md) · [Arquitetura](docs/arquitetura.md) · [Constituição](.specify/memory/constitution.md) · [Fontes](docs/fontes.md) · [Descoberta do C1](docs/descoberta/c1/README.md)
@@ -36,6 +37,7 @@ Execute `sh ./mvnw clean verify` ou `.\mvnw.cmd clean verify` no Windows. O buil
 - [CTPS histórica em Java e Kotlin](specs/014-ctps-historica/quickstart.md). Confira os campos extraídos do S-2200 v2.5 com `CtpsProfile.ESOCIAL_S2200_V2_5`. Para a CTPS Digital, confira o CPF pelo modo adequado ao seu fluxo.
 - [Código IBGE de município e UF em Java e Kotlin](specs/005-municipio-ibge-uf/quickstart.md). Consulte o prefixo e compare a UF. Use `Uf.fromName("sao paulo")` para obter a UF e consultar nome, sigla, capital, código IBGE e DDDs.
 - [Dinheiro, Moedas, Rateio e Câmbio em Java e Kotlin](specs/008-nucleo-monetario/quickstart.md). Use `Real`, `Dolar`, `Euro` ou `Dinheiro` com política explícita (`ABNT_NBR_5891`, `FINANCEIRO`, `TRUNCAMENTO`), `ratear`/`alocar` sem perda de centavos e `TaxaCambio` reversível.
+- [Calculadora Financeira, Percentuais e Tabela Progressiva em Java e Kotlin](specs/011-calculadora-percentual-faixas/quickstart.md). Use `CalculadoraFinanceira` para fórmulas intermediárias em `DECIMAL128`, `Percentual` para descontos/acréscimos conciliáveis e *gross-up* (`calcularBasePorDentro`) e `TabelaProgressiva` para apuração marginal parametrizada.
 
 ## Criando seu próprio documento
 

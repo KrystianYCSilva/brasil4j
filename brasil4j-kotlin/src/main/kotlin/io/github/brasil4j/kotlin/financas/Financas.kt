@@ -1,13 +1,17 @@
 package io.github.brasil4j.kotlin.financas
 
+import io.github.brasil4j.financas.CalculadoraFinanceira
 import io.github.brasil4j.financas.Dinheiro
 import io.github.brasil4j.financas.Dolar
 import io.github.brasil4j.financas.Euro
 import io.github.brasil4j.financas.MetodoArredondamento
 import io.github.brasil4j.financas.Moeda
+import io.github.brasil4j.financas.Percentual
 import io.github.brasil4j.financas.QuantiaMonetaria
 import io.github.brasil4j.financas.Real
+import io.github.brasil4j.financas.TabelaProgressiva
 import java.math.BigDecimal
+import java.math.MathContext
 
 /**
  * Interpreta este texto decimal canônico como quantia em [Real], aplicando e retendo [arredondamento].
@@ -284,3 +288,148 @@ public operator fun Dinheiro.div(divisor: Int): Dinheiro = this.dividir(divisor.
 /** Aloca proporcionalmente este [Dinheiro] pelos [pesos] inteiros informados (Hamilton). */
 public fun Dinheiro.alocarPorPesos(vararg pesos: Long): List<Dinheiro> =
     this.alocar(pesos.map { BigDecimal.valueOf(it) })
+
+/** Interpreta este texto decimal em pontos percentuais como [Percentual] (ex.: `"17.5".porCento()` = `17.5%`). */
+public fun String.porCento(): Percentual = Percentual.de(this)
+
+/** Converte este [BigDecimal] em pontos percentuais para [Percentual]. */
+public fun BigDecimal.porCento(): Percentual = Percentual.de(this)
+
+/** Constrói um [Percentual] a partir de pontos percentuais inteiros (ex.: `18.porCento()` = `18%`). */
+public fun Int.porCento(): Percentual = Percentual.de(this.toLong())
+
+/** Constrói um [Percentual] a partir de pontos percentuais inteiros (ex.: `18L.porCento()` = `18%`). */
+public fun Long.porCento(): Percentual = Percentual.de(this)
+
+/** Constrói um [Percentual] a partir de pontos-base inteiros (`1 bp = 0.01%`, ex.: `1750.pontosBase()` = `17.5%`). */
+public fun Int.pontosBase(): Percentual = Percentual.dePontosBase(this.toLong())
+
+/** Constrói um [Percentual] a partir de pontos-base inteiros (`1 bp = 0.01%`, ex.: `1750L.pontosBase()` = `17.5%`). */
+public fun Long.pontosBase(): Percentual = Percentual.dePontosBase(this)
+
+/** Soma dois [Percentual]s de forma exata. */
+public operator fun Percentual.plus(outro: Percentual): Percentual = this.somar(outro)
+
+/** Subtrai [outro] deste [Percentual] de forma exata. */
+public operator fun Percentual.minus(outro: Percentual): Percentual = this.subtrair(outro)
+
+/** Inverte o sinal deste [Percentual]. */
+public operator fun Percentual.unaryMinus(): Percentual = this.negar()
+
+/** Aplica [percentual] sobre este valor monetário preservando o subtipo [T] e retendo [arredondamento]. */
+public fun <T : Dinheiro> T.aplicar(
+    percentual: Percentual,
+    arredondamento: MetodoArredondamento = this.arredondamento
+): T = percentual.aplicarSobre(this, arredondamento)
+
+/** Acrescenta [percentual] a este valor monetário (`this + aplicar(percentual)`), preservando o subtipo [T]. */
+public fun <T : Dinheiro> T.acrescentar(
+    percentual: Percentual,
+    arredondamento: MetodoArredondamento = this.arredondamento
+): T = percentual.acrescentarEm(this, arredondamento)
+
+/** Desconta [percentual] deste valor monetário (`this - aplicar(percentual)`), preservando o subtipo [T]. */
+public fun <T : Dinheiro> T.descontar(
+    percentual: Percentual,
+    arredondamento: MetodoArredondamento = this.arredondamento
+): T = percentual.descontarDe(this, arredondamento)
+
+/** Calcula a base "por dentro" (*gross-up*: `this / (1 - fator)`) para [percentual] em `[0%, 100%)`. */
+public fun <T : Dinheiro> T.basePorDentro(
+    percentual: Percentual,
+    arredondamento: MetodoArredondamento = this.arredondamento
+): T = percentual.calcularBasePorDentro(this, arredondamento)
+
+/** Avalia [bloco] no [MathContext] informado e entrega [Real] arredondado com [arredondamento]. */
+public fun calcularReais(
+    arredondamento: MetodoArredondamento = MetodoArredondamento.ABNT_NBR_5891,
+    precisao: MathContext = MathContext.DECIMAL128,
+    bloco: (MathContext) -> BigDecimal
+): Real = CalculadoraFinanceira.de(arredondamento, precisao).calcularReais { mc -> bloco(mc) }
+
+/** Avalia [bloco] no [MathContext] informado e entrega [Dolar] arredondado com [arredondamento]. */
+public fun calcularDolares(
+    arredondamento: MetodoArredondamento = MetodoArredondamento.ABNT_NBR_5891,
+    precisao: MathContext = MathContext.DECIMAL128,
+    bloco: (MathContext) -> BigDecimal
+): Dolar = CalculadoraFinanceira.de(arredondamento, precisao).calcularDolares { mc -> bloco(mc) }
+
+/** Avalia [bloco] no [MathContext] informado e entrega [Euro] arredondado com [arredondamento]. */
+public fun calcularEuros(
+    arredondamento: MetodoArredondamento = MetodoArredondamento.ABNT_NBR_5891,
+    precisao: MathContext = MathContext.DECIMAL128,
+    bloco: (MathContext) -> BigDecimal
+): Euro = CalculadoraFinanceira.de(arredondamento, precisao).calcularEuros { mc -> bloco(mc) }
+
+/** Avalia [bloco] no [MathContext] informado e entrega o subtipo canônico de [Dinheiro] para [moeda]. */
+public fun calcularEmMoeda(
+    moeda: Moeda,
+    arredondamento: MetodoArredondamento = MetodoArredondamento.ABNT_NBR_5891,
+    precisao: MathContext = MathContext.DECIMAL128,
+    bloco: (MathContext) -> BigDecimal
+): Dinheiro = CalculadoraFinanceira.de(arredondamento, precisao).calcularMoeda(moeda) { mc -> bloco(mc) }
+
+/** Marcador de escopo para o DSL Kotlin de [TabelaProgressiva]. */
+@DslMarker
+public annotation class FinancasDsl
+
+/**
+ * Escopo de configuração declarativa de faixas para [TabelaProgressiva] em Kotlin.
+ *
+ * @param T subtipo monetário da tabela
+ */
+@FinancasDsl
+public class EscopoTabelaProgressiva<T : Dinheiro> internal constructor(
+    private val builder: TabelaProgressiva.Builder<T>
+) {
+    private var concluida: TabelaProgressiva<T>? = null
+
+    /** Adiciona uma faixa limitada `(limiteAnterior, limiteSuperior]` com a [aliquota] informada. */
+    public fun faixaAte(limiteSuperior: T, aliquota: Percentual): Unit {
+        exigirEscopoAberto()
+        builder.faixaAte(limiteSuperior, aliquota)
+    }
+
+    /** Adiciona uma faixa limitada interpretando [limiteSuperior] no modo `exato` da moeda da tabela. */
+    public fun faixaAte(limiteSuperior: String, aliquota: Percentual): Unit {
+        exigirEscopoAberto()
+        builder.faixaAte(limiteSuperior, aliquota)
+    }
+
+    /** Encerra a tabela com a faixa aberta `(ultimoLimite, +infinito)` usando [aliquotaFinal]. */
+    public fun faixaAcima(aliquotaFinal: Percentual): Unit {
+        exigirEscopoAberto()
+        concluida = builder.faixaAcima(aliquotaFinal)
+    }
+
+    private fun exigirEscopoAberto() {
+        require(concluida == null) {
+            "faixaAcima(aliquota) deve ser a última instrução e chamada exatamente uma vez no bloco da tabela progressiva."
+        }
+    }
+
+    internal fun construir(): TabelaProgressiva<T> =
+        requireNotNull(concluida) {
+            "O bloco de configuração da tabela progressiva deve encerrar chamando faixaAcima(aliquota)."
+        }
+}
+
+/** Constrói uma [TabelaProgressiva] em [Real] por meio do DSL declarativo. */
+public fun tabelaProgressivaReais(bloco: EscopoTabelaProgressiva<Real>.() -> Unit): TabelaProgressiva<Real> =
+    EscopoTabelaProgressiva(TabelaProgressiva.emReais()).apply(bloco).construir()
+
+/** Constrói uma [TabelaProgressiva] em [Dolar] por meio do DSL declarativo. */
+public fun tabelaProgressivaDolares(bloco: EscopoTabelaProgressiva<Dolar>.() -> Unit): TabelaProgressiva<Dolar> =
+    EscopoTabelaProgressiva(TabelaProgressiva.emDolares()).apply(bloco).construir()
+
+/** Constrói uma [TabelaProgressiva] em [Euro] por meio do DSL declarativo. */
+public fun tabelaProgressivaEuros(bloco: EscopoTabelaProgressiva<Euro>.() -> Unit): TabelaProgressiva<Euro> =
+    EscopoTabelaProgressiva(TabelaProgressiva.emEuros()).apply(bloco).construir()
+
+/** Constrói uma [TabelaProgressiva] para [moeda] por meio do DSL declarativo. */
+public fun tabelaProgressivaEmMoeda(
+    moeda: Moeda,
+    bloco: EscopoTabelaProgressiva<Dinheiro>.() -> Unit
+): TabelaProgressiva<Dinheiro> =
+    EscopoTabelaProgressiva(TabelaProgressiva.paraMoeda(moeda)).apply(bloco).construir()
+
