@@ -15,7 +15,7 @@ public final class CpfFormatter {
      * Aplica a máscara completa, exibindo todos os dígitos.
      *
      * @param input CPF canônico ou com máscara completa
-     * @return CPF no formato XXX.XXX.XXX-XX
+     * @return CPF na máscara 999.999.999-99
      * @throws IllegalArgumentException se o formato da entrada for inválido
      */
     public static String format(String input) {
